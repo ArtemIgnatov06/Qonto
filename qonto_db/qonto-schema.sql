@@ -1,8 +1,8 @@
--- Створення бази
-CREATE DATABASE IF NOT EXISTS trademate CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE trademate;
+-- Создание базы
+CREATE DATABASE IF NOT EXISTS qonto CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE Qonto;
 
--- Таблиця користувачів
+-- Таблица пользователей
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50),
@@ -15,18 +15,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Адреси користувача
-CREATE TABLE user_addresses (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    address TEXT,
-    city VARCHAR(100),
-    postal_code VARCHAR(20),
-    country VARCHAR(100),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- Категорії
+-- Таблица категорий (рекурсивная ссылка на себя)
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
@@ -34,13 +23,13 @@ CREATE TABLE categories (
     FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
--- Бренди
+-- Таблица брендов
 CREATE TABLE brands (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100)
 );
 
--- Товари
+-- Таблица товаров
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
@@ -55,7 +44,7 @@ CREATE TABLE products (
     FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
--- Фото товарів
+-- Таблица фото товаров
 CREATE TABLE product_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT,
@@ -64,7 +53,38 @@ CREATE TABLE product_images (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
--- Відгуки
+-- Таблица администраторов/менеджеров (создаем перед event_logs)
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE,
+    password_hash TEXT,
+    role ENUM('admin', 'manager') DEFAULT 'manager',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица журналов событий (ссылается на admins)
+CREATE TABLE event_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT,
+    action TEXT,
+    entity_type VARCHAR(50),
+    entity_id INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES admins(id)
+);
+
+-- Таблица адресов пользователей (ссылается на users)
+CREATE TABLE user_addresses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    address TEXT,
+    city VARCHAR(100),
+    postal_code VARCHAR(20),
+    country VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Таблица отзывов (ссылается на users и products)
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -76,7 +96,7 @@ CREATE TABLE reviews (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Кошик
+-- Таблица корзины (cart_items) (ссылается на users и products)
 CREATE TABLE cart_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -86,7 +106,7 @@ CREATE TABLE cart_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Замовлення
+-- Таблица заказов (ссылается на users)
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -99,7 +119,7 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Позиції в замовленні
+-- Таблица позиций в заказе (order_items) (ссылается на orders и products)
 CREATE TABLE order_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT,
@@ -110,7 +130,7 @@ CREATE TABLE order_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Обране
+-- Таблица избранного (favorites) (ссылается на users и products)
 CREATE TABLE favorites (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -119,7 +139,7 @@ CREATE TABLE favorites (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Чат з AI
+-- Таблица чата с AI (ссылается на users)
 CREATE TABLE chat_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -129,7 +149,7 @@ CREATE TABLE chat_logs (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Служба підтримки
+-- Таблица службы поддержки (support_requests) (ссылается на users)
 CREATE TABLE support_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -139,24 +159,4 @@ CREATE TABLE support_requests (
     status ENUM('new', 'in_progress', 'resolved') DEFAULT 'new',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Адміністратори/менеджери
-CREATE TABLE admins (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(100) UNIQUE,
-    password_hash TEXT,
-    role ENUM('admin', 'manager') DEFAULT 'manager',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Журнал подій
-CREATE TABLE event_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    admin_id INT,
-    action TEXT,
-    entity_type VARCHAR(50),
-    entity_id INT,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (admin_id) REFERENCES admins(id)
 );
