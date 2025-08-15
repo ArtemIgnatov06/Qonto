@@ -1,0 +1,69 @@
+/* index.css — сброс и базовая типографика */
+:root {
+  --bg: #f0f4f8;
+  --card-bg: #ffffff;
+  --primary-text: #1f2d3a;
+  --muted-text: #6b7a8c;
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(31, 45, 58, 0.08);
+  --border: 1px solid rgba(31, 45, 58, 0.1);
+  --link: #5f9ea0;
+  --link-hover: #476f7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--primary-text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.heading-large {
+  font-size: 1.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.text-muted {
+  color: var(--muted-text);
+  margin: 0;
+}
+
+.link {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.button {
+  background-color: #d0e3f2; /* нежный пастельный */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color .2s ease;
+}
+
+.button:hover {
+  background-color: #b5d4ea;
+}
+
+.page {
+  padding: 2rem 0;
+}
