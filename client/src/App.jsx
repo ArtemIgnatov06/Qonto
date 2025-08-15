@@ -14,6 +14,7 @@ import { AuthForm } from './Components/AuthForm'; // если у тебя defaul
 import Header from './Components/Header';
 // src/App.jsx
 import AdminApplications from './Pages/AdminApplications.jsx';
+import SellerApplication from './Pages/SellerApplication';
 
 
 import './App.css';
@@ -36,7 +37,7 @@ export default function App() {
             <Route path="/auth" element={<AuthForm />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin/applications" element={<AdminApplications />} />
-
+            <Route path="/seller/apply" element={<SellerApplication />} />
           </Routes>
         </main>
       </div>
