@@ -12,6 +12,9 @@ import Contacts from './Pages/Contacts';
 import Profile from './Pages/Profile';
 import { AuthForm } from './Components/AuthForm'; // если у тебя default export, то: import AuthForm from './components/AuthForm';
 import Header from './Components/Header';
+// src/App.jsx
+import AdminApplications from './Pages/AdminApplications.jsx';
+
 
 import './App.css';
 
@@ -32,6 +35,8 @@ export default function App() {
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/auth" element={<AuthForm />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin/applications" element={<AdminApplications />} />
+
           </Routes>
         </main>
       </div>
