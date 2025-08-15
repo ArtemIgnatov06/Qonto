@@ -52,6 +52,9 @@ const Header = () => {
         <NavLink to="/contacts" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
           Контакты
         </NavLink>
+        {user?.role === 'admin' && (
+        <NavLink to="/admin/applications" className="btn">Заявки</NavLink>
+        )}
         {user && (
           <div
             style={{
