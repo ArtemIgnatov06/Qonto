@@ -1,4 +1,8 @@
-require('dotenv').config();
+// server/index.js
+const path = require('path');
+// Читаем .env именно из папки server
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -45,8 +49,18 @@ const db = mysql.createPool({
 });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
-const API_KEY = process.env.OPENROUTER_API_KEY;
-console.log('API_KEY из .env:', API_KEY);
+
+// ---------- OpenRouter (ИИ) ----------
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_MODEL =
+  process.env.OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free'; // ← по умолчанию Mistral FREE
+const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+const OPENROUTER_SITE_URL = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',')[0];
+const OPENROUTER_TITLE = process.env.OPENROUTER_APP_TITLE || 'MyShop Assistant';
+
+if (!OPENROUTER_API_KEY) {
+  console.warn('⚠️  OPENROUTER_API_KEY не найден. /api/chat будет возвращать 503, пока не настроите ключ в server/.env');
+}
 
 /* ===================== helpers ===================== */
 const random6 = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -138,14 +152,12 @@ async function verifyGoogleIdToken(idToken) {
 }
 
 /* ===================== авторизация ===================== */
-/** Достаём токен из cookie ИЛИ из Authorization: Bearer */
 function extractToken(req) {
   const auth = req.headers.authorization || '';
   const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   return bearer || req.cookies.token || null;
 }
 
-/** Лёгкая прослойка: если токен валиден — кладём в req.user полноценного пользователя (с role & seller_status) */
 app.use(async (req, res, next) => {
   const token = extractToken(req);
   if (!token) { req.user = null; return next(); }
@@ -158,7 +170,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-/** Жёсткая проверка — требует авторизацию */
 function requireAuth(req, res, next) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
   next();
@@ -174,7 +185,7 @@ function requireApprovedSeller(req, res, next) {
   next();
 }
 
-/* ===================== init OTP tables (на всякий случай) ===================== */
+/* ===================== init OTP tables ===================== */
 (async () => {
   try {
     await db.query(`
@@ -373,7 +384,7 @@ app.post('/api/auth/google/verify', async (req, res) => {
   }
 });
 
-/* ===================== Привязка телефона + вход по телефону (пароль) ===================== */
+/* ===================== Привязка телефона + вход по телефону ===================== */
 app.post('/api/me/update-phone', requireAuth, async (req, res) => {
   try {
     let { phone, password } = req.body || {};
@@ -472,8 +483,8 @@ app.post('/api/me/update-profile', requireAuth, async (req, res) => {
   try {
     let { first_name, last_name, email } = req.body || {};
     first_name = (first_name || '').trim();
-    last_name  = (last_name  || '').trim();
-    email      = (email      || '').trim();
+    last_name = (last_name || '').trim();
+    email = (email || '').trim();
 
     if (!first_name || !last_name || !email) {
       return res.status(400).json({ error: 'Имя, фамилия и email обязательны' });
@@ -492,7 +503,6 @@ app.post('/api/me/update-profile', requireAuth, async (req, res) => {
 });
 
 app.get('/api/me', (req, res) => {
-  // Благодаря верхнему middleware, тут уже есть role/seller_status
   res.json({ user: req.user || null });
 });
 
@@ -501,17 +511,27 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true });
 });
 
-/* ===================== Chat demo ===================== */
+// === Chat (Mistral FREE с фолбэком) ===
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body.message;
-  try {
-    let systemContext = 'Ты вежливый ИИ-помощник, консультирующий по интернет-магазину.';
-    if (req.user) systemContext += ` Пользователь: ${req.user.username}, email: ${req.user.email}.`;
+  const PRIMARY_MODEL = 'mistralai/mistral-7b-instruct:free';
+  const FALLBACK_MODELS = [
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'openrouter/auto'
+  ];
 
-    const response = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
+  if (!OPENROUTER_API_KEY) {
+    return res.status(503).json({ error: 'AI недоступен: отсутствует OPENROUTER_API_KEY на сервере.' });
+  }
+
+  let systemContext = 'Ты вежливый ИИ-помощник, консультирующий по интернет-магазину.';
+  if (req.user) systemContext += ` Пользователь: ${req.user.username}, email: ${req.user.email}.`;
+
+  async function callModel(model) {
+    const { data } = await axios.post(
+      `${OPENROUTER_BASE_URL}/chat/completions`,
       {
-        model: 'mistralai/mistral-7b-instruct:free',
+        model,
         messages: [
           { role: 'system', content: systemContext },
           { role: 'user', content: userMessage }
@@ -520,26 +540,60 @@ app.post('/api/chat', async (req, res) => {
       },
       {
         headers: {
-          'Authorization': `Bearer ${API_KEY}`,
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:3000',
-          'X-Title': 'MyShop Assistant'
+          'HTTP-Referer': OPENROUTER_SITE_URL,
+          'X-Title': OPENROUTER_TITLE
         }
       }
     );
+    const aiReply = data?.choices?.[0]?.message?.content || 'Пустой ответ от модели';
+    return { aiReply, usedModel: model };
+  }
 
-    const aiReply = response.data.choices[0].message.content;
-    res.json({ reply: aiReply });
+  try {
+    // 1) Пытаемся бесплатную Mistral
+    try {
+      const r = await callModel(PRIMARY_MODEL);
+      return res.json({ reply: r.aiReply, model: r.usedModel });
+    } catch (e) {
+      const s = e.response?.status;
+      // 401/403/402 — проблемы доступа/кредиты/домен: попробуем фолбэки
+      if (![401, 402, 403].includes(s)) throw e;
+    }
+
+    // 2) Автоматический фолбэк
+    for (const m of FALLBACK_MODELS) {
+      try {
+        const r = await callModel(m);
+        return res.json({ reply: r.aiReply, model: r.usedModel });
+      } catch (e) {
+        // пробуем следующий
+      }
+    }
+
+    // если ничто не сработало
+    return res.status(503).json({ error: 'AI недоступен для текущего ключа/модели. Проверьте ключ и Allowed Sites.' });
   } catch (error) {
-    console.error('Ошибка обращения к OpenRouter:', error.response?.data || error.message);
-    res.status(500).json({ reply: 'Ошибка при соединении с ИИ 😢' });
+    const status = error.response?.status || 500;
+    const detail = error.response?.data || error.message;
+    console.error('Ошибка обращения к OpenRouter:', detail);
+    res.status(status).json({
+      error:
+        status === 401
+          ? 'Неверный/отключённый OPENROUTER_API_KEY.'
+          : status === 402
+            ? 'Недостаточно кредитов/лимит.'
+            : status === 403
+              ? 'Доступ к выбранной модели ограничен (проверьте Allowed Sites/регион/политику).'
+              : 'Не удалось связаться с AI.'
+    });
   }
 });
 
-/* ===================== Маркетплейс: заявки продавцов ===================== */
-// Список заявок (по умолчанию pending)
+/* ===================== Заявки продавцов ===================== */
 app.get('/admin/applications', requireAuth, requireAdmin, async (req, res) => {
-  const status = ['pending','approved','rejected'].includes(req.query.status) ? req.query.status : 'pending';
+  const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
   const [rows] = await db.query(`
     SELECT a.*, u.first_name, u.last_name, u.email, u.phone
     FROM seller_applications a
@@ -550,7 +604,6 @@ app.get('/admin/applications', requireAuth, requireAdmin, async (req, res) => {
   res.json(rows);
 });
 
-// Подача заявки
 app.post('/seller/apply', requireAuth, async (req, res) => {
   const { company_name, tax_id, price_list_url, comment } = req.body || {};
   if (!company_name || !tax_id) return res.status(400).json({ message: 'company_name and tax_id are required' });
@@ -570,11 +623,10 @@ app.post('/seller/apply', requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// Принять/отклонить заявку
 app.patch('/admin/applications/:id', requireAuth, requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
   const { action, reason } = req.body || {};
-  if (!['approve','reject'].includes(action)) return res.status(400).json({ message: 'Invalid action' });
+  if (!['approve', 'reject'].includes(action)) return res.status(400).json({ message: 'Invalid action' });
 
   const conn = await db.getConnection();
   try {

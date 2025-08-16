@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../App.css';
 
+// Можно переопределить базовый URL через REACT_APP_API_BASE
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5050';
+
 const TypingIndicator = () => (
   <div className="message message-ai typing-indicator">
     <span className="dot" />
@@ -20,21 +23,17 @@ export default function ChatWidget() {
   const bottomRef = useRef(null);
 
   const scrollToBottom = useCallback(() => {
-    // плавно или мгновенно
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, []);
 
-  // Когда открывается виджет — прокрутка вниз
   useEffect(() => {
     if (open) {
-      // немного задержим, чтобы содержимое отрендерилось
       setTimeout(scrollToBottom, 50);
     }
   }, [open, scrollToBottom]);
 
-  // Прокрутка после добавления новых сообщений или исчезновения индикатора
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
@@ -47,15 +46,20 @@ export default function ChatWidget() {
     setIsTyping(true);
 
     try {
-      const res = await axios.post('http://localhost:5050/api/chat', { message: userMessage });
-      // небольшая пауза, чтобы анимация была заметней (опционально)
-      // await new Promise(r => setTimeout(r, 300));
-      setMessages(prev => [
-        ...prev,
-        { role: 'ai', content: res.data.reply },
-      ]);
+      const res = await axios.post(
+        `${API_BASE}/api/chat`,
+        { message: userMessage },
+        { withCredentials: true }
+      );
+      setMessages(prev => [...prev, { role: 'ai', content: res.data.reply }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'ai', content: 'Ошибка ответа от ИИ 😞' }]);
+      const msg =
+        err?.response?.data?.reply ||
+        err?.response?.data?.error ||
+        (err?.response
+          ? `Ошибка ${err.response.status}: ${err.response.statusText}`
+          : 'Ошибка ответа от ИИ 😞');
+      setMessages(prev => [...prev, { role: 'ai', content: msg }]);
     } finally {
       setIsTyping(false);
     }
