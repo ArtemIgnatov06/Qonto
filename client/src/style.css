@@ -67,3 +67,32 @@ body {
 .page {
   padding: 2rem 0;
 }
+
+/* === products grid === */
+.products-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+  gap:16px;
+  margin-top:12px;
+}
+.product-card{
+  border:1px solid rgba(0,0,0,0.1);
+  border-radius:12px;
+  padding:12px;
+  display:flex;
+  gap:12px;
+  background:#fff;
+}
+.product-thumb{
+  width:64px; height:64px;
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  background:#f3f4f6;
+  font-size:28px;
+  flex-shrink:0;
+}
+.product-title{ font-weight:600; margin-bottom:4px; }
+.product-desc{ font-size:.9rem; color:#555; max-height:3.6em; overflow:hidden; }
+.product-meta{ display:flex; gap:12px; margin-top:6px; align-items:center; }
+.price{ font-weight:700; }
+.text-danger{ color:#b91c1c; }

@@ -510,6 +510,24 @@ app.post('/api/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ success: true });
 });
+/* ===================== Products (public) ===================== */
+app.get('/products', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT p.id, p.title, p.description, p.price, p.qty, p.status, p.created_at,
+              u.username AS seller_username
+         FROM products p
+         JOIN users u ON u.id = p.seller_id
+        WHERE p.status = 'active' AND p.qty > 0
+        ORDER BY p.created_at DESC
+        LIMIT 100`
+    );
+    res.json({ items: rows });
+  } catch (e) {
+    console.error('GET /products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // === Chat (Mistral FREE с фолбэком) ===
 app.post('/api/chat', async (req, res) => {
