@@ -123,3 +123,4 @@ CREATE TABLE IF NOT EXISTS `products` (
 
 -- 5) Сделать себя админом (подставь свой email/username/id)
 UPDATE `users` SET role='admin' WHERE email='ignatov051@gmail.com';
+UPDATE `users` SET role='admin' WHERE email='u5585103@live.warwick.ac.uk';
