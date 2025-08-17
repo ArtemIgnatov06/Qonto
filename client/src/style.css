@@ -69,30 +69,48 @@ body {
 }
 
 /* === products grid === */
+/* компактная карточка-контейнер на главной */
+.page-home .card.card-compact{
+  padding: 16px 18px;          /* было слишком много — уменьшаем */
+  max-width: 1500px;           /* чтобы контент не “плавал” по ширине */
+  margin: 16px auto;           /* меньше отступы вокруг */
+}
+
+/* сетка товаров: 3 в ряд на десктопе */
 .products-grid{
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
-  gap:16px;
+  gap:16px;                    /* компактнее */
   margin-top:12px;
 }
+.products-grid-3{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* карточка товара — квадратная плитка */
 .product-card{
-  border:1px solid rgba(0,0,0,0.1);
-  border-radius:12px;
-  padding:12px;
-  display:flex;
-  gap:12px;
   background:#fff;
+  border:1px solid #e6e6e6;
+  border-radius:12px;
+  padding:12px;                /* меньше внутренние отступы */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  transition: box-shadow .2s;
 }
+.product-card:hover{ box-shadow:0 4px 12px rgba(0,0,0,.06); }
+
+/* квадратная картинка */
 .product-thumb{
-  width:64px; height:64px;
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
   border-radius:8px;
-  display:flex; align-items:center; justify-content:center;
-  background:#f3f4f6;
-  font-size:28px;
-  flex-shrink:0;
+  margin-bottom:8px;
 }
+
+/* текстовые блоки */
 .product-title{ font-weight:600; margin-bottom:4px; }
-.product-desc{ font-size:.9rem; color:#555; max-height:3.6em; overflow:hidden; }
-.product-meta{ display:flex; gap:12px; margin-top:6px; align-items:center; }
-.price{ font-weight:700; }
-.text-danger{ color:#b91c1c; }
+.product-desc{ font-size:.92rem; color:#555; margin-bottom:6px; }
+.product-price{ font-weight:700; margin-bottom:4px; }
+.product-seller{ font-size:.82rem; color:#8a8a8a; }

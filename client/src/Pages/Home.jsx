@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ChatWidget from '../Components/ChatWidget';
 import '../App.css';
 
+
 export default function Home() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,7 @@ export default function Home() {
         const data = await r.json();
         if (!abort) setItems(Array.isArray(data.items) ? data.items : []);
       } catch {
-        if (!abort) setError('Не удалось загрузить товары');
+        if (!abort) setError('Не вдалося завантажити товари');
       } finally {
         if (!abort) setLoading(false);
       }
@@ -26,10 +27,7 @@ export default function Home() {
 
   return (
     <div className="page page-home">
-      <div className="card">
-        <button className="button menu-button" aria-label="Меню">
-          &#9776;
-        </button>
+      <div className="card card-compact"> {/* уменьшенные отступы */}
         <h2 className="heading-large">Каталог товаров</h2>
 
         {loading && <p className="text-muted">Загрузка…</p>}
@@ -37,26 +35,33 @@ export default function Home() {
 
         {!loading && !error && (
           items.length ? (
-            <div className="products-grid">
+            <div className="products-grid products-grid-3">
               {items.map(p => (
                 <div className="product-card" key={p.id}>
-                  <div className="product-thumb" aria-hidden="true">🛍️</div>
+                  <img
+                    className="product-thumb"
+                    src="/placeholder.svg"
+                    alt={p.title}
+                  />
                   <div className="product-body">
                     <div className="product-title">{p.title}</div>
-                    {p.description && <div className="product-desc">{p.description}</div>}
-                    <div className="product-meta">
-                      <span className="price">{Number(p.price).toFixed(2)} ₴</span>
-                      <span className="qty">В наличии: {p.qty}</span>
+                    {p.description && (
+                      <div className="product-desc">{p.description}</div>
+                    )}
+                    <div className="product-price">
+                      {Number(p.price).toFixed(2)} ₴
                     </div>
                     {p.seller_username && (
-                      <div className="seller">Продавец: {p.seller_username}</div>
+                      <div className="product-seller">
+                        Продавец: {p.seller_username}
+                      </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-muted">(Пока нет активных товаров)</p>
+            <p className="text-muted">(Поки немає активних товарів)</p>
           )
         )}
       </div>
@@ -64,3 +69,4 @@ export default function Home() {
     </div>
   );
 }
+
