@@ -2,17 +2,40 @@
 /* Ничего на главной странице больше не затронем */
 
 .profile-page {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 24px auto;
   padding: 0 16px 40px;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr; /* сам контейнер — одна колонка */
   gap: 24px;
 }
 
 .profile-page h2 {
   margin: 0;
   font-weight: 700;
+  grid-column: 1 / -1; /* заголовок на всю ширину */
+}
+
+/* ====== СЕТКА ВНУТРИ СТРАНИЦЫ (ДВЕ КОЛОНКИ) ====== */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* по умолчанию одна колонка (мобилки) */
+  gap: 24px;
+  align-items: start;
+}
+
+/* на широких экранах — две колонки, левая чуть шире */
+@media (min-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 2fr 1.5fr;
+    gap: 32px;
+  }
+}
+
+/* правая колонка — вертикальный стек карточек */
+.profile-right-col {
+  display: grid;
+  gap: 20px;
 }
 
 /* Карточка ТОЛЬКО внутри страницы профиля */
@@ -21,6 +44,9 @@
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
 }
 
 .profile-page .profile-card .form-row {
@@ -59,7 +85,6 @@
 .profile-page .msg.error   { color: #b00020; }
 
 .profile-page .btn-logout {
-  justify-self: start;
   padding: 10px 14px;
   border: none;
   border-radius: 10px;
@@ -68,13 +93,10 @@
   cursor: pointer;
 }
 
-/* Две колонки на широких экранах */
-@media (min-width: 900px) {
-  .profile-page {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-  .profile-page h2 {
-    grid-column: 1 / -1;
-  }
+/* ряд кнопок в профиле */
+.profile-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
 }
