@@ -98,7 +98,7 @@ const Profile = () => {
         <div className="profile-right-col">
           <PhoneBinder />
 
-          {user?.seller_status && (
+          {['pending', 'approved', 'rejected'].includes(user?.seller_status) && (
             <div className="card">
               <h3 style={{ marginTop: 0 }}>Статус заявки продавца</h3>
 
