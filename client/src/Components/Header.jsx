@@ -21,21 +21,21 @@ const Header = () => {
       className="header-bar"
       style={{
         display: 'flex',
-        justifyContent: 'space-between', // распределяем левый и правый блоки по краям
+        justifyContent: 'space-between',
         alignItems: 'center',
         padding: '12px 24px',
         background: '#f2f6fc',
         gap: 16,
       }}
     >
-      {/* Левый блок: логотип React + меню + (если есть) аватар */}
+      {/* Левый блок: логотип + меню */}
       <nav
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 16,
-          flexGrow: 1, // занимает максимум слева
-          minWidth: 0,  // чтобы не ломать layout при переполнении
+          flexGrow: 1,
+          minWidth: 0,
         }}
       >
         <img
@@ -43,6 +43,7 @@ const Header = () => {
           alt="React Logo"
           style={{ width: 36, height: 36, display: 'block', flexShrink: 0 }}
         />
+
         <NavLink to="/" end className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
           Домой
         </NavLink>
@@ -52,9 +53,20 @@ const Header = () => {
         <NavLink to="/contacts" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
           Контакты
         </NavLink>
+
+        {/* Админские ссылки (такие же как остальные) */}
         {user?.role === 'admin' && (
-        <NavLink to="/admin/applications" className="btn">Заявки</NavLink>
+          <>
+            <NavLink to="/admin/applications" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
+              Заявки
+            </NavLink>
+            <NavLink to="/admin/product-deletions" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
+              Удалённые товары
+            </NavLink>
+          </>
         )}
+
+        {/* Аватарка пользователя */}
         {user && (
           <div
             style={{
@@ -89,12 +101,8 @@ const Header = () => {
         )}
       </nav>
 
-      {/* Правый блок: кнопка Войти или Выйти */}
-      <div
-        style={{
-          flexShrink: 0, // не сжимать
-        }}
-      >
+      {/* Правый блок: кнопка Войти/Выйти */}
+      <div style={{ flexShrink: 0 }}>
         {user ? (
           <button onClick={handleLogout} className="btn-login" style={{ padding: '6px 12px' }}>
             Выйти

@@ -5,6 +5,7 @@ import '../Styles/profile.css';
 import { useAuth } from '../Hooks/useAuth';
 import PhoneBinder from '../Components/PhoneBinder';
 import { useNavigate } from 'react-router-dom';
+import UserProducts from '../Components/UserProducts'; // 👈 подключаем компонент
 
 const Profile = () => {
   const { user, refresh } = useAuth();
@@ -117,6 +118,12 @@ const Profile = () => {
                   <p className="muted" style={{ marginTop: 4 }}>
                     Теперь вы можете выставлять свои товары на продажу.
                   </p>
+                  {/* КНОПКА ДОБАВЛЕНИЯ ТОВАРА */}
+                  <div style={{ marginTop: 8 }}>
+                    <button className="btn-primary" onClick={() => navigate('/products/new')}>
+                      Добавить товар
+                    </button>
+                  </div>
                 </>
               )}
 
@@ -160,6 +167,14 @@ const Profile = () => {
                   </span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* 👇 Блок "Мои товары" — только если продавец одобрен */}
+          {user?.seller_status === 'approved' && (
+            <div className="card" style={{ marginTop: 20 }}>
+              <h3 style={{ marginTop: 0 }}>Мои товары</h3>
+              <UserProducts />
             </div>
           )}
         </div>

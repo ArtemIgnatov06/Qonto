@@ -15,6 +15,8 @@ import Header from './Components/Header';
 // src/App.jsx
 import AdminApplications from './Pages/AdminApplications.jsx';
 import SellerApplication from './Pages/SellerApplication';
+import ProductNew from './Pages/ProductNew';
+import AdminDeletions from './Pages/AdminDeletions';
 
 
 import './App.css';
@@ -38,6 +40,8 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin/applications" element={<AdminApplications />} />
             <Route path="/seller/apply" element={<SellerApplication />} />
+            <Route path="/products/new" element={<ProductNew />} />
+            <Route path="/admin/product-deletions" element={<AdminDeletions />} />
           </Routes>
         </main>
       </div>

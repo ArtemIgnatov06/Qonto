@@ -48,12 +48,13 @@ const db = mysql.createPool({
   timezone: '+00:00',
 });
 
+const DB_NAME = process.env.DB_NAME;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
 
 // ---------- OpenRouter (ИИ) ----------
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_MODEL =
-  process.env.OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free'; // ← по умолчанию Mistral FREE
+  process.env.OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free';
 const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
 const OPENROUTER_SITE_URL = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',')[0];
 const OPENROUTER_TITLE = process.env.OPENROUTER_APP_TITLE || 'MyShop Assistant';
@@ -185,6 +186,58 @@ function requireApprovedSeller(req, res, next) {
   next();
 }
 
+/* ===================== ensure schema: products ===================== */
+/** Автодобавляем недостающие поля/индексы для products (MySQL) */
+async function ensureProductsSchema() {
+  try {
+    // category
+    const [c1] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'category'`,
+      [DB_NAME]
+    );
+    if (!c1[0].cnt) {
+      await db.query(`ALTER TABLE products ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT 'Разное' AFTER price`);
+      console.log('✅ products.category добавлен');
+    }
+
+    // created_at
+    const [c2] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'created_at'`,
+      [DB_NAME]
+    );
+    if (!c2[0].cnt) {
+      await db.query(`ALTER TABLE products ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+      console.log('✅ products.created_at добавлен');
+    }
+
+    // idx category
+    const [i1] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_category'`,
+      [DB_NAME]
+    );
+    if (!i1[0].cnt) {
+      await db.query(`CREATE INDEX idx_products_category ON products(category)`);
+      console.log('✅ индекс idx_products_category создан');
+    }
+
+    // idx created_at
+    const [i2] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_created_at'`,
+      [DB_NAME]
+    );
+    if (!i2[0].cnt) {
+      await db.query(`CREATE INDEX idx_products_created_at ON products(created_at)`);
+      console.log('✅ индекс idx_products_created_at создан');
+    }
+  } catch (e) {
+    console.error('ensureProductsSchema error:', e.message || e);
+  }
+}
+
 /* ===================== init OTP tables ===================== */
 (async () => {
   try {
@@ -209,8 +262,11 @@ function requireApprovedSeller(req, res, next) {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
     console.log('✅ email_otps / phone_otps tables ensured');
+
+    // гарантируем схему products
+    await ensureProductsSchema();
   } catch (e) {
-    console.error('Не удалось создать таблицы OTP:', e?.message || e);
+    console.error('Не удалось инициализировать таблицы:', e?.message || e);
   }
 })();
 
@@ -438,7 +494,7 @@ app.post('/api/auth/phone/start', async (req, res) => {
     await db.query(
       `INSERT INTO phone_otps (phone, code_hash, expires_at)
        VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP`,
+       ON DUPЛICATE KEY UPDATE code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP`,
       [phone, hash, expiresAt]
     );
 
@@ -510,26 +566,242 @@ app.post('/api/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ success: true });
 });
+
 /* ===================== Products (public) ===================== */
-app.get('/products', async (req, res) => {
+/** общий обработчик листинга с ?category=... */
+const listProducts = async (req, res) => {
+  const { category } = req.query;
   try {
-    const [rows] = await db.query(
-      `SELECT p.id, p.title, p.description, p.price, p.qty, p.status, p.created_at,
-              u.username AS seller_username
-         FROM products p
-         JOIN users u ON u.id = p.seller_id
-        WHERE p.status = 'active' AND p.qty > 0
-        ORDER BY p.created_at DESC
-        LIMIT 100`
-    );
+    let sql =
+      `SELECT
+          p.id,
+          p.title,
+          p.description,
+          p.price,
+          p.qty,
+          p.status,
+          p.category,
+          p.created_at,
+          TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
+       FROM products p
+       JOIN users u ON u.id = p.seller_id
+       WHERE p.status = 'active' AND p.qty > 0`;
+    const params = [];
+
+    if (category) {
+      sql += ` AND p.category = ?`;
+      params.push(category);
+    }
+
+    sql += ` ORDER BY p.created_at DESC LIMIT 100`;
+
+    const [rows] = await db.query(sql, params);
     res.json({ items: rows });
   } catch (e) {
     console.error('GET /products error', e);
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+/** общий обработчик создания товара */
+const createProduct = async (req, res) => {
+  const { title, description, price, qty, category } = req.body || {};
+  if (!title || price == null || !category || String(category).trim() === '') {
+    return res.status(400).json({ message: 'title, price и category обязательны' });
+  }
+
+  const p = Number(price);
+  if (!Number.isFinite(p) || p < 0) {
+    return res.status(400).json({ message: 'price должен быть неотрицательным числом' });
+  }
+  const q = Number.isFinite(Number(qty)) ? Math.max(0, parseInt(qty, 10)) : 1;
+
+  try {
+    // создаём товар сразу активным
+    const [result] = await db.query(
+      `INSERT INTO products (seller_id, title, description, price, qty, category, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'active', NOW())`,
+      [req.user.id, title, description || null, p, q, String(category).trim()]
+    );
+
+    const newId = result.insertId;
+
+    // отдаём созданный товар тем же форматом, что и в листинге
+    const [rows] = await db.query(
+      `SELECT
+          p.id,
+          p.title,
+          p.description,
+          p.price,
+          p.qty,
+          p.status,
+          p.category,
+          p.created_at,
+          TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
+       FROM products p
+       JOIN users u ON u.id = p.seller_id
+       WHERE p.id = ?`,
+      [newId]
+    );
+
+    res.json({ ok: true, item: rows[0] });
+  } catch (e) {
+    console.error('POST /products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Листинг (оба пути)
+app.get('/products', listProducts);
+app.get('/api/products', listProducts);
+
+// Создание (оба пути) — только для одобренных продавцов
+app.post('/products', requireAuth, requireApprovedSeller, createProduct);
+app.post('/api/products', requireAuth, requireApprovedSeller, createProduct);
+
+/* ===================== Products: управление продавца ===================== */
+
+// список товаров конкретного продавца
+app.get('/api/my-products', requireAuth, requireApprovedSeller, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT id, title, description, price, qty, category, status, created_at
+         FROM products
+        WHERE seller_id = ?
+        ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+    res.json({ items: rows });
+  } catch (e) {
+    console.error('GET /api/my-products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
-// === Chat (Mistral FREE с фолбэком) ===
+// редактирование товара
+app.put('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res) => {
+  const { id } = req.params;
+  const { title, description, price, qty, category } = req.body || {};
+  try {
+    const [result] = await db.query(
+      `UPDATE products
+          SET title = ?, description = ?, price = ?, qty = ?, category = ?
+        WHERE id = ? AND seller_id = ?`,
+      [title, description, price, qty, category, id, req.user.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('PUT /api/products/:id error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// удаление товара
+app.delete('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query(
+      `DELETE FROM products WHERE id = ? AND seller_id = ?`,
+      [id, req.user.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('DELETE /api/products/:id error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* ===================== Admin: удаление чужих товаров с причиной ===================== */
+app.delete('/admin/products/:id', requireAuth, requireAdmin, async (req, res) => {
+  const productId = Number(req.params.id);
+  const { reason } = req.body || {};
+  if (!reason || !String(reason).trim()) {
+    return res.status(400).json({ message: 'Укажите причину удаления' });
+  }
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // 1) читаем товар
+    const [rows] = await conn.query(
+      `SELECT id, seller_id, title, price, category
+         FROM products
+        WHERE id = ?`,
+      [productId]
+    );
+    const prod = rows[0];
+    if (!prod) {
+      await conn.rollback();
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+
+    // 2) логируем удаление
+    await conn.query(
+      `INSERT INTO product_deletions (product_id, seller_id, title, price, category, admin_id, reason)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [prod.id, prod.seller_id, prod.title, prod.price, prod.category, req.user.id, String(reason).trim()]
+    );
+
+    // 3) физически удаляем товар
+    const [delRes] = await conn.query(`DELETE FROM products WHERE id = ?`, [productId]);
+    if (delRes.affectedRows === 0) {
+      await conn.rollback();
+      return res.status(409).json({ message: 'Не удалось удалить (возможно, уже удалён)' });
+    }
+
+    await conn.commit();
+    res.json({ ok: true });
+  } catch (e) {
+    await conn.rollback();
+    console.error('DELETE /admin/products/:id error:', e);
+    res.status(500).json({ message: 'Server error' });
+  } finally {
+    conn.release();
+  }
+});
+
+/* ===================== Admin: история удалений товаров ===================== */
+app.get('/admin/product-deletions', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT
+          pd.id,
+          pd.product_id,
+          pd.seller_id,
+          u.username        AS seller_username,
+          u.first_name      AS seller_first_name,
+          u.last_name       AS seller_last_name,
+          pd.title,
+          pd.price,
+          pd.category,
+          pd.admin_id,
+          a.username        AS admin_username,
+          a.first_name      AS admin_first_name,
+          a.last_name       AS admin_last_name,
+          pd.reason,
+          pd.created_at
+       FROM product_deletions pd
+       JOIN users a ON a.id = pd.admin_id
+       JOIN users u ON u.id = pd.seller_id
+       ORDER BY pd.created_at DESC
+       LIMIT 500`
+    );
+    res.json({ items: rows });
+  } catch (e) {
+    console.error('GET /admin/product-deletions error:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+/* ===================== Chat (Mistral FREE с фолбэком) ===================== */
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body.message;
   const PRIMARY_MODEL = 'mistralai/mistral-7b-instruct:free';
@@ -570,27 +842,19 @@ app.post('/api/chat', async (req, res) => {
   }
 
   try {
-    // 1) Пытаемся бесплатную Mistral
     try {
       const r = await callModel(PRIMARY_MODEL);
       return res.json({ reply: r.aiReply, model: r.usedModel });
     } catch (e) {
       const s = e.response?.status;
-      // 401/403/402 — проблемы доступа/кредиты/домен: попробуем фолбэки
       if (![401, 402, 403].includes(s)) throw e;
     }
-
-    // 2) Автоматический фолбэк
     for (const m of FALLBACK_MODELS) {
       try {
         const r = await callModel(m);
         return res.json({ reply: r.aiReply, model: r.usedModel });
-      } catch (e) {
-        // пробуем следующий
-      }
+      } catch (e) { }
     }
-
-    // если ничто не сработало
     return res.status(503).json({ error: 'AI недоступен для текущего ключа/модели. Проверьте ключ и Allowed Sites.' });
   } catch (error) {
     const status = error.response?.status || 500;
@@ -687,16 +951,35 @@ app.patch('/admin/applications/:id', requireAuth, requireAdmin, async (req, res)
 });
 
 /* ===================== Товары (для одобренных продавцов) ===================== */
+/** POST /products — создать товар (только approved) */
 app.post('/products', requireAuth, requireApprovedSeller, async (req, res) => {
-  const { title, description, price, qty } = req.body || {};
-  if (!title || price == null) return res.status(400).json({ message: 'title and price required' });
+  const { title, description, price, qty, category } = req.body || {};
+  if (!title || price == null || category == null || String(category).trim() === '') {
+    return res.status(400).json({ message: 'title, price и category обязательны' });
+  }
 
-  await db.query(`
-    INSERT INTO products (seller_id, title, description, price, qty)
-    VALUES (?, ?, ?, ?, ?)
-  `, [req.user.id, title, description || null, price, qty ?? 0]);
+  try {
+    const [result] = await db.query(
+      `INSERT INTO products (seller_id, title, description, price, qty, category, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+      [req.user.id, title, description || null, Number(price), qty ?? 0, String(category).trim()]
+    );
 
-  res.json({ ok: true });
+    const newId = result.insertId;
+    const [rows] = await db.query(
+      `SELECT p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
+              u.username AS seller_username
+         FROM products p
+         JOIN users u ON u.id = p.seller_id
+        WHERE p.id = ?`,
+      [newId]
+    );
+
+    res.json({ ok: true, item: rows[0] });
+  } catch (e) {
+    console.error('POST /products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 /* ===================== Запуск ===================== */
