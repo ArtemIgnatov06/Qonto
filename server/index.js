@@ -494,7 +494,7 @@ app.post('/api/auth/phone/start', async (req, res) => {
     await db.query(
       `INSERT INTO phone_otps (phone, code_hash, expires_at)
        VALUES (?, ?, ?)
-       ON DUPЛICATE KEY UPDATE code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP`,
+       ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP`,
       [phone, hash, expiresAt]
     );
 
@@ -978,6 +978,102 @@ app.post('/products', requireAuth, requireApprovedSeller, async (req, res) => {
     res.json({ ok: true, item: rows[0] });
   } catch (e) {
     console.error('POST /products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+/* ------- Product details (public) ------- */
+app.get('/api/products/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) return res.status(400).json({ message: 'Invalid id' });
+
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT
+        p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
+        u.id AS seller_id,
+        TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS seller_name,
+        COALESCE(ROUND(AVG(r.rating), 1), 0) AS avg_rating,
+        COUNT(r.id) AS reviews_count
+      FROM products p
+      JOIN users u ON u.id = p.seller_id
+      LEFT JOIN product_reviews r ON r.product_id = p.id
+      WHERE p.id = ?
+      GROUP BY p.id
+      `,
+      [id]
+    );
+
+    const item = rows[0];
+    if (!item) return res.status(404).json({ message: 'Товар не найден' });
+
+    // если надо скрывать неактивные — раскомментируй:
+    // if (item.status !== 'active' || item.qty <= 0) return res.status(404).json({ message: 'Товар недоступен' });
+
+    res.json({ item });
+  } catch (e) {
+    console.error('GET /api/products/:id error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* ------- Reviews: list (public) ------- */
+app.get('/api/products/:id/reviews', async (req, res) => {
+  const id = Number(req.params.id);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || '20', 10)));
+  const offset = Math.max(0, parseInt(req.query.offset || '0', 10));
+
+  if (!Number.isFinite(id)) return res.status(400).json({ message: 'Invalid id' });
+
+  try {
+    const [reviews] = await db.query(
+      `
+      SELECT
+        r.id, r.rating, r.comment, r.created_at, r.updated_at,
+        r.user_id,
+        u.username,
+        u.first_name, u.last_name
+      FROM product_reviews r
+      JOIN users u ON u.id = r.user_id
+      WHERE r.product_id = ?
+      ORDER BY r.created_at DESC
+      LIMIT ? OFFSET ?
+      `,
+      [id, limit, offset]
+    );
+    res.json({ items: reviews, limit, offset });
+  } catch (e) {
+    console.error('GET /api/products/:id/reviews error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* ------- Reviews: create/update (auth) ------- */
+app.post('/api/products/:id/reviews', requireAuth, async (req, res) => {
+  const productId = Number(req.params.id);
+  let { rating, comment } = req.body || {};
+  rating = Number(rating);
+  comment = (comment || '').trim();
+
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: 'rating должен быть целым числом от 1 до 5' });
+  }
+
+  try {
+    await db.query(
+      `
+      INSERT INTO product_reviews (product_id, user_id, rating, comment)
+      VALUES (?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        rating = VALUES(rating),
+        comment = VALUES(comment),
+        updated_at = CURRENT_TIMESTAMP
+      `,
+      [productId, req.user.id, rating, comment || null]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('POST /api/products/:id/reviews error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });

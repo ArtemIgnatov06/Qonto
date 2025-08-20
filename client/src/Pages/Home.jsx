@@ -1,5 +1,6 @@
 // client/src/Pages/Home.jsx
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ChatWidget from '../Components/ChatWidget';
 import { useAuth } from '../Hooks/useAuth';
 import '../App.css';
@@ -11,6 +12,7 @@ export default function Home() {
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // ✨ для перехода
 
   // грузим все товары один раз — чтобы собрать список категорий
   useEffect(() => {
@@ -60,6 +62,11 @@ export default function Home() {
     );
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [allItems]);
+
+  // покупка → переход на страницу товара
+  const handleBuy = (product) => {
+    navigate(`/product/${product.id}`);
+  };
 
   // удаление товара админом
   const handleAdminDelete = async (product) => {
@@ -113,17 +120,22 @@ export default function Home() {
             <div className="products-grid products-grid-3">
               {items.map(p => (
                 <div className="product-card" key={p.id}>
-                  <img
-                    className="product-thumb"
-                    src="/placeholder.svg"
-                    alt={p.title}
-                  />
+                  <Link to={`/product/${p.id}`} style={{ display: 'block' }}>
+                    <img
+                      className="product-thumb"
+                      src="/placeholder.svg"
+                      alt={p.title}
+                    />
+                  </Link>
+
                   <div className="product-body">
                     <div
                       className="product-title"
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
                     >
-                      <span>{p.title}</span>
+                      <Link to={`/product/${p.id}`} className="link-plain">
+                        <span>{p.title}</span>
+                      </Link>
 
                       {/* Кнопка удаления видна только админам */}
                       {user?.role === 'admin' && (
@@ -149,11 +161,32 @@ export default function Home() {
                     {p.description && (
                       <div className="product-desc">{p.description}</div>
                     )}
-                    <div className="product-price">
-                      {Number(p.price).toFixed(2)} ₴
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        marginTop: 8
+                      }}
+                    >
+                      <div className="product-price">
+                        {Number(p.price).toFixed(2)} ₴
+                      </div>
+
+                      <button
+                        type="button"
+                        className="btn-primary"
+                        onClick={() => handleBuy(p)}
+                        title="Купить"
+                      >
+                        Купить
+                      </button>
                     </div>
+
                     {p.seller_name && (
-                      <div className="product-seller">
+                      <div className="product-seller" style={{ marginTop: 6 }}>
                         Продавец: {p.seller_name}
                       </div>
                     )}
