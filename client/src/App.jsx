@@ -17,6 +17,8 @@ import AdminApplications from './Pages/AdminApplications.jsx';
 import SellerApplication from './Pages/SellerApplication';
 import ProductNew from './Pages/ProductNew';
 import AdminDeletions from './Pages/AdminDeletions';
+import CartPage from './Pages/CartPage';
+import CheckoutPage from './Pages/CheckoutPage';
 
 // ❗ правильный регистр папки:
 import ProductPage from './Pages/ProductPage';
@@ -49,6 +51,9 @@ export default function App() {
 
             {/* Страница товара */}
             <Route path="/product/:id" element={<ProductPage />} />
+
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
           </Routes>
         </main>
       </div>

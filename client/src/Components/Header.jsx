@@ -2,7 +2,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
-import ReactLogo from './logo192.png'; // путь к логотипу React
+import ReactLogo from './logo192.png'; // твой логотип
+import CartBadge from '../Components/CartBadge'; // <-- ВАЖНО: путь к бейджу корзины
 
 const Header = () => {
   const { user, refresh } = useAuth();
@@ -10,7 +11,7 @@ const Header = () => {
   const handleLogout = async () => {
     await fetch('http://localhost:5050/api/logout', {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
     });
     await refresh();
     window.location.href = '/';
@@ -54,7 +55,12 @@ const Header = () => {
           Контакты
         </NavLink>
 
-        {/* Админские ссылки (такие же как остальные) */}
+        {/* Ссылка на корзину с количеством */}
+        <NavLink to="/cart" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`} title="Перейти в корзину">
+          <CartBadge />
+        </NavLink>
+
+        {/* Админские ссылки */}
         {user?.role === 'admin' && (
           <>
             <NavLink to="/admin/applications" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
@@ -73,7 +79,7 @@ const Header = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 12,
-              marginLeft: '24px',
+              marginLeft: 24,
               flexShrink: 0,
             }}
           >
@@ -83,7 +89,7 @@ const Header = () => {
                 height: 36,
                 borderRadius: '50%',
                 backgroundColor: '#2563eb',
-                color: 'white',
+                color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

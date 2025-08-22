@@ -981,6 +981,7 @@ app.post('/products', requireAuth, requireApprovedSeller, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 /* ------- Product details (public) ------- */
 app.get('/api/products/:id', async (req, res) => {
   const id = Number(req.params.id);
@@ -993,55 +994,65 @@ app.get('/api/products/:id', async (req, res) => {
         p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
         u.id AS seller_id,
         TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS seller_name,
-        COALESCE(ROUND(AVG(r.rating), 1), 0) AS avg_rating,
-        COUNT(r.id) AS reviews_count
+        /* подзапросы вместо GROUP BY */
+        COALESCE((
+          SELECT ROUND(AVG(r2.rating), 1)
+          FROM product_reviews r2
+          WHERE r2.product_id = p.id
+        ), 0) AS avg_rating,
+        (
+          SELECT COUNT(*) FROM product_reviews r3 WHERE r3.product_id = p.id
+        ) AS reviews_count
       FROM products p
       JOIN users u ON u.id = p.seller_id
-      LEFT JOIN product_reviews r ON r.product_id = p.id
       WHERE p.id = ?
-      GROUP BY p.id
+      LIMIT 1
       `,
       [id]
     );
 
     const item = rows[0];
     if (!item) return res.status(404).json({ message: 'Товар не найден' });
-
-    // если надо скрывать неактивные — раскомментируй:
-    // if (item.status !== 'active' || item.qty <= 0) return res.status(404).json({ message: 'Товар недоступен' });
-
-    res.json({ item });
+    return res.json({ item });
   } catch (e) {
     console.error('GET /api/products/:id error', e);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
 /* ------- Reviews: list (public) ------- */
 app.get('/api/products/:id/reviews', async (req, res) => {
-  const id = Number(req.params.id);
-  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || '20', 10)));
-  const offset = Math.max(0, parseInt(req.query.offset || '0', 10));
+  const productId = Number(req.params.id);
+  const limit  = Math.min(50, Math.max(1, parseInt(req.query.limit ?? '20', 10)));
+  const offset = Math.max(0, parseInt(req.query.offset ?? '0', 10));
 
-  if (!Number.isFinite(id)) return res.status(400).json({ message: 'Invalid id' });
+  if (!Number.isFinite(productId)) {
+    return res.status(400).json({ message: 'Invalid id' });
+  }
 
   try {
-    const [reviews] = await db.query(
+    const [rows] = await db.query(
       `
       SELECT
-        r.id, r.rating, r.comment, r.created_at, r.updated_at,
+        r.id,
+        r.rating,
+        r.comment,
+        r.created_at,
+        r.updated_at,
         r.user_id,
-        u.username,
-        u.first_name, u.last_name
+        -- удобное отображаемое имя
+        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name,
+        u.username
       FROM product_reviews r
       JOIN users u ON u.id = r.user_id
       WHERE r.product_id = ?
-      ORDER BY r.created_at DESC
+      ORDER BY r.created_at DESC, r.id DESC
       LIMIT ? OFFSET ?
       `,
-      [id, limit, offset]
+      [productId, limit, offset]
     );
-    res.json({ items: reviews, limit, offset });
+
+    res.json({ items: rows || [], limit, offset });
   } catch (e) {
     console.error('GET /api/products/:id/reviews error', e);
     res.status(500).json({ message: 'Server error' });
@@ -1052,31 +1063,238 @@ app.get('/api/products/:id/reviews', async (req, res) => {
 app.post('/api/products/:id/reviews', requireAuth, async (req, res) => {
   const productId = Number(req.params.id);
   let { rating, comment } = req.body || {};
-  rating = Number(rating);
-  comment = (comment || '').trim();
 
+  if (!Number.isFinite(productId)) {
+    return res.status(400).json({ message: 'Invalid id' });
+  }
+
+  rating = parseInt(rating, 10);
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return res.status(400).json({ message: 'rating должен быть целым числом от 1 до 5' });
   }
 
+  comment = (comment ?? '').toString().trim() || null;
+
   try {
+    // один отзыв на пользователя для товара (upsert)
     await db.query(
       `
       INSERT INTO product_reviews (product_id, user_id, rating, comment)
       VALUES (?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
-        rating = VALUES(rating),
-        comment = VALUES(comment),
+        rating     = VALUES(rating),
+        comment    = VALUES(comment),
         updated_at = CURRENT_TIMESTAMP
       `,
-      [productId, req.user.id, rating, comment || null]
+      [productId, req.user.id, rating, comment]
     );
-    res.json({ ok: true });
+
+    // отдаем актуальный отзыв тем же форматом, что GET
+    const [rows] = await db.query(
+      `
+      SELECT
+        r.id,
+        r.rating,
+        r.comment,
+        r.created_at,
+        r.updated_at,
+        r.user_id,
+        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name,
+        u.username
+      FROM product_reviews r
+      JOIN users u ON u.id = r.user_id
+      WHERE r.product_id = ? AND r.user_id = ?
+      ORDER BY r.updated_at DESC, r.id DESC
+      LIMIT 1
+      `,
+      [productId, req.user.id]
+    );
+
+    return res.status(201).json({ item: rows[0] });
   } catch (e) {
     console.error('POST /api/products/:id/reviews error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+/* ===================== CART ===================== */
+
+/* List cart items for current user */
+app.get('/api/cart', requireAuth, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT
+        ci.product_id,
+        ci.qty,
+        p.title,
+        p.price
+      FROM cart_items ci
+      JOIN products p ON p.id = ci.product_id
+      WHERE ci.user_id = ?
+      ORDER BY ci.updated_at DESC, ci.id DESC
+      `,
+      [req.user.id]
+    );
+    res.json({ items: rows || [] });
+  } catch (e) {
+    console.error('GET /api/cart error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* Add to cart (upsert) */
+app.post('/api/cart', requireAuth, async (req, res) => {
+  let { product_id, qty } = req.body || {};
+  const pid = Number(product_id);
+  const q = Math.max(1, parseInt(qty ?? '1', 10));
+  if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid product_id' });
+
+  try {
+    await db.query(
+      `
+      INSERT INTO cart_items (user_id, product_id, qty)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at = CURRENT_TIMESTAMP
+      `,
+      [req.user.id, pid, q]
+    );
+    res.status(201).json({ ok: true });
+  } catch (e) {
+    console.error('POST /api/cart error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* Update quantity (set) */
+app.patch('/api/cart/:productId', requireAuth, async (req, res) => {
+  const pid = Number(req.params.productId);
+  const q = parseInt((req.body || {}).qty, 10);
+  if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid id' });
+
+  try {
+    if (!Number.isInteger(q) || q <= 0) {
+      await db.query(`DELETE FROM cart_items WHERE user_id=? AND product_id=?`, [req.user.id, pid]);
+      return res.json({ ok: true, removed: true });
+    }
+    await db.query(
+      `UPDATE cart_items SET qty=?, updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND product_id=?`,
+      [q, req.user.id, pid]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('PATCH /api/cart/:productId error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* Remove item */
+app.delete('/api/cart/:productId', requireAuth, async (req, res) => {
+  const pid = Number(req.params.productId);
+  if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid id' });
+  try {
+    await db.query(`DELETE FROM cart_items WHERE user_id=? AND product_id=?`, [req.user.id, pid]);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('DELETE /api/cart/:productId error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* ===================== CHECKOUT (demo) ===================== */
+
+/* Create order from cart + address + demo payment */
+app.post('/api/checkout', requireAuth, async (req, res) => {
+  const { address, payment } = req.body || {};
+  const country = (address?.country || '').trim();
+  const city = (address?.city || '').trim();
+  const street = (address?.street || '').trim();
+  const postal = (address?.postal || '').trim();
+
+  if (!country || !city || !street || !postal) {
+    return res.status(400).json({ message: 'Не все поля адреса заполнены' });
+  }
+
+  try {
+    // 1) читаем корзину
+    const [cart] = await db.query(
+      `
+      SELECT ci.product_id, ci.qty, p.price
+      FROM cart_items ci
+      JOIN products p ON p.id = ci.product_id
+      WHERE ci.user_id = ?
+      `,
+      [req.user.id]
+    );
+    if (!cart || cart.length === 0) {
+      return res.status(400).json({ message: 'Корзина пуста' });
+    }
+
+    // 2) создаём заказ
+    const total = cart.reduce((s, row) => s + Number(row.price) * Number(row.qty), 0);
+    const [insOrder] = await db.query(
+      `INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, 'created')`,
+      [req.user.id, total.toFixed(2)]
+    );
+    const orderId = insOrder.insertId;
+
+    // 3) позиции заказа
+    const values = cart.map(r => [orderId, r.product_id, r.qty, r.price]);
+    await db.query(
+      `INSERT INTO order_items (order_id, product_id, qty, price) VALUES ?`,
+      [values]
+    );
+
+    // 4) адрес
+    await db.query(
+      `INSERT INTO order_addresses (order_id, country, city, street, postal_code) VALUES (?, ?, ?, ?, ?)`,
+      [orderId, country, city, street, postal]
+    );
+
+    // 5) демо-платёж: валидируем Луна, определяем бренд, сохраняем только last4/brand
+    const cardNumber = (payment?.cardNumber || '').replace(/\s+/g, '');
+    const exp = (payment?.exp || '').trim(); // MM/YY
+    const cvc = (payment?.cvc || '').trim(); // не сохраняем
+    const luhnOk = /^[0-9]{12,19}$/.test(cardNumber) && luhn(cardNumber);
+    if (!luhnOk || !/^\d{2}\/\d{2}$/.test(exp) || !/^\d{3,4}$/.test(cvc)) {
+      return res.status(400).json({ message: 'Некорректные карточные данные (демо-валидация)' });
+    }
+    const last4 = cardNumber.slice(-4);
+    const brand = detectBrand(cardNumber);
+
+    // помечаем заказ оплаченным (демо)
+    await db.query(`UPDATE orders SET status='paid' WHERE id=?`, [orderId]);
+    await db.query(`INSERT INTO payments (order_id, provider, brand, last4, status) VALUES (?, 'demo', ?, ?, 'succeeded')`,
+      [orderId, brand, last4]
+    );
+
+    // 6) чистим корзину
+    await db.query(`DELETE FROM cart_items WHERE user_id=?`, [req.user.id]);
+
+    res.status(201).json({ ok: true, order_id: orderId, total, brand, last4 });
+  } catch (e) {
+    console.error('POST /api/checkout error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* helpers */
+function luhn(num) {
+  let sum = 0, dbl = false;
+  for (let i = num.length - 1; i >= 0; i--) {
+    let d = +num[i];
+    if (dbl) { d *= 2; if (d > 9) d -= 9; }
+    sum += d; dbl = !dbl;
+  }
+  return sum % 10 === 0;
+}
+function detectBrand(n) {
+  if (/^4/.test(n)) return 'visa';
+  if (/^5[1-5]/.test(n) || /^2(2[2-9]|[3-6]|7[01])/.test(n)) return 'mastercard';
+  if (/^3[47]/.test(n)) return 'amex';
+  if (/^6(?:011|5)/.test(n)) return 'discover';
+  return 'card';
+}
 
 /* ===================== Запуск ===================== */
 const PORT = process.env.PORT || 5050;
