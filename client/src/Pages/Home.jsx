@@ -120,13 +120,21 @@ export default function Home() {
             <div className="products-grid products-grid-3">
               {items.map(p => (
                 <div className="product-card" key={p.id}>
-                  <Link to={`/product/${p.id}`} style={{ display: 'block' }}>
-                    <img
-                      className="product-thumb"
-                      src="/placeholder.svg"
-                      alt={p.title}
-                    />
-                  </Link>
+                <Link to={`/product/${p.id}`} style={{ display: 'block' }}>
+                  <img
+                    className="product-thumb"
+                    src={p.preview_image_url || '/placeholder.svg'}
+                    alt={p.title}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"  // на случай, если хост режет по Referer
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                </Link>
+
+
 
                   <div className="product-body">
                     <div

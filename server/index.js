@@ -569,39 +569,49 @@ app.post('/api/logout', (req, res) => {
 
 /* ===================== Products (public) ===================== */
 /** общий обработчик листинга с ?category=... */
-const listProducts = async (req, res) => {
-  const { category } = req.query;
+// server/index.js
+async function listProducts(req, res) {
   try {
-    let sql =
-      `SELECT
-          p.id,
-          p.title,
-          p.description,
-          p.price,
-          p.qty,
-          p.status,
-          p.category,
-          p.created_at,
-          TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
-       FROM products p
-       JOIN users u ON u.id = p.seller_id
-       WHERE p.status = 'active' AND p.qty > 0`;
+    const { category } = req.query;
     const params = [];
+    let where = "p.status = 'active'";
 
     if (category) {
-      sql += ` AND p.category = ?`;
+      where += " AND p.category = ?";
       params.push(category);
     }
 
-    sql += ` ORDER BY p.created_at DESC LIMIT 100`;
+    const [rows] = await db.query(
+      `
+      SELECT
+        p.id,
+        p.title,
+        p.description,
+        p.price,
+        p.qty,
+        p.status,
+        p.category,
+        p.created_at,
+        p.preview_image_url, -- <— ВАЖНО!
+        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
+      FROM products p
+      JOIN users u ON u.id = p.seller_id
+      WHERE ${where}
+      ORDER BY p.created_at DESC
+      `,
+      params
+    );
 
-    const [rows] = await db.query(sql, params);
     res.json({ items: rows });
   } catch (e) {
     console.error('GET /products error', e);
     res.status(500).json({ message: 'Server error' });
   }
-};
+}
+
+// и маршруты
+app.get('/products', listProducts);
+app.get('/api/products', listProducts);
 
 /** общий обработчик создания товара */
 const createProduct = async (req, res) => {
@@ -629,18 +639,19 @@ const createProduct = async (req, res) => {
     // отдаём созданный товар тем же форматом, что и в листинге
     const [rows] = await db.query(
       `SELECT
-          p.id,
-          p.title,
-          p.description,
-          p.price,
-          p.qty,
-          p.status,
-          p.category,
-          p.created_at,
-          TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
-       FROM products p
-       JOIN users u ON u.id = p.seller_id
-       WHERE p.id = ?`,
+        p.id,
+        p.title,
+        p.description,
+        p.price,
+        p.qty,
+        p.status,
+        p.category,
+        p.created_at,
+        p.preview_image_url,                      -- <— ЭТО НУЖНО
+        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
+      FROM products p
+      JOIN users u ON u.id = p.seller_id
+      WHERE p.status = 'active'`,
       [newId]
     );
 

@@ -1,3 +1,4 @@
+// pages/ProductNew.jsx (твой файл)
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -13,25 +14,21 @@ const ProductNew = () => {
     description: '',
     price: '',
     category: '',
-    qty: 1,                 // новое поле
+    qty: 1,
+    preview_image_url: '',     // <— НОВОЕ ПОЛЕ
   });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
 
   if (!user) return <div className="profile-page">Не авторизован</div>;
   if (user.seller_status !== 'approved') {
-    return (
-      <div className="profile-page">
-        Вам нужно дождаться одобрения заявки продавца.
-      </div>
-    );
+    return <div className="profile-page">Вам нужно дождаться одобрения заявки продавца.</div>;
   }
 
   const submit = async (e) => {
     e.preventDefault();
     setErr(null);
 
-    // простая валидация
     const priceNum = Number(form.price);
     const qtyNum = Number.isFinite(Number(form.qty)) ? Math.max(0, parseInt(form.qty, 10)) : 1;
     if (!Number.isFinite(priceNum) || priceNum < 0) {
@@ -46,11 +43,12 @@ const ProductNew = () => {
         description: form.description.trim(),
         category: form.category.trim(),
         price: priceNum,
-        qty: qtyNum,        // отправляем количество
+        qty: qtyNum,
+        preview_image_url: form.preview_image_url.trim() || null,  // <— ОТПРАВЛЯЕМ
       };
       const { data } = await axios.post('/api/products', payload, { withCredentials: true });
       if (data.ok) {
-        navigate('/'); // после создания — домой, чтобы увидеть товар в каталоге
+        navigate('/'); // домой — увидеть товар в каталоге
       } else {
         setErr(data.error || 'Не удалось сохранить товар');
       }
@@ -60,6 +58,9 @@ const ProductNew = () => {
       setSaving(false);
     }
   };
+
+  // Простая проверка, что строка выглядит как URL-картинки
+  const validImageUrl = (u) => /^https?:\/\/.+\.(png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(u);
 
   return (
     <div className="profile-page">
@@ -118,6 +119,25 @@ const ProductNew = () => {
             placeholder="Краткое описание товара"
           />
         </div>
+
+        {/* НОВОЕ: превью-картинка по URL */}
+        <div className="form-row">
+          <label>Ссылка на превью‑картинку</label>
+          <input
+            type="url"
+            value={form.preview_image_url}
+            onChange={(e) => setForm({ ...form, preview_image_url: e.target.value })}
+            placeholder="https://example.com/image.jpg"
+          />
+          <small>Поддерживаются .jpg, .jpeg, .png, .webp, .gif, .avif</small>
+        </div>
+
+        {/* Предпросмотр (фиксированный размер миниатюры) */}
+        {validImageUrl(form.preview_image_url) && (
+          <div className="thumb-preview">
+            <img src={form.preview_image_url} alt="Предпросмотр" className="thumb-fixed" />
+          </div>
+        )}
 
         <div className="profile-actions">
           <button className="btn-primary" type="submit" disabled={saving}>
