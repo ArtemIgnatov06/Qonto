@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
+// client/src/Components/UserProducts.jsx
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const UserProducts = () => {
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+
+  const money = useMemo(() => {
+    const lng = i18n.language || 'ru';
+    const locale = lng.startsWith('ua') || lng.startsWith('uk') ? 'uk-UA' : 'ru-RU';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'UAH' });
+  }, [i18n.language]);
 
   const load = async () => {
     setLoading(true);
@@ -13,39 +22,64 @@ const UserProducts = () => {
       const { data } = await axios.get('/api/my-products', { withCredentials: true });
       setItems(data.items || []);
     } catch {
-      setErr('Не удалось загрузить товары');
+      setErr(t('userProducts.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   const remove = async (id) => {
-    if (!window.confirm('Удалить товар?')) return;
+    if (!window.confirm(t('userProducts.confirmDelete'))) return;
     try {
       await axios.delete(`/api/products/${id}`, { withCredentials: true });
-      setItems(items.filter(i => i.id !== id));
+      setItems((prev) => prev.filter((i) => i.id !== id));
     } catch {
-      alert('Ошибка удаления');
+      alert(t('userProducts.deleteFailed'));
     }
   };
 
   return (
-    <div>
-      {loading && <p className="text-muted">Загрузка…</p>}
+    <div aria-live="polite">
+      {loading && <p className="text-muted">{t('common.loading')}</p>}
       {err && <p className="text-danger">{err}</p>}
 
-      {!loading && !items.length && <p className="text-muted">У вас пока нет товаров</p>}
+      {!loading && !items.length && (
+        <p className="text-muted">{t('userProducts.empty')}</p>
+      )}
 
       <ul style={{ listStyle: 'none', padding: 0 }}>
-        {items.map(p => (
-          <li key={p.id} style={{ marginBottom: 12, padding: 8, border: '1px solid #ddd', borderRadius: 8 }}>
-            <div><b>{p.title}</b> ({p.category}) — {Number(p.price).toFixed(2)} ₴</div>
-            <div style={{ fontSize: 14, color: '#666' }}>{p.description}</div>
+        {items.map((p) => (
+          <li
+            key={p.id}
+            style={{ marginBottom: 12, padding: 8, border: '1px solid #ddd', borderRadius: 8 }}
+            aria-label={t('userProducts.itemAria', { title: p.title })}
+          >
+            <div>
+              <b>{p.title}</b> ({p.category}) — {money.format(Number(p.price) || 0)}
+            </div>
+            {p.description && (
+              <div style={{ fontSize: 14, color: '#666' }}>{p.description}</div>
+            )}
             <div style={{ marginTop: 6 }}>
-              <button className="btn-primary" style={{ marginRight: 8 }}>Редактировать</button>
-              <button className="btn-logout" onClick={() => remove(p.id)}>Удалить</button>
+              <button
+                className="btn-primary"
+                style={{ marginRight: 8 }}
+                title={t('common.edit')}
+                aria-label={t('common.edit')}
+                // TODO: сюда повесить переход или модал редактирования
+              >
+                {t('common.edit')}
+              </button>
+              <button
+                className="btn-logout"
+                onClick={() => remove(p.id)}
+                title={t('common.delete')}
+                aria-label={t('common.delete')}
+              >
+                {t('common.delete')}
+              </button>
             </div>
           </li>
         ))}

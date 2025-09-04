@@ -1,7 +1,9 @@
 // client/src/Components/CartBadge.jsx
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function CartBadge({ className = '' }) {
+  const { t } = useTranslation();
   const API = process.env.REACT_APP_API || '';
   const [count, setCount] = useState(0);
 
@@ -17,15 +19,16 @@ export default function CartBadge({ className = '' }) {
   }
 
   useEffect(() => {
-    load(); // при монтировании
+    load();
     const onChange = () => load();
     window.addEventListener('cart:changed', onChange);
-    window.addEventListener('focus', onChange); // вернулись во вкладку — обновим
+    window.addEventListener('focus', onChange);
     return () => {
       window.removeEventListener('cart:changed', onChange);
       window.removeEventListener('focus', onChange);
     };
   }, [API]);
 
-  return <span className={className}>Корзина{count ? ` (${count})` : ''}</span>;
+  // ВАЖНО: правильный ключ — cart.cart (а не cart.title)
+  return <span className={className}>{t('cart.cart')}{count ? ` (${count})` : ''}</span>;
 }

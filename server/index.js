@@ -48,6 +48,15 @@ const db = mysql.createPool({
   timezone: '+00:00',
 });
 
+(async () => {
+  try {
+    const [r] = await db.query('SELECT DATABASE() AS db');
+    console.log('Connected DB =', r[0].db);
+  } catch (e) {
+    console.error('DB ping failed:', e.message || e);
+  }
+})();
+
 const DB_NAME = process.env.DB_NAME;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
 
@@ -197,8 +206,19 @@ async function ensureProductsSchema() {
       [DB_NAME]
     );
     if (!c1[0].cnt) {
-      await db.query(`ALTER TABLE products ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT 'Разное' AFTER price`);
+      await db.query(`ALTER TABLE products ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT '' AFTER description`);
       console.log('✅ products.category добавлен');
+    }
+
+    // status
+    const [cStat] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'status'`,
+      [DB_NAME]
+    );
+    if (!cStat[0].cnt) {
+      await db.query(`ALTER TABLE products ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active' AFTER qty`);
+      console.log('✅ products.status добавлен');
     }
 
     // created_at
@@ -212,7 +232,18 @@ async function ensureProductsSchema() {
       console.log('✅ products.created_at добавлен');
     }
 
-    // idx category
+    // preview_image_url
+    const [cPrev] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'preview_image_url'`,
+      [DB_NAME]
+    );
+    if (!cPrev[0].cnt) {
+      await db.query(`ALTER TABLE products ADD COLUMN preview_image_url VARCHAR(500) NULL DEFAULT NULL AFTER status`);
+      console.log('✅ products.preview_image_url добавлен');
+    }
+
+    // индексы
     const [i1] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_category'`,
@@ -223,7 +254,6 @@ async function ensureProductsSchema() {
       console.log('✅ индекс idx_products_category создан');
     }
 
-    // idx created_at
     const [i2] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_created_at'`,
@@ -615,54 +645,60 @@ app.get('/api/products', listProducts);
 
 /** общий обработчик создания товара */
 const createProduct = async (req, res) => {
-  const { title, description, price, qty, category } = req.body || {};
-  if (!title || price == null || !category || String(category).trim() === '') {
-    return res.status(400).json({ message: 'title, price и category обязательны' });
-  }
-
-  const p = Number(price);
-  if (!Number.isFinite(p) || p < 0) {
-    return res.status(400).json({ message: 'price должен быть неотрицательным числом' });
-  }
-  const q = Number.isFinite(Number(qty)) ? Math.max(0, parseInt(qty, 10)) : 1;
-
   try {
+    const { title, description, price, qty, category, preview_image_url } = req.body || {};
+    if (!title || price == null || !category || String(category).trim() === '') {
+      return res.status(400).json({ message: 'title, price и category обязательны' });
+    }
+
+    const p = Number(price);
+    if (!Number.isFinite(p) || p < 0) {
+      return res.status(400).json({ message: 'price должен быть неотрицательным числом' });
+    }
+    const q = Number.isFinite(Number(qty)) ? Math.max(0, parseInt(qty, 10)) : 1;
+
+    const preview = (preview_image_url && String(preview_image_url).trim()) || null;
+    if (preview && !/^https?:\/\//i.test(preview)) {
+      return res.status(400).json({ message: 'preview_image_url должен быть абсолютным URL' });
+    }
+
     // создаём товар сразу активным
     const [result] = await db.query(
-      `INSERT INTO products (seller_id, title, description, price, qty, category, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, 'active', NOW())`,
-      [req.user.id, title, description || null, p, q, String(category).trim()]
+      `INSERT INTO products (seller_id, title, description, price, qty, category, status, preview_image_url, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'active', ?, NOW())`,
+      [req.user.id, title, description || null, p, q, String(category).trim(), preview]
     );
 
     const newId = result.insertId;
 
-    // отдаём созданный товар тем же форматом, что и в листинге
+    // отдаём созданный товар
     const [rows] = await db.query(
       `SELECT
-        p.id,
-        p.title,
-        p.description,
-        p.price,
-        p.qty,
-        p.status,
-        p.category,
-        p.created_at,
-        p.preview_image_url,                      -- <— ЭТО НУЖНО
-        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
-      FROM products p
-      JOIN users u ON u.id = p.seller_id
-      WHERE p.status = 'active'`,
+         p.id,
+         p.title,
+         p.description,
+         p.price,
+         p.qty,
+         p.status,
+         p.category,
+         p.created_at,
+         p.preview_image_url,
+         TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
+       FROM products p
+       JOIN users u ON u.id = p.seller_id
+       WHERE p.id = ?
+       LIMIT 1`,
       [newId]
     );
 
-    res.json({ ok: true, item: rows[0] });
+    res.status(201).json({ ok: true, item: rows[0] });
   } catch (e) {
     console.error('POST /products error', e);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Листинг (оба пути)
+// Листинг
 app.get('/products', listProducts);
 app.get('/api/products', listProducts);
 
@@ -1034,7 +1070,7 @@ app.get('/api/products/:id', async (req, res) => {
 /* ------- Reviews: list (public) ------- */
 app.get('/api/products/:id/reviews', async (req, res) => {
   const productId = Number(req.params.id);
-  const limit  = Math.min(50, Math.max(1, parseInt(req.query.limit ?? '20', 10)));
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit ?? '20', 10)));
   const offset = Math.max(0, parseInt(req.query.offset ?? '0', 10));
 
   if (!Number.isFinite(productId)) {

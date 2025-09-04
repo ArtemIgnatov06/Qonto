@@ -1,10 +1,13 @@
 // client/src/Pages/ProductPage.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 
 function Stars({ value = 0 }) {
+  const { t } = useTranslation();
   const v = Number.isFinite(+value) ? Math.min(5, Math.max(0, Math.round(+value))) : 0;
-  return <span title={`Рейтинг: ${v}`}>{'★'.repeat(v)}{'☆'.repeat(5 - v)}</span>;
+  return <span title={t('productPage.ratingTooltip', { v })}>{'★'.repeat(v)}{'☆'.repeat(5 - v)}</span>;
 }
 
 function normalizeReview(r, fallbackId = null) {
@@ -20,6 +23,8 @@ function normalizeReview(r, fallbackId = null) {
 export default function ProductPage() {
   const { id } = useParams();
   const nav = useNavigate();
+  const { t, i18n } = useTranslation();
+  const { convertFromUAH, formatMoney } = useCurrency();
 
   const [item, setItem] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -33,6 +38,11 @@ export default function ProductPage() {
   const [added, setAdded] = useState(false);
 
   const API = process.env.REACT_APP_API || '';
+  const locale = useMemo(
+    () => (i18n.language?.startsWith('ua') || i18n.language?.startsWith('uk') ? 'uk-UA' : 'ru-RU'),
+    [i18n.language]
+  );
+  const dateTime = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }), [locale]);
 
   async function loadData(pid) {
     setLoading(true);
@@ -47,16 +57,16 @@ export default function ProductPage() {
       const d1 = await r1.json().catch(() => ({}));
       const d2 = await r2.json().catch(() => ({}));
       if (!r1.ok || !d1?.item) {
-        setError(d1?.message || 'Товар не найден');
+        setError(d1?.message || t('productPage.errors.notFound'));
         return;
-      }
+        }
       setItem(d1.item);
       const list = (Array.isArray(d2?.items) ? d2.items : [])
         .map((x, i) => normalizeReview(x, i))
         .filter(Boolean);
       setReviews(list);
     } catch {
-      setError('Сеть/сервер недоступен');
+      setError(t('productPage.errors.network'));
     } finally {
       setLoading(false);
     }
@@ -66,6 +76,10 @@ export default function ProductPage() {
     loadData(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, API]);
+
+  useEffect(() => {
+    if (item?.title) document.title = item.title;
+  }, [item?.title]);
 
   async function submitReview(e) {
     e.preventDefault();
@@ -90,7 +104,7 @@ export default function ProductPage() {
       setMyComment('');
       setMyRating(5);
     } catch {
-      alert('Не удалось отправить отзыв');
+      alert(t('productPage.errors.reviewSend'));
     }
   }
 
@@ -105,31 +119,28 @@ export default function ProductPage() {
       });
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
-        alert(d?.message || 'Не удалось добавить в корзину. Войдите в аккаунт.');
+        alert(d?.message || t('productPage.errors.addToCart'));
         return false;
       }
       setAdded(true);
-      // уведомляем шапку обновить бейдж
       window.dispatchEvent(new CustomEvent('cart:changed', { detail: { type: 'add', productId, qty } }));
       return true;
     } catch {
-      alert('Сеть/сервер недоступен');
+      alert(t('productPage.errors.network'));
       return false;
     }
   }
 
-  if (loading) return <div style={{ padding: 24, textAlign: 'center' }}>Загрузка…</div>;
+  if (loading) return <div style={{ padding: 24, textAlign: 'center' }}>{t('common.loading')}</div>;
   if (error) {
     return (
       <div style={{ padding: 24, textAlign: 'center' }}>
-        <h2>Ошибка</h2>
+        <h2>{t('common.error')}</h2>
         <div>{error}</div>
       </div>
     );
   }
 
-  const priceUAH = new Intl.NumberFormat('uk-UA', { style: 'currency', currency: 'UAH' })
-    .format(item.price || 0);
   const avg = item.avg_rating ?? item.ratingAvg ?? 0;
   const cnt = item.reviews_count ?? item.ratingCount ?? 0;
 
@@ -138,46 +149,52 @@ export default function ProductPage() {
       <h1 style={{ marginBottom: 8 }}>{item.title}</h1>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-        <div style={{ fontSize: 22, fontWeight: 700 }}>{priceUAH}</div>
+        <div style={{ fontSize: 22, fontWeight: 700 }}>
+          {formatMoney(convertFromUAH(item.price || 0))}
+        </div>
 
         {/* Купить: положить в корзину и перейти в корзину */}
         <button
           style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #000', cursor: 'pointer', background: '#fff' }}
           onClick={async () => { if (await addToCart(item.id, 1)) nav('/cart'); }}
+          title={t('productPage.buttons.buyNow')}
+          aria-label={t('productPage.buttons.buyNow')}
         >
-          Купить
+          {t('productPage.buttons.buyNow')}
         </button>
 
         {/* В корзину: положить и остаться на странице */}
         <button
           style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #888', cursor: 'pointer', background: '#f6f6f6' }}
           onClick={async () => { await addToCart(item.id, 1); }}
+          title={t('productPage.buttons.addToCart')}
+          aria-label={t('productPage.buttons.addToCart')}
         >
-          В корзину
+          {t('productPage.buttons.addToCart')}
         </button>
       </div>
 
       {added && (
         <div style={{ margin: '8px 0 12px', fontSize: 14 }}>
-          Товар добавлен в корзину. <a href="/cart">Перейти в корзину →</a>
+          {t('productPage.added')} <a href="/cart">{t('productPage.buttons.goToCart')} →</a>
         </div>
       )}
 
       <div style={{ color: '#555', marginBottom: 10 }}>
-        Продавец: {item.seller_name || '—'} · Категория: {item.category || '—'}
+        {t('productPage.seller')}: {item.seller_name || '—'} · {t('productPage.category')}: {item.category || '—'}
       </div>
 
       <div style={{ marginBottom: 16 }}>
         <Stars value={avg} /> {avg} ({cnt})
       </div>
 
-      <h3 style={{ margin: '12px 0 6px' }}>Описание</h3>
+      <h3 style={{ margin: '12px 0 6px' }}>{t('productPage.description')}</h3>
       <p style={{ marginBottom: 24 }}>{item.description}</p>
 
-      <h3 style={{ marginTop: 24 }}>Отзывы</h3>
+      <h3 style={{ marginTop: 24 }}>{t('productPage.reviews')}</h3>
       <form onSubmit={submitReview} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '12px 0' }}>
         <label>
-          Рейтинг:{' '}
+          {t('productPage.rating')}:{' '}
           <input
             type="number"
             min="1"
@@ -188,29 +205,31 @@ export default function ProductPage() {
           />
         </label>
         <textarea
-          placeholder="Ваш комментарий (необязательно)"
+          placeholder={t('productPage.yourComment')}
           value={myComment}
           onChange={(e) => setMyComment(e.target.value)}
           rows={3}
           style={{ flex: 1, padding: 8 }}
         />
-        <button disabled={!canSubmit} style={{ padding: '8px 10px' }}>Оставить отзыв</button>
+        <button disabled={!canSubmit} style={{ padding: '8px 10px' }}>
+          {t('productPage.leaveReview')}
+        </button>
       </form>
 
       {reviews.length === 0 ? (
-        <div>Пока нет отзывов.</div>
+        <div>{t('productPage.noReviews')}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {reviews.map((r, i) => (
             <div key={r.id ?? i} style={{ background: '#fff', borderRadius: 10, padding: 12, border: '1px solid #e5e5e5' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                 <Stars value={r.rating} />
-                <strong>— {r.user_name || 'Покупатель'}</strong>
+                <strong>— {r.user_name || t('productPage.customer')}</strong>
               </div>
               <div style={{ whiteSpace: 'pre-wrap' }}>{r.comment}</div>
               {r.created_at && (
                 <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
-                  {new Date(r.created_at).toLocaleString('uk-UA')}
+                  {dateTime.format(new Date(r.created_at))}
                 </div>
               )}
             </div>

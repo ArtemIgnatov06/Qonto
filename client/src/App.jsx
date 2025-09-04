@@ -1,16 +1,15 @@
 // client/src/App.jsx
-import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route
-} from 'react-router-dom';
+import './i18n';
+
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import Home from './Pages/Home';
 import About from './Pages/About';
 import Contacts from './Pages/Contacts';
 import Profile from './Pages/Profile';
-import { AuthForm } from './Components/AuthForm'; // если default export — поменяй на import AuthForm from ...
+import { AuthForm } from './Components/AuthForm';
 import Header from './Components/Header';
 
 import AdminApplications from './Pages/AdminApplications.jsx';
@@ -25,38 +24,60 @@ import ProductPage from './Pages/ProductPage';
 
 import './App.css';
 
+// Обёртка, которая держит <html lang> в актуальном состоянии при смене языка
+function I18nShell({ children }) {
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    const apply = (lng) => {
+      const htmlLang =
+        lng?.startsWith('ua') || lng?.startsWith('uk') ? 'uk' : lng?.startsWith('en') ? 'en' : 'ru';
+      document.documentElement.lang = htmlLang;
+      document.documentElement.dir = 'ltr';
+    };
+    apply(i18n.language);
+    i18n.on('languageChanged', apply);
+    return () => i18n.off('languageChanged', apply);
+  }, [i18n]);
+  return children;
+}
+
 export default function App() {
   return (
-    <Router>
-      <div className="app-root">
-        <div className="top-brow">
-          <div className="container brow-inner">
-            <Header />
+    <Suspense fallback={null}>
+      <I18nShell>
+        <Router>
+          <div className="app-root">
+            <div className="top-brow">
+              <div className="container brow-inner">
+                <Header />
+              </div>
+            </div>
+
+            <main className="main-content container">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contacts" element={<Contacts />} />
+                <Route path="/auth" element={<AuthForm />} />
+                <Route path="/profile" element={<Profile />} />
+
+                {/* Админ/продавец */}
+                <Route path="/admin/applications" element={<AdminApplications />} />
+                <Route path="/admin/product-deletions" element={<AdminDeletions />} />
+                <Route path="/seller/apply" element={<SellerApplication />} />
+                <Route path="/products/new" element={<ProductNew />} />
+
+                {/* Страница товара */}
+                <Route path="/product/:id" element={<ProductPage />} />
+
+                {/* Корзина / оформление */}
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+              </Routes>
+            </main>
           </div>
-        </div>
-
-        <main className="main-content container">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/auth" element={<AuthForm />} />
-            <Route path="/profile" element={<Profile />} />
-
-            {/* Админ/продавец */}
-            <Route path="/admin/applications" element={<AdminApplications />} />
-            <Route path="/admin/product-deletions" element={<AdminDeletions />} />
-            <Route path="/seller/apply" element={<SellerApplication />} />
-            <Route path="/products/new" element={<ProductNew />} />
-
-            {/* Страница товара */}
-            <Route path="/product/:id" element={<ProductPage />} />
-
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+        </Router>
+      </I18nShell>
+    </Suspense>
   );
 }

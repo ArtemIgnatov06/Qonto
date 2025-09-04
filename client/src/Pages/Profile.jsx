@@ -5,9 +5,11 @@ import '../Styles/profile.css';
 import { useAuth } from '../Hooks/useAuth';
 import PhoneBinder from '../Components/PhoneBinder';
 import { useNavigate } from 'react-router-dom';
-import UserProducts from '../Components/UserProducts'; // 👈 подключаем компонент
+import UserProducts from '../Components/UserProducts';
+import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, refresh } = useAuth();
   const navigate = useNavigate();
 
@@ -28,7 +30,11 @@ const Profile = () => {
     }
   }, [user]);
 
-  if (!user) return <div className="profile-page">Не авторизован</div>;
+  useEffect(() => {
+    document.title = t('meta.title.profile');
+  }, [t]);
+
+  if (!user) return <div className="profile-page">{t('auth.required')}</div>;
 
   const handleLogout = async () => {
     await fetch('http://localhost:5050/api/logout', { method: 'POST', credentials: 'include' });
@@ -39,10 +45,10 @@ const Profile = () => {
     setSaving(true); setMsg(null); setErr(null);
     try {
       const { data } = await axios.post('/api/me/update-profile', form, { withCredentials: true });
-      if (data.ok) { setMsg('Данные профиля сохранены'); await refresh(); }
-      else setErr(data.error || 'Не удалось сохранить профиль');
+      if (data.ok) { setMsg(t('profile.saved')); await refresh(); }
+      else setErr(data.error || t('profile.saveFailed'));
     } catch (e) {
-      setErr(e?.response?.data?.error || 'Не удалось сохранить профиль');
+      setErr(e?.response?.data?.error || t('profile.saveFailed'));
     } finally { setSaving(false); }
   };
 
@@ -50,26 +56,28 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
-      <h2>Профиль</h2>
+      <h2>{t('profile.title')}</h2>
 
       {/* двухколоночная сетка */}
       <div className="profile-grid">
         {/* левая колонка — профиль + выход */}
         <div className="card profile-card">
           <div className="form-row">
-            <label>Имя</label>
+            <label>{t('forms.firstName')}</label>
             <input
               value={form.first_name}
               onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-              placeholder="Имя"
+              placeholder={t('forms.firstName')}
+              aria-label={t('forms.firstName')}
             />
           </div>
           <div className="form-row">
-            <label>Фамилия</label>
+            <label>{t('forms.lastName')}</label>
             <input
               value={form.last_name}
               onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-              placeholder="Фамилия"
+              placeholder={t('forms.lastName')}
+              aria-label={t('forms.lastName')}
             />
           </div>
           <div className="form-row">
@@ -79,20 +87,21 @@ const Profile = () => {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="you@example.com"
+              aria-label="Email"
             />
           </div>
 
           <div className="profile-actions">
-            <button className="btn-primary" onClick={saveProfile} disabled={saving}>
-              {saving ? 'Сохраняем...' : 'Сохранить'}
+            <button className="btn-primary" onClick={saveProfile} disabled={saving} aria-busy={saving}>
+              {saving ? t('profile.saving') : t('profile.save')}
             </button>
             <button className="btn-logout" onClick={handleLogout}>
-              Выйти
+              {t('auth.logout')}
             </button>
           </div>
 
-          {msg && <div className="msg success">{msg}</div>}
-          {err && <div className="msg error">{err}</div>}
+          {msg && <div className="msg success" role="status">{msg}</div>}
+          {err && <div className="msg error" role="alert">{err}</div>}
         </div>
 
         {/* правая колонка — телефон → статус → CTA */}
@@ -101,27 +110,26 @@ const Profile = () => {
 
           {['pending', 'approved', 'rejected'].includes(user?.seller_status) && (
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>Статус заявки продавца</h3>
+              <h3 style={{ marginTop: 0 }}>{t('seller.status.title')}</h3>
 
               {user.seller_status === 'pending' && (
                 <>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>⏳ Заявка на рассмотрении</div>
+                  <div style={{ fontWeight: 600, marginTop: 6 }}>⏳ {t('seller.status.pending')}</div>
                   <p className="muted" style={{ marginTop: 4 }}>
-                    Мы уведомим вас, как только решение будет принято.
+                    {t('seller.status.pendingHint')}
                   </p>
                 </>
               )}
 
               {user.seller_status === 'approved' && (
                 <>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>✅ Ваша заявка принята</div>
+                  <div style={{ fontWeight: 600, marginTop: 6 }}>✅ {t('seller.status.approved')}</div>
                   <p className="muted" style={{ marginTop: 4 }}>
-                    Теперь вы можете выставлять свои товары на продажу.
+                    {t('seller.status.approvedHint')}
                   </p>
-                  {/* КНОПКА ДОБАВЛЕНИЯ ТОВАРА */}
                   <div style={{ marginTop: 8 }}>
                     <button className="btn-primary" onClick={() => navigate('/products/new')}>
-                      Добавить товар
+                      {t('seller.actions.addProduct')}
                     </button>
                   </div>
                 </>
@@ -129,15 +137,15 @@ const Profile = () => {
 
               {user.seller_status === 'rejected' && (
                 <>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>❌ Заявка отклонена</div>
+                  <div style={{ fontWeight: 600, marginTop: 6 }}>❌ {t('seller.status.rejected')}</div>
                   {user.seller_rejection_reason && (
                     <p className="muted" style={{ marginTop: 4 }}>
-                      Причина: {user.seller_rejection_reason}
+                      {t('seller.status.reason')}: {user.seller_rejection_reason}
                     </p>
                   )}
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
                     <button className="btn-primary" onClick={goApply}>
-                      Подать заявку заново
+                      {t('seller.actions.applyAgain')}
                     </button>
                   </div>
                 </>
@@ -147,9 +155,9 @@ const Profile = () => {
 
           {user?.seller_status !== 'approved' && (
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>Стать продавцом</h3>
+              <h3 style={{ marginTop: 0 }}>{t('seller.become.title')}</h3>
               <p className="muted" style={{ marginTop: 4 }}>
-                Оформите заявку, чтобы получить доступ к публикации товаров.
+                {t('seller.become.text')}
               </p>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
                 <button
@@ -158,22 +166,21 @@ const Profile = () => {
                   disabled={user?.seller_status === 'pending'}
                 >
                   {user?.seller_status === 'pending'
-                    ? 'Заявка на рассмотрении'
-                    : 'Стать продавцом'}
+                    ? t('seller.actions.pending')
+                    : t('seller.actions.become')}
                 </button>
                 {user?.seller_status === 'rejected' && (
                   <span style={{ color: '#6b7280' }}>
-                    Предыдущая заявка была отклонена — вы можете подать заново.
+                    {t('seller.become.rejectedNote')}
                   </span>
                 )}
               </div>
             </div>
           )}
 
-          {/* 👇 Блок "Мои товары" — только если продавец одобрен */}
           {user?.seller_status === 'approved' && (
             <div className="card" style={{ marginTop: 20 }}>
-              <h3 style={{ marginTop: 0 }}>Мои товары</h3>
+              <h3 style={{ marginTop: 0 }}>{t('seller.myProducts')}</h3>
               <UserProducts />
             </div>
           )}

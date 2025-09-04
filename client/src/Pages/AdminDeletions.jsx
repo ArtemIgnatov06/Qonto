@@ -1,13 +1,22 @@
 // client/src/Pages/AdminDeletions.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import '../App.css';
 import { useAuth } from '../Hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminDeletions() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const locale = useMemo(
+    () => (i18n.language?.startsWith('ua') || i18n.language?.startsWith('uk') ? 'uk-UA' : 'ru-RU'),
+    [i18n.language]
+  );
+  const money = useMemo(() => new Intl.NumberFormat(locale, { style: 'currency', currency: 'UAH' }), [locale]);
+  const dateTime = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }), [locale]);
 
   useEffect(() => {
     let abort = false;
@@ -20,24 +29,28 @@ export default function AdminDeletions() {
         const data = await r.json();
         if (!abort) setItems(Array.isArray(data.items) ? data.items : []);
       } catch (e) {
-        if (!abort) setError('Не удалось загрузить историю удалений');
+        if (!abort) setError(t('adminDeletions.errors.loadFailed'));
       } finally {
         if (!abort) setLoading(false);
       }
     })();
     return () => { abort = true; };
-  }, []);
+  }, [t]);
 
   if (!user || user.role !== 'admin') {
-    return <div className="page"><h2>Доступ запрещён</h2></div>;
+    return (
+      <div className="page">
+        <h2>{t('admin.accessDenied')}</h2>
+      </div>
+    );
   }
 
   return (
-    <div className="page page-admin">
+    <div className="page page-admin" aria-labelledby="deleted-title">
       <div className="card">
-        <h2 className="heading-large">История удалённых товаров</h2>
+        <h2 id="deleted-title" className="heading-large">{t('adminDeletions.title')}</h2>
 
-        {loading && <p className="text-muted">Загрузка…</p>}
+        {loading && <p className="text-muted">{t('common.loading')}</p>}
         {error && <p className="text-danger">{error}</p>}
 
         {!loading && !error && (
@@ -48,20 +61,21 @@ export default function AdminDeletions() {
                 style={{
                   width: '100%',
                   marginTop: 16,
-                  borderCollapse: 'separate',  // разъединяем, чтобы работал spacing
-                  borderSpacing: '0 8px',      // вертикальный зазор между строками
+                  borderCollapse: 'separate',
+                  borderSpacing: '0 8px',
                 }}
+                aria-label={t('adminDeletions.tableAria')}
               >
                 <thead>
                   <tr>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>ID товара</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Название</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Категория</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Цена</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Продавец</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Удалил админ</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Причина</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>Дата</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.productId')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.title')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.category')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.price')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.seller')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.admin')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.reason')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -76,7 +90,7 @@ export default function AdminDeletions() {
                       <td style={{ padding: '12px 16px' }}>{d.product_id}</td>
                       <td style={{ padding: '12px 16px' }}>{d.title}</td>
                       <td style={{ padding: '12px 16px' }}>{d.category}</td>
-                      <td style={{ padding: '12px 16px' }}>{Number(d.price).toFixed(2)} ₴</td>
+                      <td style={{ padding: '12px 16px' }}>{money.format(Number(d.price) || 0)}</td>
                       <td style={{ padding: '12px 16px' }}>
                         {d.seller_first_name} {d.seller_last_name} ({d.seller_username})
                       </td>
@@ -85,7 +99,7 @@ export default function AdminDeletions() {
                       </td>
                       <td style={{ padding: '12px 16px', color: '#d32f2f' }}>{d.reason}</td>
                       <td style={{ padding: '12px 16px' }}>
-                        {new Date(d.created_at).toLocaleString()}
+                        {dateTime.format(new Date(d.created_at))}
                       </td>
                     </tr>
                   ))}
@@ -93,7 +107,7 @@ export default function AdminDeletions() {
               </table>
             </div>
           ) : (
-            <p className="text-muted">(Пока нет удалённых товаров)</p>
+            <p className="text-muted">{t('adminDeletions.empty')}</p>
           )
         )}
       </div>

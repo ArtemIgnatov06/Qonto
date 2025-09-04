@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../App.css';
+import { useTranslation } from 'react-i18next';
 
 // Можно переопределить базовый URL через REACT_APP_API_BASE
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5050';
@@ -15,6 +16,7 @@ const TypingIndicator = () => (
 );
 
 export default function ChatWidget() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -57,8 +59,8 @@ export default function ChatWidget() {
         err?.response?.data?.reply ||
         err?.response?.data?.error ||
         (err?.response
-          ? `Ошибка ${err.response.status}: ${err.response.statusText}`
-          : 'Ошибка ответа от ИИ 😞');
+          ? t('chat.error.http', { status: err.response.status, statusText: err.response.statusText })
+          : t('chat.error.generic'));
       setMessages(prev => [...prev, { role: 'ai', content: msg }]);
     } finally {
       setIsTyping(false);
@@ -66,9 +68,7 @@ export default function ChatWidget() {
   };
 
   const handleKeyDown = e => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
+    if (e.key === 'Enter') sendMessage();
   };
 
   return (
@@ -76,11 +76,11 @@ export default function ChatWidget() {
       {open ? (
         <div className="chat-box">
           <div className="chat-header">
-            <div>Чат с ИИ</div>
+            <div>{t('chat.header')}</div>
             <button
               className="close-button"
               onClick={() => setOpen(false)}
-              aria-label="Закрыть"
+              aria-label={t('chat.close')}
             >
               ✕
             </button>
@@ -105,7 +105,7 @@ export default function ChatWidget() {
             <input
               type="text"
               className="chat-input"
-              placeholder="Напиши сообщение..."
+              placeholder={t('chat.placeholder')}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -118,13 +118,14 @@ export default function ChatWidget() {
               disabled={isTyping}
               style={{ minWidth: 80 }}
             >
-              {isTyping ? '...' : 'Отправить'}
+              {isTyping ? t('chat.typing') : t('chat.send')}
             </button>
           </div>
         </div>
       ) : (
+        // ВАЖНО: используем chat.open (а не chat.openShort)
         <button className="button open-widget" onClick={() => setOpen(true)}>
-          Чат💬
+          {t('chat.open')}
         </button>
       )}
     </div>
