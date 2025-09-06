@@ -18,6 +18,8 @@ import ProductNew from './Pages/ProductNew';
 import AdminDeletions from './Pages/AdminDeletions';
 import CartPage from './Pages/CartPage';
 import CheckoutPage from './Pages/CheckoutPage';
+import MyProducts from './Pages/MyProducts';
+import ProductEdit from './Pages/ProductEdit';
 
 // ❗ правильный регистр папки:
 import ProductPage from './Pages/ProductPage';
@@ -66,6 +68,8 @@ export default function App() {
                 <Route path="/admin/product-deletions" element={<AdminDeletions />} />
                 <Route path="/seller/apply" element={<SellerApplication />} />
                 <Route path="/products/new" element={<ProductNew />} />
+                <Route path="/my/products" element={<MyProducts />} />
+                <Route path="/product/:id/edit" element={<ProductEdit />} />
 
                 {/* Страница товара */}
                 <Route path="/product/:id" element={<ProductPage />} />

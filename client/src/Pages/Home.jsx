@@ -43,6 +43,13 @@ export default function Home() {
 
   const [items, setItems] = useState([]);
   const [allItems, setAllItems] = useState([]);
+
+  // ── NEW: состояние для категорий из API
+  const [categories, setCategories] = useState([]);
+  const [catName, setCatName] = useState('');
+  const [catLoading, setCatLoading] = useState(true);
+  const [catErr, setCatErr] = useState('');
+
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -57,7 +64,32 @@ export default function Home() {
     document.title = t('meta.title.home');
   }, [t]);
 
-  // все товары — для списка категорий
+  // ── NEW: загрузка категорий
+  const loadCategories = async () => {
+    setCatLoading(true);
+    setCatErr('');
+    try {
+      const { r, data } = await fetchJsonWithFallback(`${API}/api/categories`, { credentials: 'include' });
+      if (!r.ok) throw new Error(pickMessage(r, data, t('home.errors.categoriesLoadFailed')));
+      const items = Array.isArray(data.items) ? data.items : [];
+      setCategories(items);
+      // если выбранная категория больше не существует — сбросим фильтр
+      if (category && !items.some(c => c.name === category)) {
+        setCategory('');
+      }
+    } catch (e) {
+      setCatErr(e.message || t('home.errors.categoriesLoadFailed'));
+    } finally {
+      setCatLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // все товары — для каталога/удаления
   useEffect(() => {
     let abort = false;
     (async () => {
@@ -106,11 +138,6 @@ export default function Home() {
     return () => { abort = true; };
   }, [category, t]);
 
-  const categories = useMemo(() => {
-    const set = new Set((allItems || []).map(i => (i?.category || '').toString().trim()).filter(Boolean));
-    return Array.from(set).sort((a, b) => a.localeCompare(b, locale));
-  }, [allItems, locale]);
-
   const handleBuy = (product) => navigate(`/product/${product.id}`);
 
   const handleAdminDelete = async (product) => {
@@ -134,28 +161,82 @@ export default function Home() {
     }
   };
 
+  const submitNewCategory = async () => {
+    const name = (catName || '').trim();
+    if (!name) return;
+    setCatErr('');
+    try {
+      const { r, data } = await fetchJsonWithFallback(`${API}/admin/categories`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (!r.ok) throw new Error(pickMessage(r, data, t('home.errors.categoryCreateFailed')));
+      setCatName('');
+      await loadCategories();
+    } catch (e) {
+      setCatErr(e.message || t('home.errors.categoryCreateFailed'));
+    }
+  };
+
   return (
     <div className="page page-home">
       <div className="card card-compact">
         <h2 className="heading-large">{t('home.title')}</h2>
 
+        {/* Фильтр по категории */}
         <div className="form-row" style={{ marginBottom: 12 }}>
           <label htmlFor="category" style={{ display: 'block', marginBottom: 6 }}>
             {t('home.filters.category')}
           </label>
-          <select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            style={{ minHeight: 40, padding: '8px 10px' }}
-            aria-label={t('home.filters.category')}
-          >
-            <option value="">{t('home.filters.all')}</option>
-            {categories.map(c => (
-              <option value={c} key={c}>{c}</option>
-            ))}
-          </select>
+
+          {catLoading ? (
+            <div className="text-muted">{t('common.loading')}</div>
+          ) : catErr ? (
+            <div className="msg error" role="alert">{catErr}</div>
+          ) : (
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ minHeight: 40, padding: '8px 10px' }}
+              aria-label={t('home.filters.category')}
+            >
+              <option value="">{t('home.filters.all')}</option>
+              {categories.map(c => (
+                <option value={c.name} key={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
         </div>
+
+        {/* ── NEW: форма добавления категории для админа */}
+        {user?.role === 'admin' && (
+          <div className="form-row" style={{ marginBottom: 16 }}>
+            <label htmlFor="new-category" style={{ display: 'block', marginBottom: 6 }}>
+              {t('home.filters.addCategory')}
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                id="new-category"
+                value={catName}
+                onChange={(e) => setCatName(e.target.value)}
+                placeholder={t('home.placeholders.categoryName')}
+                aria-label={t('home.placeholders.categoryName')}
+              />
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={catLoading || !catName.trim()}
+                onClick={submitNewCategory}
+              >
+                {t('home.buttons.add')}
+              </button>
+            </div>
+            {catErr && <div className="msg error" role="alert" style={{ marginTop: 6 }}>{catErr}</div>}
+          </div>
+        )}
 
         {loading && <p className="text-muted">{t('common.loading')}</p>}
         {error && <p className="text-danger">{t('home.errors.loadFailed')}: {error}</p>}

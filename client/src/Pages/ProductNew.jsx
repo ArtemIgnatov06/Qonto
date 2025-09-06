@@ -45,9 +45,41 @@ const ProductNew = () => {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
 
+  // категории
+  const [categories, setCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(true);
+  const [catErr, setCatErr] = useState('');
+
   useEffect(() => {
     document.title = t('productNew.metaTitle');
   }, [t]);
+
+  // загрузка категорий
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setCatLoading(true);
+      setCatErr('');
+      try {
+        const res = await axios.get(`${API}/api/categories`, { withCredentials: true });
+        const items = Array.isArray(res.data?.items) ? res.data.items : [];
+        if (!cancelled) setCategories(items);
+      } catch (e) {
+        if (!cancelled) setCatErr('Не удалось загрузить категории');
+      } finally {
+        if (!cancelled) setCatLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // авто-выбор первой категории после загрузки (чтобы не было плейсхолдера)
+  useEffect(() => {
+    if (!catLoading && !catErr && categories.length && !form.category) {
+      setForm(prev => ({ ...prev, category: categories[0].name }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catLoading, catErr, categories]);
 
   if (!user) return <div className="profile-page">{t('auth.required')}</div>;
   if (user.seller_status !== 'approved') {
@@ -80,26 +112,24 @@ const ProductNew = () => {
       title: form.title.trim(),
       description: form.description.trim(),
       category: form.category.trim(),
-      price: priceNum, // сервер ожидает UAH
+      price: priceNum,
       qty: qtyNum,
       preview_image_url: form.preview_image_url.trim() || null,
     };
 
     setSaving(true);
     try {
-      // 1) пытаемся на /api/products
       let url = `${API}/api/products`;
       let resp;
       try {
         resp = await axios.post(url, payload, { withCredentials: true });
       } catch (e1) {
         const status = e1?.response?.status;
-        // 2) если 404/405 — пробуем без /api
         if (status === 404 || status === 405) {
           url = `${API}/products`;
           resp = await axios.post(url, payload, { withCredentials: true });
         } else {
-          throw e1; // не фолбэчим, показываем реальную ошибку
+          throw e1;
         }
       }
 
@@ -114,11 +144,7 @@ const ProductNew = () => {
         data?.error ||
         (Array.isArray(data?.errors) && data.errors.filter(Boolean).join(', ')) ||
         stringifyData(data);
-      if (fallback) {
-        setErr(fallback);
-      } else {
-        setErr(t('productNew.errors.saveFailed'));
-      }
+      setErr(fallback || t('productNew.errors.saveFailed'));
     } catch (e) {
       console.error('Add product failed:', e);
       setErr(extractAxiosErr(e, t));
@@ -143,16 +169,28 @@ const ProductNew = () => {
           />
         </div>
 
+        {/* select категорий из API — без плейсхолдера */}
         <div className="form-row">
           <label htmlFor="pn-category">{t('productNew.fields.category')}</label>
-          <input
-            id="pn-category"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            placeholder={t('productNew.placeholders.category')}
-            required
-            aria-label={t('productNew.fields.category')}
-          />
+
+          {catLoading ? (
+            <div className="text-muted">{t('common.loading')}</div>
+          ) : catErr ? (
+            <div className="msg error" role="alert">{catErr}</div>
+          ) : (
+            <select
+              id="pn-category"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              required
+              aria-label={t('productNew.fields.category')}
+              disabled={!categories.length}
+            >
+              {categories.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="form-row">
@@ -220,7 +258,12 @@ const ProductNew = () => {
         )}
 
         <div className="profile-actions">
-          <button className="btn-primary" type="submit" disabled={saving} aria-busy={saving}>
+          <button
+            className="btn-primary"
+            type="submit"
+            disabled={saving || catLoading || !!catErr || !form.category.trim()}
+            aria-busy={saving}
+          >
             {saving ? t('common.saving') : t('common.save')}
           </button>
           <button className="btn-logout" type="button" onClick={() => navigate(-1)}>

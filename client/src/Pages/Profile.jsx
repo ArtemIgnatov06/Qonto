@@ -4,8 +4,7 @@ import axios from 'axios';
 import '../Styles/profile.css';
 import { useAuth } from '../Hooks/useAuth';
 import PhoneBinder from '../Components/PhoneBinder';
-import { useNavigate } from 'react-router-dom';
-import UserProducts from '../Components/UserProducts';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
@@ -128,7 +127,8 @@ const Profile = () => {
                     {t('seller.status.approvedHint')}
                   </p>
                   <div style={{ marginTop: 8 }}>
-                    <button className="btn-primary" onClick={() => navigate('/products/new')}>
+                    {/* исправлено: путь формы добавления товара */}
+                    <button className="btn-primary" onClick={() => navigate('/product/new')}>
                       {t('seller.actions.addProduct')}
                     </button>
                   </div>
@@ -178,10 +178,20 @@ const Profile = () => {
             </div>
           )}
 
+          {/* Заменили длинный список на одну кнопку */}
           {user?.seller_status === 'approved' && (
             <div className="card" style={{ marginTop: 20 }}>
-              <h3 style={{ marginTop: 0 }}>{t('seller.myProducts')}</h3>
-              <UserProducts />
+              <h3 style={{ marginTop: 0 }}>
+                {t('profile.myProducts.title', { defaultValue: 'Мои товары' })}
+              </h3>
+              <p className="muted" style={{ marginTop: 4 }}>
+                {t('profile.myProducts.hint', {
+                  defaultValue: 'Смотрите и редактируйте ваши товары на отдельной странице.'
+                })}
+              </p>
+              <Link className="btn-primary" to="/my/products">
+                {t('profile.myProducts.open', { defaultValue: 'Открыть список' })}
+              </Link>
             </div>
           )}
         </div>

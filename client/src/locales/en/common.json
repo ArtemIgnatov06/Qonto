@@ -1,6 +1,9 @@
 {
-  "lang": { "ru": "Russian", "uk": "Ukrainian", "en": "English" },
-
+  "lang": {
+    "ru": "Russian",
+    "uk": "Ukrainian",
+    "en": "English"
+  },
   "nav": {
     "home": "Home",
     "about": "About",
@@ -9,23 +12,23 @@
     "adminApplications": "Applications",
     "adminDeletions": "Deleted products"
   },
-
   "currency": {
-  "label": "Currency",
-  "change": "Change currency"
+    "label": "Currency",
+    "change": "Change currency"
   },
-
   "auth": {
     "login": "Log in",
     "logout": "Log out",
     "register": "Register",
     "required": "Login required.",
-    "tabs": { "login": "Log in", "register": "Register" },
+    "tabs": {
+      "login": "Log in",
+      "register": "Register"
+    },
     "byEmail": "By email",
     "byPhonePass": "Phone + password",
     "byPhoneOtp": "Phone + SMS code"
   },
-
   "google": {
     "signIn": "Sign in with Google",
     "missingClientId": "Specify GOOGLE_CLIENT_ID on frontend.",
@@ -37,7 +40,6 @@
       "verifyGeneric": "Code verification error"
     }
   },
-
   "otp": {
     "close": "Close",
     "title": "Enter code",
@@ -46,12 +48,10 @@
     "submit": "Confirm",
     "checking": "Checking..."
   },
-
   "errors": {
     "generic": "Error",
     "serverUnavailable": "Server unavailable"
   },
-
   "common": {
     "loading": "Loading…",
     "refresh": "Refresh",
@@ -66,14 +66,12 @@
     "errorWithMsg": "Error: {{msg}}",
     "or": "or"
   },
-
   "forms": {
     "firstName": "First name",
     "lastName": "Last name",
     "phone": "Phone",
     "password": "Password"
   },
-
   "cart": {
     "cart": "Cart",
     "add": "Add to cart",
@@ -93,7 +91,6 @@
     "qtyInputAria": "Quantity for “{{title}}”",
     "removeItemAria": "Remove “{{title}}”"
   },
-
   "product": {
     "price": "Price",
     "rating": "Rating",
@@ -103,9 +100,9 @@
     "yourComment": "Your comment",
     "submit": "Submit",
     "cancel": "Cancel",
-    "buy": "Buy"
+    "buy": "Buy",
+    "edit": "Edit"
   },
-
   "productPage": {
     "buttons": {
       "buyNow": "Buy now",
@@ -129,7 +126,6 @@
       "addToCart": "Failed to add to cart. Please log in."
     }
   },
-
   "productNew": {
     "metaTitle": "Add product — Qonto",
     "title": "Add product",
@@ -147,48 +143,61 @@
       "category": "Example: Electronics",
       "description": "Short product description"
     },
-    "hint": { "supported": "Supported: .jpg, .jpeg, .png, .webp, .gif, .avif" },
+    "hint": {
+      "supported": "Supported: .jpg, .jpeg, .png, .webp, .gif, .avif"
+    },
     "previewAlt": "Preview",
     "errors": {
       "priceMustBeNonNegative": "Price must be a non-negative number",
       "saveFailed": "Failed to save product"
     }
   },
-
   "home": {
     "title": "Product catalog",
     "filters": {
       "category": "Category",
-      "all": "All categories"
+      "all": "All categories",
+      "addCategory": "Add category"
     },
     "seller": "Seller",
-    "buttons": { "deleteProduct": "Delete product" },
-    "prompts": { "deleteReason": "Specify reason for deleting product \"{{title}}\": " },
+    "buttons": {
+      "deleteProduct": "Delete product",
+      "add": "Add"
+    },
+    "prompts": {
+      "deleteReason": "Specify reason for deleting product \"{{title}}\": "
+    },
     "errors": {
       "loadFailed": "Failed to load products",
-      "deleteFailed": "Delete error"
+      "deleteFailed": "Delete error",
+      "categoriesLoadFailed": "Failed to load categories",
+      "categoryCreateFailed": "Failed to add category"
+    },
+    "placeholders": {
+      "categoryName": "Category name"
     },
     "empty": "(No active products yet)"
   },
-
   "about": {
     "title": "About us",
     "lead": "We are a modern online store with products for every taste. Our goal is to make shopping simple and pleasant."
   },
-
   "contacts": {
     "title": "Contacts",
     "text": "Contact us by email:"
   },
-
   "profile": {
     "title": "Profile",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Profile data saved",
-    "saveFailed": "Failed to save profile"
+    "saveFailed": "Failed to save profile",
+    "myProducts": {
+      "title": "My products",
+      "hint": "View and edit your products on a dedicated page.",
+      "open": "Open list"
+    }
   },
-
   "seller": {
     "status": {
       "title": "Seller application status",
@@ -212,7 +221,6 @@
     },
     "myProducts": "My products"
   },
-
   "phoneBinder": {
     "cardAria": "Phone binding",
     "title": "Phone",
@@ -224,7 +232,6 @@
     "saved": "Phone saved",
     "saveFailed": "Failed to save phone"
   },
-
   "userProducts": {
     "loadFailed": "Failed to load products",
     "empty": "You don’t have any products yet",
@@ -232,15 +239,15 @@
     "deleteFailed": "Delete error",
     "itemAria": "Product {{title}}"
   },
-
   "admin": {
     "only": "Access for administrators only.",
     "accessDenied": "Access denied"
   },
-
   "adminApplications": {
     "title": "Seller applications",
-    "filters": { "status": "Status" },
+    "filters": {
+      "status": "Status"
+    },
     "status": {
       "pending": "Pending",
       "approved": "Approved",
@@ -252,15 +259,18 @@
       "comment": "Comment",
       "status": "Status"
     },
-    "links": { "priceList": "Price list" },
-    "prompts": { "rejectReason": "Reason for rejection?" },
+    "links": {
+      "priceList": "Price list"
+    },
+    "prompts": {
+      "rejectReason": "Reason for rejection?"
+    },
     "errors": {
       "loadFailed": "Load error",
       "saveDecision": "Failed to save decision"
     },
     "empty": "No applications."
   },
-
   "adminDeletions": {
     "title": "Deleted products history",
     "tableAria": "Deleted products history table",
@@ -274,10 +284,11 @@
       "reason": "Reason",
       "date": "Date"
     },
-    "errors": { "loadFailed": "Failed to load deletion history" },
+    "errors": {
+      "loadFailed": "Failed to load deletion history"
+    },
     "empty": "(No deleted products yet)"
   },
-
   "checkout": {
     "title": "Checkout",
     "summary": "Order summary:",
@@ -308,7 +319,6 @@
       "line2": "For production integrate Stripe/WayForPay/… (tokenization)."
     }
   },
-
   "sellerApply": {
     "metaTitle": "Seller application — Qonto",
     "title": "Seller application",
@@ -333,9 +343,10 @@
     "send": "Send application",
     "sending": "Sending…",
     "sent": "Application sent! Status updated to pending.",
-    "errors": { "submitFailed": "Failed to send application" }
+    "errors": {
+      "submitFailed": "Failed to send application"
+    }
   },
-
   "chat": {
     "open": "Chat💬",
     "header": "AI Chat",
@@ -348,13 +359,29 @@
       "generic": "AI response error 😞"
     }
   },
-
   "meta": {
     "title": {
       "home": "Home — Qonto",
       "about": "About — Qonto",
       "contacts": "Contacts — Qonto",
       "profile": "Profile — Qonto"
+    }
+  },
+  "myProducts": {
+    "metaTitle": "My products",
+    "title": "My products",
+    "addNew": "Add product",
+    "empty": "You haven't added any products yet"
+    }
+  ,
+  "productEdit": {
+    "metaTitle": "Edit product",
+    "title": "Edit product",
+    "save": "Save changes",
+    "errors": {
+      "loadFailed": "Failed to load product",
+      "saveFailed": "Failed to save changes",
+      "categoriesLoadFailed": "Failed to load categories"
     }
   }
 }

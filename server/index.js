@@ -195,6 +195,21 @@ function requireApprovedSeller(req, res, next) {
   next();
 }
 
+/* ===================== ensure schema: categories ===================== */
+async function ensureCategoriesSchema() {
+  try {
+    await db.query(
+      `CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL UNIQUE,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
+    );
+  } catch (err) {
+    console.error('ensureCategoriesSchema error:', err);
+  }
+}
+
 /* ===================== ensure schema: products ===================== */
 /** Автодобавляем недостающие поля/индексы для products (MySQL) */
 async function ensureProductsSchema() {
@@ -293,8 +308,10 @@ async function ensureProductsSchema() {
     `);
     console.log('✅ email_otps / phone_otps tables ensured');
 
-    // гарантируем схему products
+    // гарантируем схему categories и products
+    await ensureCategoriesSchema();
     await ensureProductsSchema();
+
   } catch (e) {
     console.error('Не удалось инициализировать таблицы:', e?.message || e);
   }
@@ -597,6 +614,41 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true });
 });
 
+/* ===================== Categories ===================== */
+async function isCategoryExists(name) {
+  const [rows] = await db.query('SELECT id FROM categories WHERE name = ? LIMIT 1', [String(name || '').trim()]);
+  return rows.length > 0;
+}
+
+app.get('/api/categories', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, name FROM categories ORDER BY name ASC');
+    res.json({ items: rows });
+  } catch (e) {
+    console.error('GET /api/categories error:', e);
+    res.status(500).json({ message: 'Не удалось загрузить категории' });
+  }
+});
+
+app.post('/admin/categories', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    let { name } = req.body || {};
+    name = (name || '').toString().trim();
+    if (!name) return res.status(400).json({ message: 'Название категории обязательно' });
+    if (name.length > 100) return res.status(400).json({ message: 'Слишком длинное название' });
+
+    await db.query('INSERT INTO categories (name) VALUES (?)', [name]);
+    const [rows] = await db.query('SELECT id, name FROM categories WHERE name = ? LIMIT 1', [name]);
+    res.status(201).json({ item: rows[0] });
+  } catch (e) {
+    if (e?.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'Такая категория уже существует' });
+    }
+    console.error('POST /admin/categories error:', e);
+    res.status(500).json({ message: 'Не удалось добавить категорию' });
+  }
+});
+
 /* ===================== Products (public) ===================== */
 /** общий обработчик листинга с ?category=... */
 // server/index.js
@@ -643,6 +695,14 @@ async function listProducts(req, res) {
 app.get('/products', listProducts);
 app.get('/api/products', listProducts);
 
+// ── NEW: проверяем, что категория существует в таблице categories
+async function isCategoryExists(name) {
+  const cat = String(name || '').trim();
+  if (!cat) return false;
+  const [rows] = await db.query('SELECT id FROM categories WHERE name = ? LIMIT 1', [cat]);
+  return rows.length > 0;
+}
+
 /** общий обработчик создания товара */
 const createProduct = async (req, res) => {
   try {
@@ -662,11 +722,21 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: 'preview_image_url должен быть абсолютным URL' });
     }
 
+    const cat = String(category).trim();
+
+    // ── NEW: НЕ-админ не может создавать новую категорию — только выбирать существующую
+    if (req.user?.role !== 'admin') {
+      const exists = await isCategoryExists(cat);
+      if (!exists) {
+        return res.status(400).json({ message: 'Категория должна существовать. Обратитесь к администратору.' });
+      }
+    }
+
     // создаём товар сразу активным
     const [result] = await db.query(
       `INSERT INTO products (seller_id, title, description, price, qty, category, status, preview_image_url, created_at)
        VALUES (?, ?, ?, ?, ?, ?, 'active', ?, NOW())`,
-      [req.user.id, title, description || null, p, q, String(category).trim(), preview]
+      [req.user.id, title, description || null, p, q, cat, preview]
     );
 
     const newId = result.insertId;
@@ -709,18 +779,54 @@ app.post('/api/products', requireAuth, requireApprovedSeller, createProduct);
 /* ===================== Products: управление продавца ===================== */
 
 // список товаров конкретного продавца
-app.get('/api/my-products', requireAuth, requireApprovedSeller, async (req, res) => {
+// список товаров текущего пользователя (для страницы "Мои товары")
+app.get('/api/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT id, title, description, price, qty, category, status, created_at
-         FROM products
-        WHERE seller_id = ?
-        ORDER BY created_at DESC`,
+      `SELECT
+         p.id,
+         p.title,
+         p.description,
+         p.price,
+         p.qty,
+         p.category,
+         p.status,
+         p.created_at,
+         p.preview_image_url
+       FROM products p
+       WHERE p.seller_id = ?
+       ORDER BY p.created_at DESC`,
       [req.user.id]
     );
     res.json({ items: rows });
   } catch (e) {
-    console.error('GET /api/my-products error', e);
+    console.error('GET /api/my/products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// fallback без /api (если фронт вдруг обратится на /my/products)
+app.get('/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT
+         p.id,
+         p.title,
+         p.description,
+         p.price,
+         p.qty,
+         p.category,
+         p.status,
+         p.created_at,
+         p.preview_image_url
+       FROM products p
+       WHERE p.seller_id = ?
+       ORDER BY p.created_at DESC`,
+      [req.user.id]
+    );
+    res.json({ items: rows });
+  } catch (e) {
+    console.error('GET /my/products error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -729,16 +835,28 @@ app.get('/api/my-products', requireAuth, requireApprovedSeller, async (req, res)
 app.put('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res) => {
   const { id } = req.params;
   const { title, description, price, qty, category } = req.body || {};
+
   try {
+    // ── NEW: нормализуем категорию и проверяем её существование для НЕ-админа
+    const cat = category != null ? String(category).trim() : category;
+    if (cat && req.user?.role !== 'admin') {
+      const exists = await isCategoryExists(cat);
+      if (!exists) {
+        return res.status(400).json({ message: 'Категория должна существовать. Обратитесь к администратору.' });
+      }
+    }
+
     const [result] = await db.query(
       `UPDATE products
-          SET title = ?, description = ?, price = ?, qty = ?, category = ?
-        WHERE id = ? AND seller_id = ?`,
-      [title, description, price, qty, category, id, req.user.id]
+         SET title = ?, description = ?, price = ?, qty = ?, category = ?
+       WHERE id = ? AND seller_id = ?`,
+      [title, description, price, qty, cat, id, req.user.id] // <- используем cat
     );
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Товар не найден' });
     }
+
     res.json({ ok: true });
   } catch (e) {
     console.error('PUT /api/products/:id error', e);
