@@ -6,8 +6,9 @@ import ReactLogo from './logo192.png';
 import CartBadge from '../Components/CartBadge';
 import { useTranslation } from 'react-i18next';
 import { useCurrency, SUPPORTED } from '../contexts/CurrencyContext.jsx';
+import { flagByCurrency, flagByLang } from './Flag';
 
-// ⚠️ Положи иконку в: client/src/assets/translator.png  (или поменяй путь ниже)
+// 👇 иконка переводчика (оставляем её на самой кнопке)
 import TranslateIcon from '../assets/translator.png';
 
 const langs = [
@@ -47,7 +48,7 @@ function LanguageButton({ i18n, t, onChange }) {
           width: 36,
           height: 36,
           borderRadius: '50%',
-          backgroundColor: '#2563eb', // тот же синий, что и у аватарки
+          backgroundColor: '#2563eb',
           border: 'none',
           display: 'flex',
           alignItems: 'center',
@@ -56,6 +57,7 @@ function LanguageButton({ i18n, t, onChange }) {
           flexShrink: 0,
         }}
       >
+        {/* оставляем картинку переводчика на кнопке */}
         <img
           src={TranslateIcon}
           alt=""
@@ -77,7 +79,7 @@ function LanguageButton({ i18n, t, onChange }) {
             border: '1px solid #e5e7eb',
             borderRadius: 12,
             padding: 6,
-            minWidth: 170,
+            minWidth: 180,
             boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
             zIndex: 30,
           }}
@@ -99,8 +101,14 @@ function LanguageButton({ i18n, t, onChange }) {
                 borderRadius: 10,
                 cursor: 'pointer',
                 fontWeight: i18n.language.startsWith(code) ? 600 : 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
               }}
             >
+              <span style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
+                {flagByLang(code)}
+              </span>
               {t(labelKey)}
             </button>
           ))}
@@ -131,6 +139,15 @@ function CurrencySelect({ t }) {
       <label htmlFor="currency-select" style={{ fontSize: 12, opacity: 0.75 }}>
         {t('currency.label') || 'Валюта'}
       </label>
+
+      {/* маленький флаг текущей валюты */}
+      <span
+        aria-hidden="true"
+        style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}
+      >
+        {flagByCurrency(currency)}
+      </span>
+
       <select
         id="currency-select"
         value={currency}

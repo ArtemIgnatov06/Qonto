@@ -95,8 +95,8 @@
 
 /* ряд кнопок в профиле */
 .profile-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+   display: flex;
+  justify-content: flex-start; /* кнопки выровнены слева */
+  gap: 12px;                   /* ровный зазор между кнопками */
   margin-top: 12px;
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../Styles/profile.css';
 
 const API = process.env.REACT_APP_API || '';
@@ -136,10 +136,9 @@ export default function ProductEdit() {
 
   return (
     <div className="profile-page">
-      <div className="card" style={{maxWidth: 720}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+      <div className="card" style={{ maxWidth: 720 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 12 }}>
           <h2 className="heading-large">{t('productEdit.title')}</h2>
-          <Link to="/my/products" className="btn-logout">{t('common.cancel')}</Link>
         </div>
 
         {loading ? (
