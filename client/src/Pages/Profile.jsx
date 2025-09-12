@@ -12,7 +12,8 @@ const Profile = () => {
   const { user, refresh } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '' });
+  // ✨ добавили contact_email
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', contact_email: '' });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
@@ -24,7 +25,9 @@ const Profile = () => {
       setForm({
         first_name: user.first_name || '',
         last_name: user.last_name || '',
-        email: user.email || ''
+        email: user.email || '',
+        // ✨ инициализация поля «Почта для связи»
+        contact_email: user.contact_email || ''
       });
     }
   }, [user]);
@@ -43,6 +46,7 @@ const Profile = () => {
   const saveProfile = async () => {
     setSaving(true); setMsg(null); setErr(null);
     try {
+      // ✨ отправляем contact_email вместе с остальными полями
       const { data } = await axios.post('/api/me/update-profile', form, { withCredentials: true });
       if (data.ok) { setMsg(t('profile.saved')); await refresh(); }
       else setErr(data.error || t('profile.saveFailed'));
@@ -55,7 +59,40 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
-      <h2>{t('profile.title')}</h2>
+      {/* ✨ Заголовок + ссылка на Видимый профиль */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 24,
+          marginBottom: 20,
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 700,
+            color: '#111827',
+          }}
+        >
+          {t('profile.title') || 'Личный профиль'}
+        </h2>
+
+        <Link
+          to="/profile/public"
+          style={{
+            fontSize: 18,
+            fontWeight: 600,
+            color: '#6d28d9', // фиолетовый
+            textDecoration: 'none',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+          onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+        >
+          {t('profile.publicTitle') || 'Видимый профиль'}
+        </Link>
+      </div>
 
       {/* двухколоночная сетка */}
       <div className="profile-grid">
@@ -87,6 +124,18 @@ const Profile = () => {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="you@example.com"
               aria-label="Email"
+            />
+          </div>
+
+          {/* ✨ Новое поле: Почта для связи */}
+          <div className="form-row">
+            <label>{t('profile.contactEmail') || 'Почта для связи'}</label>
+            <input
+              type="email"
+              value={form.contact_email}
+              onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+              placeholder="myshop@domain.com"
+              aria-label={t('profile.contactEmail') || 'Почта для связи'}
             />
           </div>
 

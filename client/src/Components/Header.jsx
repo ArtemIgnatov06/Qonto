@@ -22,7 +22,6 @@ function LanguageButton({ i18n, t, onChange }) {
   const menuRef = useRef(null);
   const btnRef = useRef(null);
 
-  // закрываем по клику вне
   useEffect(() => {
     const onDocClick = (e) => {
       if (!open) return;
@@ -57,14 +56,7 @@ function LanguageButton({ i18n, t, onChange }) {
           flexShrink: 0,
         }}
       >
-        {/* оставляем картинку переводчика на кнопке */}
-        <img
-          src={TranslateIcon}
-          alt=""
-          width={20}
-          height={20}
-          style={{ filter: 'invert(1)' }}
-        />
+        <img src={TranslateIcon} alt="" width={20} height={20} style={{ filter: 'invert(1)' }} />
       </button>
 
       {open && (
@@ -118,7 +110,6 @@ function LanguageButton({ i18n, t, onChange }) {
   );
 }
 
-// Селектор валют
 function CurrencySelect({ t }) {
   const { currency, setCurrency, isLoading, error } = useCurrency();
 
@@ -139,26 +130,14 @@ function CurrencySelect({ t }) {
       <label htmlFor="currency-select" style={{ fontSize: 12, opacity: 0.75 }}>
         {t('currency.label') || 'Валюта'}
       </label>
-
-      {/* маленький флаг текущей валюты */}
-      <span
-        aria-hidden="true"
-        style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}
-      >
+      <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
         {flagByCurrency(currency)}
       </span>
-
       <select
         id="currency-select"
         value={currency}
         onChange={(e) => setCurrency(e.target.value)}
-        style={{
-          border: 'none',
-          outline: 'none',
-          background: 'transparent',
-          padding: '4px 2px',
-          cursor: 'pointer',
-        }}
+        style={{ border: 'none', outline: 'none', background: 'transparent', padding: '4px 2px', cursor: 'pointer' }}
       >
         {SUPPORTED.map((v) => (
           <option key={v.code} value={v.code}>
@@ -180,7 +159,6 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const { user, refresh } = useAuth();
 
-  // применяем сохранённый язык
   useEffect(() => {
     const saved = localStorage.getItem('i18nextLng');
     if (saved && saved !== i18n.language) i18n.changeLanguage(saved);
@@ -192,13 +170,31 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
-    await fetch('http://localhost:5050/api/logout', {
-      method: 'POST',
-      credentials: 'include',
-    });
+    await fetch('http://localhost:5050/api/logout', { method: 'POST', credentials: 'include' });
     await refresh();
     window.location.href = '/';
   };
+
+  // -------------------- ONLINE HEARTBEAT --------------------
+  // раз в 20 сек пингуем сервер, чтобы обновлять users.last_seen_at
+  useEffect(() => {
+    if (!user) return;
+    const tick = () =>
+      fetch('http://localhost:5050/api/heartbeat', { method: 'POST', credentials: 'include' }).catch(() => {});
+    tick(); // сразу при маунте
+    const id = setInterval(tick, 20000);
+    return () => clearInterval(id);
+  }, [user]);
+  // ----------------------------------------------------------
+
+  const avatarUrl = user?.avatar_url
+    ? String(user.avatar_url).startsWith('http')
+      ? user.avatar_url
+      : `http://localhost:5050${user.avatar_url}`
+    : null;
+
+  const userLetter =
+    user?.first_name?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'U';
 
   return (
     <header
@@ -212,21 +208,8 @@ const Header = () => {
         gap: 16,
       }}
     >
-      {/* Левый блок: логотип + меню */}
-      <nav
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          flexGrow: 1,
-          minWidth: 0,
-        }}
-      >
-        <img
-          src={ReactLogo}
-          alt="Logo"
-          style={{ width: 36, height: 36, display: 'block', flexShrink: 0 }}
-        />
+      <nav style={{ display: 'flex', alignItems: 'center', gap: 16, flexGrow: 1, minWidth: 0 }}>
+        <img src={ReactLogo} alt="Logo" style={{ width: 36, height: 36, display: 'block', flexShrink: 0 }} />
 
         <NavLink to="/" end className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
           {t('nav.home')}
@@ -238,16 +221,10 @@ const Header = () => {
           {t('nav.contacts')}
         </NavLink>
 
-        {/* Ссылка на корзину с количеством */}
-        <NavLink
-          to="/cart"
-          className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}
-          title={t('cart.cart')}
-        >
+        <NavLink to="/cart" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`} title={t('cart.cart')}>
           <CartBadge />
         </NavLink>
 
-        {/* Админские ссылки */}
         {user?.role === 'admin' && (
           <>
             <NavLink to="/admin/applications" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
@@ -259,7 +236,6 @@ const Header = () => {
           </>
         )}
 
-        {/* Если пользователь вошёл — блок с языком/валютой и аватаркой справа в навигации */}
         {user && (
           <div
             style={{
@@ -271,18 +247,16 @@ const Header = () => {
               marginRight: 'auto',
             }}
           >
-            {/* Селектор валют */}
             <CurrencySelect t={t} />
-
-            {/* Кнопка языка слева от аватарки */}
             <LanguageButton i18n={i18n} t={t} onChange={changeLang} />
-
-            {/* Аватарка */}
             <div
+              onClick={() => (window.location.href = '/profile')}
+              title={t('nav.profile')}
               style={{
                 width: 36,
                 height: 36,
                 borderRadius: '50%',
+                overflow: 'hidden',
                 backgroundColor: '#2563eb',
                 color: '#fff',
                 display: 'flex',
@@ -293,16 +267,21 @@ const Header = () => {
                 fontSize: 14,
                 userSelect: 'none',
               }}
-              onClick={() => (window.location.href = '/profile')}
-              title={t('nav.profile')}
             >
-              {user.first_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="avatar"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                userLetter
+              )}
             </div>
           </div>
         )}
       </nav>
 
-      {/* Правый блок: Войти/Выйти (и язык/валюта — если пользователь ещё не вошёл) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
         {!user && (
           <>

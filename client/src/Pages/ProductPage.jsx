@@ -1,6 +1,6 @@
 // client/src/Pages/ProductPage.jsx
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 
@@ -144,6 +144,26 @@ export default function ProductPage() {
   const avg = item.avg_rating ?? item.ratingAvg ?? 0;
   const cnt = item.reviews_count ?? item.ratingCount ?? 0;
 
+  // ✨ Продавец как ссылка на публичный профиль, если есть seller_id
+  const sellerNameText =
+    item.seller_name ||
+    `${(item.seller_first_name || '').trim()} ${(item.seller_last_name || '').trim()}`.trim() ||
+    '—';
+
+  const sellerNode = item.seller_id ? (
+    <Link
+      to={`/profile/public/${item.seller_id}`}
+      style={{ color: '#6d28d9', fontWeight: 500, textDecoration: 'none' }}
+      onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+      onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+      title={t('productPage.viewSellerProfile')}
+    >
+      {sellerNameText}
+    </Link>
+  ) : (
+    <span>{sellerNameText}</span>
+  );
+
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
       <h1 style={{ marginBottom: 8 }}>{item.title}</h1>
@@ -181,7 +201,7 @@ export default function ProductPage() {
       )}
 
       <div style={{ color: '#555', marginBottom: 10 }}>
-        {t('productPage.seller')}: {item.seller_name || '—'} · {t('productPage.category')}: {item.category || '—'}
+        {t('productPage.seller')}: {sellerNode} · {t('productPage.category')}: {item.category || '—'}
       </div>
 
       <div style={{ marginBottom: 16 }}>

@@ -11,6 +11,9 @@ import Contacts from './Pages/Contacts';
 import Profile from './Pages/Profile';
 import { AuthForm } from './Components/AuthForm';
 import Header from './Components/Header';
+import ProfilePublic from './Pages/ProfilePublic.jsx';
+import ChatList from './Pages/ChatList.jsx';
+import ChatThread from './Pages/ChatThread.jsx';
 
 import AdminApplications from './Pages/AdminApplications.jsx';
 import SellerApplication from './Pages/SellerApplication';
@@ -62,6 +65,10 @@ export default function App() {
                 <Route path="/contacts" element={<Contacts />} />
                 <Route path="/auth" element={<AuthForm />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/public" element={<ProfilePublic />} />
+                <Route path="/profile/public/:id" element={<ProfilePublic />} />
+                <Route path="/chats" element={<ChatList />} />
+                <Route path="/chats/:id" element={<ChatThread />} />
 
                 {/* Админ/продавец */}
                 <Route path="/admin/applications" element={<AdminApplications />} />

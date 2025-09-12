@@ -17,17 +17,16 @@
     "change": "Change currency"
   },
   "auth": {
-    "login": "Log in",
-    "logout": "Log out",
+    "loginTab": "Sign in",
+    "registerTab": "Sign up",
+    "byEmail": "Sign in with e-mail",
+    "byPhonePass": "Sign in with phone & password",
+    "byPhoneOtp": "Sign in with SMS code",
+    "login": "Sign in",
+    "logout": "Sign out",
     "register": "Register",
-    "required": "Login required.",
-    "tabs": {
-      "login": "Log in",
-      "register": "Register"
-    },
-    "byEmail": "By email",
-    "byPhonePass": "Phone + password",
-    "byPhoneOtp": "Phone + SMS code"
+    "required": "You must be signed in.",
+    "invalidCreds": "Incorrect email or password."
   },
   "google": {
     "signIn": "Sign in with Google",
@@ -104,6 +103,7 @@
     "edit": "Edit"
   },
   "productPage": {
+    "viewSellerProfile": "View seller profile",
     "buttons": {
       "buyNow": "Buy now",
       "addToCart": "Add to cart",
@@ -187,11 +187,15 @@
     "text": "Contact us by email:"
   },
   "profile": {
-    "title": "Profile",
+    "title": "Personal profile",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Profile data saved",
     "saveFailed": "Failed to save profile",
+    "publicTitle": "Public profile",
+    "contactEmail": "Contact email",
+    "contact": "Contact",
+    "soldCount": "Items sold",
     "myProducts": {
       "title": "My products",
       "hint": "View and edit your products on a dedicated page.",
@@ -348,16 +352,22 @@
     }
   },
   "chat": {
-    "open": "Chat💬",
-    "header": "AI Chat",
-    "close": "Close",
-    "placeholder": "Type a message...",
-    "send": "Send",
+    "open": "Чат💬",
+    "header": "Чат з ШІ",
+    "close": "Закрити",
+    "placeholder": "Напишіть повідомлення...",
+    "send": "Надіслати",
     "typing": "...",
     "error": {
-      "http": "Error {{status}}: {{statusText}}",
-      "generic": "AI response error 😞"
-    }
+      "http": "Помилка {{status}}: {{statusText}}",
+      "generic": "Помилка відповіді від ШІ 😞"
+    },
+    "writeToSeller": "Написати продавцю",
+    "chats": "Чати",
+    "thread": "Діалог",
+    "online": "в мережі",
+    "offline": "не в мережі",
+    "noMessages": "Поки немає повідомлень"
   },
   "meta": {
     "title": {
@@ -372,8 +382,7 @@
     "title": "My products",
     "addNew": "Add product",
     "empty": "You haven't added any products yet"
-    }
-  ,
+  },
   "productEdit": {
     "metaTitle": "Edit product",
     "title": "Edit product",

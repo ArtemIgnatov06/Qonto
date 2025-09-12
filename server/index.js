@@ -1,5 +1,7 @@
 // server/index.js
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 // Читаем .env именно из папки server
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
@@ -29,6 +31,23 @@ if (SMS_PROVIDER === 'twilio') {
 
 const app = express();
 
+
+// === Static uploads & multer storage for avatars ===
+const uploadsRoot = path.resolve(__dirname, 'uploads');
+const avatarDir = path.join(uploadsRoot, 'avatars');
+try { fs.mkdirSync(avatarDir, { recursive: true }); } catch {}
+app.use('/uploads', express.static(uploadsRoot));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, avatarDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '.jpg');
+    const uid = (req.user && req.user.id) ? req.user.id : 'anon';
+    cb(null, `${uid}_${Date.now()}${ext}`);
+  }
+});
+const upload = multer({ storage });
+// === End uploads ===
 // === CORS
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',');
 app.use(cors({ origin: allowedOrigins, credentials: true }));
@@ -58,6 +77,33 @@ const db = mysql.createPool({
 })();
 
 const DB_NAME = process.env.DB_NAME;
+
+
+async function ensureUsersExtraSchema() {
+  try {
+    const [c1] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'contact_email'`,
+      [DB_NAME]
+    );
+    if (!c1[0].cnt) {
+      await db.query(`ALTER TABLE users ADD COLUMN contact_email VARCHAR(255) NULL AFTER email`);
+      console.log('✅ users.contact_email added');
+    }
+    const [c2] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'avatar_url'`,
+      [DB_NAME]
+    );
+    if (!c2[0].cnt) {
+      await db.query(`ALTER TABLE users ADD COLUMN avatar_url VARCHAR(512) NULL AFTER contact_email`);
+      console.log('✅ users.avatar_url added');
+    }
+  } catch (e) {
+    console.error('ensureUsersExtraSchema error:', e?.message || e);
+  }
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
 
 // ---------- OpenRouter (ИИ) ----------
@@ -84,8 +130,7 @@ const normalizePhone = (raw) => {
 
 async function getUserById(id) {
   const [rows] = await db.query(
-    `SELECT id, first_name, last_name, username, phone, email, role, seller_status, seller_rejection_reason
-     FROM users WHERE id=? LIMIT 1`,
+    `SELECT id, first_name, last_name, username, phone, email, contact_email, avatar_url, role, seller_status, seller_rejection_reason FROM users WHERE id=? LIMIT 1`,
     [id]
   );
   return rows[0] || null;
@@ -309,7 +354,8 @@ async function ensureProductsSchema() {
     console.log('✅ email_otps / phone_otps tables ensured');
 
     // гарантируем схему categories и products
-    await ensureCategoriesSchema();
+    await ensureUsersExtraSchema();
+await ensureCategoriesSchema();
     await ensureProductsSchema();
 
   } catch (e) {
@@ -584,18 +630,19 @@ app.post('/api/auth/phone/verify', async (req, res) => {
 /* ===================== Профиль ===================== */
 app.post('/api/me/update-profile', requireAuth, async (req, res) => {
   try {
-    let { first_name, last_name, email } = req.body || {};
+    let { first_name, last_name, email, contact_email } = req.body || {};
     first_name = (first_name || '').trim();
     last_name = (last_name || '').trim();
     email = (email || '').trim();
 
-    if (!first_name || !last_name || !email) {
+    contact_email = (contact_email || '').trim();
+if (!first_name || !last_name || !email) {
       return res.status(400).json({ error: 'Имя, фамилия и email обязательны' });
     }
     const [exists] = await db.query('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1', [email, req.user.id]);
     if (exists.length) return res.status(400).json({ error: 'Этот email уже используется' });
 
-    await db.query('UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?', [first_name, last_name, email, req.user.id]);
+    await db.query('UPDATE users SET first_name=?, last_name=?, email=?, contact_email=? WHERE id=?', [ first_name, last_name, email, contact_email || null, req.user.id ]);
 
     const user = await getUserById(req.user.id);
     res.json({ ok: true, user });
@@ -612,6 +659,145 @@ app.get('/api/me', (req, res) => {
 app.post('/api/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ success: true });
+});
+
+app.post('/api/heartbeat', requireAuth, async (req, res) => {
+  try {
+    await db.query('UPDATE users SET last_seen_at = NOW() WHERE id = ?', [req.user.id]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false });
+  }
+});
+
+/* ===================== Chats ===================== */
+
+// создать/получить существующий диалог покупатель->продавец
+app.post('/api/chats/start', requireAuth, async (req, res) => {
+  try {
+    const seller_id = Number(req.body?.seller_id);
+    if (!seller_id || seller_id === req.user.id) {
+      return res.status(400).json({ error: 'Некорректный продавец' });
+    }
+
+    const [se] = await db.query('SELECT id FROM users WHERE id=? LIMIT 1', [seller_id]);
+    if (!se.length) return res.status(404).json({ error: 'Продавец не найден' });
+
+    const buyer_id = req.user.id;
+
+    const [ex] = await db.query(
+      'SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',
+      [seller_id, buyer_id]
+    );
+
+    if (ex.length) return res.json({ id: ex[0].id });
+
+    const [r] = await db.query(
+      'INSERT INTO chat_threads (seller_id, buyer_id) VALUES (?, ?)',
+      [seller_id, buyer_id]
+    );
+
+    res.json({ id: r.insertId });
+  } catch (e) {
+    console.error('POST /api/chats/start', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// список моих диалогов (role=seller|buyer|all)
+app.get('/api/chats/my', requireAuth, async (req, res) => {
+  try {
+    const role = String(req.query.role || 'all');
+    const me = req.user.id;
+
+    let where = 't.seller_id=? OR t.buyer_id=?';
+    let params = [me, me];
+    if (role === 'seller') { where = 't.seller_id=?'; params = [me]; }
+    if (role === 'buyer')  { where = 't.buyer_id=?';  params = [me]; }
+
+    const [rows] = await db.query(
+      `
+      SELECT
+        t.id, t.seller_id, t.buyer_id, t.updated_at,
+        s.first_name AS seller_first_name, s.last_name AS seller_last_name, s.avatar_url AS seller_avatar,
+        b.first_name AS buyer_first_name,  b.last_name AS buyer_last_name,  b.avatar_url AS buyer_avatar,
+        (SELECT body       FROM chat_messages m WHERE m.thread_id=t.id ORDER BY m.id DESC LIMIT 1) AS last_text,
+        (SELECT created_at FROM chat_messages m WHERE m.thread_id=t.id ORDER BY m.id DESC LIMIT 1) AS last_at,
+        (SELECT COUNT(*)   FROM chat_messages m WHERE m.thread_id=t.id AND m.sender_id<>? AND m.read_at IS NULL) AS unread
+      FROM chat_threads t
+      JOIN users s ON s.id=t.seller_id
+      JOIN users b ON b.id=t.buyer_id
+      WHERE ${where}
+      ORDER BY COALESCE(last_at, t.updated_at) DESC
+      `,
+      [me, ...params]
+    );
+
+    res.json({ items: rows });
+  } catch (e) {
+    console.error('GET /api/chats/my', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// сообщения в диалоге
+app.get('/api/chats/:id/messages', requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const me = req.user.id;
+
+    const [tt] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [id]);
+    const t = tt[0];
+    if (!t || (t.seller_id !== me && t.buyer_id !== me)) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    const [msgs] = await db.query(
+      `SELECT id, sender_id, body, created_at, read_at
+       FROM chat_messages
+       WHERE thread_id=?
+       ORDER BY id ASC`,
+      [id]
+    );
+
+    await db.query(
+      `UPDATE chat_messages SET read_at=NOW()
+       WHERE thread_id=? AND sender_id<>? AND read_at IS NULL`,
+      [id, me]
+    );
+
+    res.json({ thread: { id, seller_id: t.seller_id, buyer_id: t.buyer_id }, items: msgs });
+  } catch (e) {
+    console.error('GET /api/chats/:id/messages', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// отправка сообщения
+app.post('/api/chats/:id/messages', requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const me = req.user.id;
+    const text = String(req.body?.body || '').trim();
+    if (!text) return res.status(400).json({ error: 'Пустое сообщение' });
+
+    const [tt] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [id]);
+    const t = tt[0];
+    if (!t || (t.seller_id !== me && t.buyer_id !== me)) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    const [r] = await db.query(
+      'INSERT INTO chat_messages (thread_id, sender_id, body) VALUES (?, ?, ?)',
+      [id, me, text]
+    );
+    await db.query('UPDATE chat_threads SET updated_at=NOW() WHERE id=?', [id]);
+
+    res.json({ ok: true, id: r.insertId, sender_id: me, body: text });
+  } catch (e) {
+    console.error('POST /api/chats/:id/messages', e);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 /* ===================== Categories ===================== */
@@ -1461,8 +1647,126 @@ function detectBrand(n) {
   return 'card';
 }
 
+/* ===================== Users: online status ===================== */
+(async () => {
+  try {
+    const [c1] = await db.query("SHOW COLUMNS FROM users LIKE 'last_seen_at'");
+    if (!c1.length) {
+      await db.query("ALTER TABLE users ADD COLUMN last_seen_at DATETIME NULL, ADD INDEX idx_last_seen (last_seen_at)");
+      console.log('✅ added users.last_seen_at');
+    }
+  } catch (e) {
+    console.error('ensure last_seen_at error:', e.message || e);
+  }
+})();
+
+/* ===================== Chat schema ===================== */
+(async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS chat_threads (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        seller_id INT NOT NULL,
+        buyer_id INT NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_pair (seller_id, buyer_id),
+        INDEX idx_seller (seller_id, updated_at),
+        INDEX idx_buyer (buyer_id, updated_at),
+        CONSTRAINT fk_chat_threads_seller FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT fk_chat_threads_buyer  FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        thread_id INT NOT NULL,
+        sender_id INT NOT NULL,
+        body TEXT NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        read_at DATETIME NULL,
+        INDEX idx_thread_created (thread_id, created_at),
+        CONSTRAINT fk_chat_messages_thread FOREIGN KEY (thread_id) REFERENCES chat_threads(id) ON DELETE CASCADE,
+        CONSTRAINT fk_chat_messages_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    console.log('✅ chat tables ready');
+  } catch (e) {
+    console.error('ensure chat schema error:', e.message || e);
+  }
+})();
+
 /* ===================== Запуск ===================== */
 const PORT = process.env.PORT || 5050;
+
+// Upload avatar
+app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
+  try {
+    const url = `/uploads/avatars/${req.file.filename}`;
+    await db.query('UPDATE users SET avatar_url=? WHERE id=?', [url, req.user.id]);
+    res.json({ url });
+  } catch (e) {
+    console.error('avatar upload error:', e);
+    res.status(500).json({ error: 'Failed to save avatar' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Сервер работает на http://localhost:${PORT}`);
+});
+
+
+// Public user profile
+app.get('/api/users/:id/public', async (req, res) => {
+  const userId = Number(req.params.id);
+  try {
+    const [rows] = await db.query(
+      `SELECT id, first_name, last_name, contact_email, avatar_url, last_seen_at
+         FROM users
+        WHERE id=? LIMIT 1`,
+      [userId]
+    );
+    if (!rows.length) return res.status(404).json({ message: 'User not found' });
+    const u = rows[0];
+
+    // Average rating across user's products
+    const [[r1]] = await db.query(
+      `SELECT ROUND(AVG(r.rating), 2) AS rating
+         FROM product_reviews r
+         JOIN products p ON p.id = r.product_id
+        WHERE p.seller_id = ?`,
+      [userId]
+    );
+
+    // Items sold count (qty)
+    const [[r2]] = await db.query(
+      `SELECT COALESCE(SUM(oi.qty),0) AS soldCount
+         FROM order_items oi
+         JOIN orders o   ON o.id = oi.order_id
+         JOIN products p ON p.id = oi.product_id
+        WHERE p.seller_id = ?
+          AND o.status IN ('paid','completed')`,
+      [userId]
+    );
+
+    const online = u.last_seen_at
+      ? (Date.now() - new Date(u.last_seen_at).getTime()) < 60 * 1000
+      : false;
+
+    res.json({
+      id: u.id,
+      firstName: u.first_name,
+      lastName: u.last_name,
+      contactEmail: u.contact_email,
+      avatarUrl: u.avatar_url,
+      rating: r1?.rating != null ? Number(r1.rating) : null,
+      soldCount: Number(r2?.soldCount || 0),
+      online,
+      lastSeenAt: u.last_seen_at,
+    });
+  } catch (e) {
+    console.error('GET /api/users/:id/public error:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
