@@ -5,6 +5,10 @@ const multer = require('multer');
 // Читаем .env именно из папки server
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
+// +++ SOCKET.IO + HTTP
+const http = require('http');
+const { Server } = require('socket.io');
+
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -17,20 +21,16 @@ const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const crypto = require('crypto');
 
-// === SMS (Twilio, опционально)
-const SMS_PROVIDER = (process.env.SMS_PROVIDER || '').toLowerCase();
-let twilioClient = null;
-if (SMS_PROVIDER === 'twilio') {
-  try {
-    const twilio = require('twilio');
-    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-  } catch (e) {
-    console.warn('Twilio SDK не установлен или переменные не заданы. SMS отправка будет недоступна до настройки.');
-  }
-}
+// === CORS
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',');
 
+// === Express app (создаём ДО любых app.use)
 const app = express();
 
+// === Базовые middlewares
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
 
 // === Static uploads & multer storage for avatars ===
 const uploadsRoot = path.resolve(__dirname, 'uploads');
@@ -48,13 +48,103 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 // === End uploads ===
-// === CORS
-const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',');
-app.use(cors({ origin: allowedOrigins, credentials: true }));
 
-// === Парсеры
-app.use(express.json());
-app.use(cookieParser());
+// ==== Chat attachments upload (ниже ваших require и до роутов) ====
+const chatUploadsDir = path.join(__dirname, 'uploads', 'chat');
+fs.mkdirSync(chatUploadsDir, { recursive: true });
+
+const chatStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, chatUploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '');
+    const safeName = `${Date.now()}_${Math.random().toString(36).slice(2)}${ext}`;
+    cb(null, safeName);
+  }
+});
+
+function isAllowedAttachment(file) {
+  // разрешим картинки и общие вложения; при желании сузьте
+  const ok = [
+    'image/png','image/jpeg','image/webp','image/gif',
+    'application/pdf','image/heic','image/heif'
+  ];
+  return ok.includes(file.mimetype);
+}
+
+const uploadChat = multer({
+  storage: chatStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => cb(null, isAllowedAttachment(file))
+});
+
+// отдать статику
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// --- SOCKET.IO init (после CORS/парсеров, до маршрутов)
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: { origin: allowedOrigins, credentials: true }
+});
+
+// presence: карта кто онлайн
+const onlineUsers = new Map(); // userId -> Set<socketId>
+
+function _attach(userId, socketId) {
+  if (!userId) return;
+  if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
+  onlineUsers.get(userId).add(socketId);
+}
+function _detach(userId, socketId) {
+  const set = onlineUsers.get(userId);
+  if (!set) return;
+  set.delete(socketId);
+  if (set.size === 0) onlineUsers.delete(userId);
+}
+
+function isOnline(userId) {
+  return onlineUsers.has(Number(userId));
+}
+function emitToUser(userId, event, payload) {
+  io.to(`user:${userId}`).emit(event, payload);
+}
+
+// делаем хелперы доступными в роутерах/обработчиках дальше по файлу
+app.locals.isOnline = isOnline;
+app.locals.emitToUser = emitToUser;
+
+io.on('connection', (socket) => {
+  let userId = null;
+
+  // клиент сразу после connect вызывает socket.emit('auth', <user.id>)
+  socket.on('auth', (uid) => {
+    userId = Number(uid);
+    if (!userId) return;
+    socket.join(`user:${userId}`);
+    _attach(userId, socket.id);
+    io.emit('presence:update', { userId, online: true });
+  });
+
+  // клиент присоединяется к комнате треда (для typing/моментальных сообщений)
+  socket.on('thread:join', (threadId) => {
+    if (!threadId) return;
+    socket.join(`thread:${Number(threadId)}`);
+  });
+
+  // “печатает…”
+  socket.on('thread:typing', ({ threadId, from }) => {
+    socket.to(`thread:${Number(threadId)}`).emit('thread:typing', { threadId: Number(threadId), from });
+  });
+
+  socket.on('disconnect', () => {
+    if (userId) {
+      _detach(userId, socket.id);
+      if (!isOnline(userId)) {
+        io.emit('presence:update', { userId, online: false });
+      }
+    }
+  });
+});
 
 // === MySQL
 const db = mysql.createPool({
@@ -77,7 +167,6 @@ const db = mysql.createPool({
 })();
 
 const DB_NAME = process.env.DB_NAME;
-
 
 async function ensureUsersExtraSchema() {
   try {
@@ -672,35 +761,52 @@ app.post('/api/heartbeat', requireAuth, async (req, res) => {
 
 /* ===================== Chats ===================== */
 
+// безопасный emit (если socket.io не инициализирован – просто молча пропускаем)
+function _emitTo(req, userId, event, payload) {
+  try {
+    const fn = req.app?.locals?.emitToUser;
+    if (typeof fn === 'function') fn(userId, event, payload);
+  } catch (_) {}
+}
+
 // создать/получить существующий диалог покупатель->продавец
 app.post('/api/chats/start', requireAuth, async (req, res) => {
   try {
     const seller_id = Number(req.body?.seller_id);
-    if (!seller_id || seller_id === req.user.id) {
+    const buyer_id  = Number(req.user.id);
+
+    if (!seller_id || seller_id === buyer_id) {
       return res.status(400).json({ error: 'Некорректный продавец' });
     }
 
+    // проверим, что продавец существует
     const [se] = await db.query('SELECT id FROM users WHERE id=? LIMIT 1', [seller_id]);
     if (!se.length) return res.status(404).json({ error: 'Продавец не найден' });
 
-    const buyer_id = req.user.id;
-
+    // если тред уже есть — отдадим его id
     const [ex] = await db.query(
       'SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',
       [seller_id, buyer_id]
     );
-
     if (ex.length) return res.json({ id: ex[0].id });
 
-    const [r] = await db.query(
-      'INSERT INTO chat_threads (seller_id, buyer_id) VALUES (?, ?)',
+    // создаём, избегая гонок
+    await db.query(
+      'INSERT IGNORE INTO chat_threads (seller_id, buyer_id) VALUES (?, ?)',
       [seller_id, buyer_id]
     );
 
-    res.json({ id: r.insertId });
+    // гарантированно читаем id созданного/существующего треда
+    const [rows] = await db.query(
+      'SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',
+      [seller_id, buyer_id]
+    );
+    if (!rows.length) return res.status(500).json({ error: 'Не удалось создать чат' });
+
+    return res.json({ id: rows[0].id });
   } catch (e) {
     console.error('POST /api/chats/start', e);
-    res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -741,39 +847,106 @@ app.get('/api/chats/my', requireAuth, async (req, res) => {
 });
 
 // сообщения в диалоге
-app.get('/api/chats/:id/messages', requireAuth, async (req, res) => {
+// до хэндлера: заверните middleware uploadChat.array(...)
+app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), async (req, res) => {
   try {
-    const id = Number(req.params.id);
+    const threadId = Number(req.params.id);
     const me = req.user.id;
+    const body = String(req.body?.body || '').trim();
 
-    const [tt] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [id]);
-    const t = tt[0];
-    if (!t || (t.seller_id !== me && t.buyer_id !== me)) {
-      return res.status(404).json({ message: 'Chat not found' });
+    // получим тред
+    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [threadId]);
+    if (!t) return res.status(404).json({ error: 'Диалог не найден' });
+    if (t.seller_id !== me && t.buyer_id !== me) {
+      return res.status(403).json({ error: 'Нет доступа к диалогу' });
     }
 
-    const [msgs] = await db.query(
-      `SELECT id, sender_id, body, created_at, read_at
-       FROM chat_messages
-       WHERE thread_id=?
-       ORDER BY id ASC`,
-      [id]
-    );
+    // Проверка блокировки со стороны получателя
+    const receiver = me === t.seller_id ? t.buyer_id : t.seller_id;
+    const blockedForMe =
+      (receiver === t.seller_id && t.blocked_by_seller) ||
+      (receiver === t.buyer_id  && t.blocked_by_buyer);
+    if (blockedForMe) {
+      return res.status(403).json({ error: 'Пользователь заблокировал вас' });
+    }
 
-    await db.query(
-      `UPDATE chat_messages SET read_at=NOW()
-       WHERE thread_id=? AND sender_id<>? AND read_at IS NULL`,
-      [id, me]
-    );
+    const files = Array.isArray(req.files) ? req.files : [];
 
-    res.json({ thread: { id, seller_id: t.seller_id, buyer_id: t.buyer_id }, items: msgs });
+    // 1) Если есть текст без файлов — отдельная запись
+    const created = [];
+    if (body && !files.length) {
+      const [r] = await db.query(
+        `INSERT INTO chat_messages (thread_id, sender_id, body)
+         VALUES (?, ?, ?)`,
+        [threadId, me, body]
+      );
+      created.push({ id: r.insertId, body });
+    }
+
+    // 2) Файлы — каждая запись отдельно (body можно прикрепить к первой, если нужно)
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      const attachUrl = `/uploads/chat/${f.filename}`;
+      const attachType = f.mimetype;
+      const attachName = f.originalname || f.filename;
+      const attachSize = f.size || null;
+
+      const thisBody = (i === 0 ? body : ''); // текст пойдёт в первую запись
+
+      const [r2] = await db.query(
+        `INSERT INTO chat_messages
+           (thread_id, sender_id, body, attachment_url, attachment_type, attachment_name, attachment_size)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [threadId, me, thisBody, attachUrl, attachType, attachName, attachSize]
+      );
+      created.push({
+        id: r2.insertId,
+        body: thisBody,
+        attachment_url: attachUrl,
+        attachment_type: attachType,
+        attachment_name: attachName,
+        attachment_size: attachSize
+      });
+    }
+
+    // если вообще ничего не пришло
+    if (!created.length) {
+      return res.status(400).json({ error: 'Пустое сообщение' });
+    }
+
+    // MUTE-логика: если получатель замутил — копим серый счётчик и НЕ триггерим всплытие
+    const receiverMuted =
+      (receiver === t.seller_id && t.muted_by_seller) ||
+      (receiver === t.buyer_id  && t.muted_by_buyer);
+
+    if (receiverMuted) {
+      if (receiver === t.seller_id) {
+        await db.query(`UPDATE chat_threads SET muted_unread_seller = muted_unread_seller + ? WHERE id=?`,
+                       [created.length, threadId]);
+      } else {
+        await db.query(`UPDATE chat_threads SET muted_unread_buyer = muted_unread_buyer + ? WHERE id=?`,
+                       [created.length, threadId]);
+      }
+    } else {
+      // обычный «всплывающий» сценарий
+      _emitTo(req, receiver, 'chat:message', {
+        thread_id: threadId,
+        items: created
+      });
+      _emitTo(req, receiver, 'chat:unread', { delta: created.length });
+    }
+
+    // Отправителю — мгновенная доставка
+    _emitTo(req, me, 'chat:message:ack', { thread_id: threadId, items: created });
+
+    res.json({ ok: true, items: created });
   } catch (e) {
-    console.error('GET /api/chats/:id/messages', e);
+    console.error('POST /api/chats/:id/messages', e);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// отправка сообщения
+// отправка сообщения (с сокет-пушами)
 app.post('/api/chats/:id/messages', requireAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -793,9 +966,306 @@ app.post('/api/chats/:id/messages', requireAuth, async (req, res) => {
     );
     await db.query('UPDATE chat_threads SET updated_at=NOW() WHERE id=?', [id]);
 
-    res.json({ ok: true, id: r.insertId, sender_id: me, body: text });
+    const payload = {
+      id: r.insertId,
+      thread_id: id,
+      sender_id: me,
+      body: text,
+      created_at: new Date()
+    };
+
+    // пушим новое сообщение обоим участникам (если socket.io включён)
+    _emitTo(req, t.seller_id, 'chat:message', payload);
+    _emitTo(req, t.buyer_id,  'chat:message', payload);
+
+    // инкремент непрочитанного собеседнику
+    const receiver = me === t.seller_id ? t.buyer_id : t.seller_id;
+    _emitTo(req, receiver, 'chat:unread', { delta: +1 });
+
+    res.json({ ok: true, ...payload });
   } catch (e) {
     console.error('POST /api/chats/:id/messages', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// пометить входящие как прочитанные, обнулить «серый» счётчик и вернуть новое значение
+app.post('/api/chats/:id/read', requireAuth, async (req, res) => {
+  try {
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+
+    // 1) Прочитать входящие
+    await db.query(
+      `UPDATE chat_messages m
+       JOIN chat_threads t ON t.id = m.thread_id
+       SET m.read_at = NOW()
+       WHERE m.thread_id = ?
+         AND m.sender_id <> ?
+         AND m.read_at IS NULL`,
+      [threadId, me]
+    );
+
+    // 2) Сброс «серого» счётчика для моей стороны
+    await db.query(
+      `UPDATE chat_threads
+       SET muted_unread_seller = IF(seller_id = ?, 0, muted_unread_seller),
+           muted_unread_buyer  = IF(buyer_id  = ?, 0, muted_unread_buyer)
+       WHERE id = ?`,
+      [me, me, threadId]
+    );
+
+    // 3) Посчитать актуальный непрочитанный (если у тебя это нужно для бейджа)
+    const [[{ c }]] = await db.query(
+      `SELECT COUNT(*) AS c
+       FROM chat_messages m
+       JOIN chat_threads t ON t.id = m.thread_id
+       WHERE m.thread_id = ?
+         AND (t.seller_id = ? OR t.buyer_id = ?)
+         AND m.sender_id <> ?
+         AND m.read_at IS NULL`,
+      [threadId, me, me, me]
+    );
+
+    // 4) Обновить бейдж клиенту этой же стороне
+    _emitTo(req, me, 'chat:unread:replace', { total: c });
+
+    res.json({ ok: true, unread: c });
+  } catch (e) {
+    console.error('POST /api/chats/:id/read', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// helper: роль стороны
+function sideColumns(me, t) {
+  if (me === t.seller_id) {
+    return {
+      archived: 'archived_by_seller',
+      muted:    'muted_by_seller',
+      blocked:  'blocked_by_seller',
+      muted_unread: 'muted_unread_seller'
+    };
+  }
+  if (me === t.buyer_id) {
+    return {
+      archived: 'archived_by_buyer',
+      muted:    'muted_by_buyer',
+      blocked:  'blocked_by_buyer',
+      muted_unread: 'muted_unread_buyer'
+    };
+  }
+  return null;
+}
+
+// Архив / разархивировать
+app.post('/api/chats/:id/archive', requireAuth, async (req,res)=>{
+  try {
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+    const { archive } = req.body; // true/false
+
+    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
+    if (!t) return res.status(404).json({error:'Диалог не найден'});
+
+    const cols = sideColumns(me, t);
+    if (!cols) return res.status(403).json({error:'Нет доступа'});
+
+    await db.query(`UPDATE chat_threads SET ${cols.archived}=? WHERE id=?`, [archive?1:0, threadId]);
+    res.json({ ok:true, archived: !!archive });
+  } catch(e){
+    console.error('archive', e); res.status(500).json({error:'Server error'});
+  }
+});
+
+// Мут / размутить
+app.post('/api/chats/:id/mute', requireAuth, async (req,res)=>{
+  try {
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+    const { mute } = req.body; // true/false
+
+    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
+    if (!t) return res.status(404).json({error:'Диалог не найден'});
+
+    const cols = sideColumns(me, t);
+    if (!cols) return res.status(403).json({error:'Нет доступа'});
+
+    await db.query(`UPDATE chat_threads SET ${cols.muted}=? WHERE id=?`, [mute?1:0, threadId]);
+    if (!mute) {
+      // при размуте можно "посеревшие" обнулить (опционально)
+      await db.query(`UPDATE chat_threads SET ${cols.muted_unread}=0 WHERE id=?`, [threadId]);
+    }
+    res.json({ ok:true, muted: !!mute });
+  } catch(e){
+    console.error('mute', e); res.status(500).json({error:'Server error'});
+  }
+});
+
+// Блок / разблок
+app.post('/api/chats/:id/block', requireAuth, async (req,res)=>{
+  try{
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+    const { block } = req.body; // true/false
+
+    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
+    if (!t) return res.status(404).json({error:'Диалог не найден'});
+
+    const cols = sideColumns(me, t);
+    if (!cols) return res.status(403).json({error:'Нет доступа'});
+
+    await db.query(`UPDATE chat_threads SET ${cols.blocked}=? WHERE id=?`, [block?1:0, threadId]);
+    res.json({ ok:true, blocked: !!block });
+  } catch(e){
+    console.error('block', e); res.status(500).json({error:'Server error'});
+  }
+});
+
+// сколько непрочитанных у меня (для хедера при загрузке)
+app.get('/api/chats/unread-count', requireAuth, async (req, res) => {
+  try {
+    const me = req.user.id;
+    const [[{ c }]] = await db.query(
+      `SELECT COUNT(*) AS c
+         FROM chat_messages m
+         JOIN chat_threads t ON t.id=m.thread_id
+        WHERE (t.seller_id=? OR t.buyer_id=?)
+          AND m.sender_id<>?
+          AND m.read_at IS NULL`,
+      [me, me, me]
+    );
+    res.json({ count: c });
+  } catch (e) {
+    console.error('GET /api/chats/unread-count', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// получить список сообщений в треде
+app.get('/api/chats/:id/messages', requireAuth, async (req, res) => {
+  try {
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+
+    const [[thread]] = await db.query(
+      'SELECT * FROM chat_threads WHERE id=? AND (seller_id=? OR buyer_id=?)',
+      [threadId, me, me]
+    );
+    if (!thread) return res.status(404).json({ error: 'Диалог не найден' });
+
+    const [items] = await db.query(
+      `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
+              attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
+       FROM chat_messages
+       WHERE thread_id=?
+       ORDER BY created_at ASC`,
+      [threadId]
+    );
+
+    res.json({ thread, items });
+  } catch (e) {
+    console.error('GET /api/chats/:id/messages', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PATCH /api/messages/:id — редактировать (только автор, если не удалено)
+app.patch('/api/messages/:id', requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const me = req.user.id;
+    const body = String(req.body?.body || '').trim();
+
+    const [[m]] = await db.query(
+      `SELECT m.*, t.seller_id, t.buyer_id
+       FROM chat_messages m
+       JOIN chat_threads t ON t.id = m.thread_id
+       WHERE m.id=? LIMIT 1`, [id]
+    );
+    if (!m) return res.status(404).json({ error: 'Сообщение не найдено' });
+    if (m.sender_id !== me) return res.status(403).json({ error: 'Можно редактировать только свои сообщения' });
+    if (m.deleted_at) return res.status(400).json({ error: 'Сообщение удалено' });
+
+    await db.query(`UPDATE chat_messages SET body=?, edited_at=NOW() WHERE id=?`, [body, id]);
+    const [[updated]] = await db.query(
+      `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
+              attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
+       FROM chat_messages WHERE id=?`, [id]
+    );
+
+    // уведомим обе стороны
+    _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
+    _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
+
+    res.json({ ok: true, item: updated });
+  } catch (e) {
+    console.error('PATCH /api/messages/:id', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE /api/messages/:id — мягкое удаление (только автор)
+app.delete('/api/messages/:id', requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const me = req.user.id;
+
+    const [[m]] = await db.query(
+      `SELECT m.*, t.seller_id, t.buyer_id
+       FROM chat_messages m
+       JOIN chat_threads t ON t.id = m.thread_id
+       WHERE m.id=? LIMIT 1`, [id]
+    );
+    if (!m) return res.status(404).json({ error: 'Сообщение не найдено' });
+    if (m.sender_id !== me) return res.status(403).json({ error: 'Можно удалять только свои сообщения' });
+    if (m.deleted_at) {
+      // уже удалено — просто отдать как есть
+      return res.json({
+        ok: true,
+        item: {
+          id: m.id,
+          thread_id: m.thread_id,
+          sender_id: m.sender_id,
+          body: m.body, // оставляем как есть
+          attachment_url: null,
+          attachment_type: null,
+          attachment_name: null,
+          attachment_size: null,
+          created_at: m.created_at,
+          read_at: m.read_at,
+          edited_at: m.edited_at,
+          deleted_at: m.deleted_at
+        }
+      });
+    }
+
+    // Мягко: вложения чистим, ставим deleted_at, body оставляем (или делаем пустым)
+    await db.query(
+      `UPDATE chat_messages
+         SET attachment_url=NULL,
+             attachment_type=NULL,
+             attachment_name=NULL,
+             attachment_size=NULL,
+             edited_at=NULL,
+             deleted_at=NOW(),
+             body=''  -- безопасно для NOT NULL
+       WHERE id=?`,
+      [id]
+    );
+
+    const [[updated]] = await db.query(
+      `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
+              attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
+       FROM chat_messages WHERE id=?`, [id]
+    );
+
+    _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
+    _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
+
+    res.json({ ok: true, item: updated });
+  } catch (e) {
+    console.error('DELETE /api/messages/:id', e);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1712,10 +2182,9 @@ app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Сервер работает на http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
 });
-
 
 // Public user profile
 app.get('/api/users/:id/public', async (req, res) => {
@@ -1750,9 +2219,7 @@ app.get('/api/users/:id/public', async (req, res) => {
       [userId]
     );
 
-    const online = u.last_seen_at
-      ? (Date.now() - new Date(u.last_seen_at).getTime()) < 60 * 1000
-      : false;
+    const online = req.app?.locals?.isOnline ? req.app.locals.isOnline(userId) : false;
 
     res.json({
       id: u.id,

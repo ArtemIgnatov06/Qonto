@@ -1,10 +1,10 @@
 // client/src/Pages/ProfilePublic.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import AvatarUploader from '../Components/AvatarUploader';
 import { useAuth } from '../Hooks/useAuth';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import AvatarCircle from '../Components/AvatarCircle';
 
 function makeAbs(url) {
   if (!url) return null;
@@ -16,12 +16,14 @@ export default function ProfilePublic() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const { id: routeId } = useParams(); // поддержка /profile/public/:id
+  const { id: routeId } = useParams();
   const viewedUserId = routeId ? Number(routeId) : user?.id;
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hover, setHover] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
 
   useEffect(() => {
     if (!viewedUserId) return;
@@ -47,18 +49,14 @@ export default function ProfilePublic() {
 
   const isMe = user?.id && Number(user.id) === Number(viewedUserId);
 
-  // Буква-фолбэк, если нет аватарки
-  const letter = (
-    (data.firstName && data.firstName[0]) ||
-    (data.lastName && data.lastName[0]) ||
-    (data.username && data.username[0]) ||
-    (data.contactEmail && data.contactEmail[0]) ||
-    'U'
-  ).toUpperCase();
+  // инициалы из snake/camel
+  const first = data.first_name || data.firstName || '';
+  const last  = data.last_name  || data.lastName  || '';
+  const initials = `${first ? first[0] : ''}${last ? last[0] : ''}`.toUpperCase() || 'U';
 
   const startChat = async () => {
     try {
-      if (!user) return navigate('/auth'); // если не авторизован — на логин
+      if (!user) return navigate('/auth');
       const { data: resp } = await axios.post(
         'http://localhost:5050/api/chats/start',
         { seller_id: Number(viewedUserId) },
@@ -70,29 +68,38 @@ export default function ProfilePublic() {
     }
   };
 
+  // загрузка аватара без второго круга
+  const onPickFile = () => fileRef.current?.click();
+  const onFileChange = async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const fd = new FormData();
+    fd.append('avatar', f);
+    setUploading(true);
+    try {
+      const { data: resp } = await axios.post(
+        'http://localhost:5050/api/me/avatar',
+        fd,
+        { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      // ожидаем, что сервер вернёт { url: "/uploads/..." } или { avatarUrl: "..." }
+      const newUrl = makeAbs(resp.url || resp.avatarUrl);
+      if (newUrl) setData((p) => ({ ...p, avatarUrl: newUrl }));
+    } catch (e2) {
+      alert(e2?.response?.data?.error || 'Не удалось загрузить фото');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   return (
     <div className="profile-page">
-      {/* Шапка страницы */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: 24,
-          marginBottom: 20
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 28,
-            fontWeight: 700,
-            color: '#111827'
-          }}
-        >
+      {/* Шапка */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 24, marginBottom: 20 }}>
+        <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#111827' }}>
           {t('profile.publicTitle') || 'Видимый профиль'}
         </h2>
-
-        {/* ПОКАЗЫВАЕМ ссылку только если это мой профиль */}
         {isMe && (
           <Link
             to="/profile"
@@ -112,80 +119,48 @@ export default function ProfilePublic() {
       </div>
 
       <div className="profile-grid">
-        {/* Левая колонка: фото + онлайн + рейтинг + продажи */}
+        {/* Левая колонка: аватар + онлайн + рейтинг */}
         <div className="card" style={{ textAlign: 'center', overflow: 'visible' }}>
-          {isMe ? (
-            <>
-              {/* Индикатор рисует сам AvatarUploader — передаем online.
-                  Если в вашем AvatarUploader нет фолбэка-буквы, он просто проигнорирует лишние пропсы — это нормально. */}
-              <AvatarUploader
-                initialUrl={data.avatarUrl}
-                online={data.online}
-                onUploaded={(url) => setData((p) => ({ ...p, avatarUrl: url }))}
-              />
-              <div className="muted" style={{ marginTop: 6 }}>
-                {data.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети')}
-              </div>
-            </>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 8 }}>
-              <div
-                style={{
-                  position: 'relative',           // точка позиционируется по кругу
-                  width: 112,
-                  height: 112,
-                  borderRadius: '50%',
-                  overflow: 'visible',            // точка выходит за край
-                  background: data.avatarUrl ? '#e5e7eb' : '#2563eb',
-                  display: 'grid',
-                  placeItems: 'center',
-                }}
-              >
-                {data.avatarUrl ? (
-                  <img
-                    src={data.avatarUrl}
-                    alt="avatar"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      color: '#fff',
-                      fontWeight: 700,
-                      fontSize: 42,
-                      lineHeight: 1,
-                      userSelect: 'none'
-                    }}
-                  >
-                    {letter}
-                  </span>
-                )}
+          <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 8 }}>
+            {/* один аватар с инициалами «ВП» */}
+            <AvatarCircle
+              src={data.avatarUrl}
+              firstName={first}
+              lastName={last}
+              username={data.username}
+              email={data.contactEmail}
+              initials={initials}
+              size={112}
+              showDot
+              online={!!data.online}
+            />
 
-                {/* Зелёная точка СНАРУЖИ круга — видна целиком */}
-                <span
-                  title={data.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети')}
-                  style={{
-                    position: 'absolute',
-                    right: -4,
-                    bottom: -4,
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    background: data.online ? '#22c55e' : '#9ca3af',
-                    border: '3px solid #fff',
-                    boxShadow: '0 2px 6px rgba(0,0,0,.12)',
-                    pointerEvents: 'none',
-                    zIndex: 2
-                  }}
+            {/* загрузка фото только кнопкой, без второго круга */}
+            {isMe && (
+              <>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={onFileChange}
+                  style={{ display: 'none' }}
                 />
-              </div>
+                <button
+                  className="btn-primary"
+                  onClick={onPickFile}
+                  disabled={uploading}
+                  style={{ marginTop: 8 }}
+                  aria-busy={uploading}
+                >
+                  {uploading ? (t('common.loading') || 'Загрузка…') : (t('profile.uploadPhoto') || 'Загрузить фото')}
+                </button>
+              </>
+            )}
 
-              {/* подпись под аватаркой */}
-              <div className="muted" style={{ marginTop: 2 }}>
-                {data.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети')}
-              </div>
+            <div className="muted" style={{ marginTop: 6 }}>
+              {data.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети')}
             </div>
-          )}
+          </div>
 
           <div style={{ marginTop: 16 }}>
             <div className="muted">{t('product.rating') || 'Рейтинг'}</div>
@@ -198,13 +173,8 @@ export default function ProfilePublic() {
             <div style={{ fontSize: 22, fontWeight: 600 }}>{data.soldCount}</div>
           </div>
 
-          {/* Кнопки действий под карточкой */}
           {!isMe ? (
-            <button
-              onClick={startChat}
-              className="btn-primary"
-              style={{ marginTop: 16 }}
-            >
+            <button onClick={startChat} className="btn-primary" style={{ marginTop: 16 }}>
               {t('chat.writeToSeller') || 'Написать продавцу'}
             </button>
           ) : (
@@ -218,19 +188,19 @@ export default function ProfilePublic() {
           )}
         </div>
 
-        {/* Правая: ФИО + связь (только чтение) */}
+        {/* Правая колонка: ФИО + связь */}
         <div className="card" style={{ display: 'grid', gap: 12 }}>
           <div>
             <div className="muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>
               {t('forms.firstName') || 'Имя'}
             </div>
-            <div style={{ fontSize: 18 }}>{data.firstName || '—'}</div>
+            <div style={{ fontSize: 18 }}>{first || '—'}</div>
           </div>
           <div>
             <div className="muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>
               {t('forms.lastName') || 'Фамилия'}
             </div>
-            <div style={{ fontSize: 18 }}>{data.lastName || '—'}</div>
+            <div style={{ fontSize: 18 }}>{last || '—'}</div>
           </div>
           <div style={{ borderTop: '1px solid #eee', paddingTop: 12 }}>
             <div className="muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>
