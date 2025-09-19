@@ -1,0 +1,801 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+/* Боксы для будущих форм авторизации/регистрации */
+.auth-box{
+  box-sizing: border-box;
+  position: absolute;
+  width: 500px;
+  height: 571px;
+  top: 205px;
+  background: transparent;
+  z-index: 1; /* при необходимости подними/опусти слой */
+}
+
+/* Rectangle 55 */
+.auth-box--left{
+  left: 287.91px;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+}
+
+/* Rectangle 56 */
+.auth-box--right{
+  left: 812.91px;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+}
+
+.auth-box--left .auth-input-wrap{
+  position: absolute;
+  left: 55px;
+  top: 136.02px;
+  width: 391px;
+  height: 55px;
+  display: block;
+}
+
+.auth-box--left .auth-input{
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  background: transparent;
+  color: #000000; /* белый текст на тёмном фоне */
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color .2s ease;
+}
+
+.auth-box--left .auth-input::placeholder{
+  color: #828181; /* серый placeholder как у пароля */
+}
+
+.auth-box--left .auth-input:focus{
+  border-color: var(--accent);
+}
+
+.auth-box--left .auth-left-title{
+  position: absolute;
+  left: 225px;
+  top: 60.02px;
+  width: 51px;
+  height: 36px;
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  text-align: center;
+  color: #35C65E;
+}
+
+/* === Пароль (Group 186) ===
+   База группы: 391×55 на (left:55px, top:201.02px)
+   (т.к. 342.91-287.91=55; 406.02-205=201.02)
+*/
+.auth-box--left .auth-input-wrap--password{
+  position: absolute;
+  left: 55px;
+  top: 201.02px;
+  width: 391px;
+  height: 55px;
+  display: block;
+}
+.auth-box--left .auth-input--password{
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  background: transparent;
+  color: #000000;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  padding: 0 48px 0 14px; /* слева текст, справа место под иконку */
+  outline: none;
+  transition: border-color .2s ease;
+}
+.auth-box--left .auth-input--password::placeholder{
+  color: #828181; /* как в макете для текста "*Пароль" */
+}
+
+/* Иконка показать/скрыть (Component 2):
+   В макете: height:20px; left: 89.51% (≈правый отступ 5.37%), top: 17.5px
+   Для точности используем right: 5.37% от ширины 391px → ≈21px
+*/
+.auth-box--left .auth-pass-toggle{
+  position: absolute;
+  top: 17.5px;
+  right: calc(5.37%);
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.auth-box--left .auth-pass-toggle svg{
+  width: 20px; height: 20px; display: block;
+}
+
+/* Фокус поля */
+.auth-box--left .auth-input--password:focus{
+  border-color: var(--accent);
+}
+
+/* === Кнопка "Війти" (Group 190) ===
+   391×55 на (left:55px, top:326.02px)
+*/
+.auth-box--left .auth-submit{
+  position: absolute;
+  left: 55px;
+  top: 326.02px;
+  width: 391px;
+  height: 55px;
+  box-sizing: border-box;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  color: #828181;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.auth-box--left .auth-submit:hover,
+.auth-box--left .auth-submit:focus-visible{
+  background: #35C65E;
+  color: #FFFFFF;
+  border-color: #35C65E;
+  outline: none;
+}
+
+.auth-box--left .auth-divider{
+  position: absolute;
+  left: 54px;
+  top: 405.98px;
+  width: 391px;
+  height: 94px;
+}
+
+/* "або" вверху блока (по макету top:0%) */
+.auth-box--left .auth-divider__text{
+  position: absolute;
+  left: 47.06%;
+  right: 46.8%;
+  top: 0%;
+  height: 24px;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  color: #828181;
+  display: flex;
+  align-items: center;
+}
+
+/* Прямоугольник-контейнер (Group 230 / Rectangle 58) — рамка */
+.auth-box--left .auth-divider::before{
+  content: "";
+  position: absolute;
+  left: 0%;
+  right: 0%;
+  top: 41.49%;
+  bottom: 0%;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+}
+
+/* Кнопка Google — располагаем по макету внизу рамки */
+.auth-box--left .auth-google{
+  position: absolute;
+  left: 0%;
+  right: 0%;
+  top: 41.49%;
+  bottom: 0%;
+  width: 100%;
+  height: calc(100% - 41.49%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  background: #FFFFFF;           /* белая */
+  border: 2px solid #ECECEC;     /* собственная рамка вместо pseudo, чтобы подсветка работала */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.auth-box--left .auth-google__img{
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Подпись */
+.auth-box--left .auth-google__label{
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  color: #363535;
+}
+
+/* Наведение/фокус: зелёная кнопка, белая надпись и инверсия логотипа (опционально) */
+.auth-box--left .auth-google:hover,
+.auth-box--left .auth-google:focus-visible{
+  background: #35C65E;
+  border-color: #35C65E;
+  outline: none;
+}
+.auth-box--left .auth-google:hover .auth-google__img,
+.auth-box--left .auth-google:focus-visible .auth-google__img{
+  filter: brightness(0) invert(1);
+}
+
+.auth-box--right .r-auth-input-wrap{
+  position: absolute;
+  width: 391px;
+  height: 55px;
+  display: block;
+}
+.auth-box--right .r-auth-input{
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  background: transparent;
+  color: #000000;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color .2s ease;
+}
+.auth-box--right .r-auth-input::placeholder{ color:#828181; }
+.auth-box--right .r-auth-input:focus{ border-color: var(--accent); }
+
+/* Group 192 — *Ім’я
+   Figma в %; ставим как у левого email: (55px, 136.02px) */
+.auth-box--right .r-auth-input-wrap--name{
+  left: 55px;
+  top: 136.02px;
+}
+
+/* Group 193 — *Електронна пошта: 867.91/407 → offsets (55px, 202px) */
+.auth-box--right .r-auth-input-wrap--email{
+  left: 55px;
+  top: 202px;
+}
+
+/* Group 198 — три точки: контейнер 70×10.5 на (215px, ~291px)
+   (1027.91-812.91=215; 496.5-205≈291.5) */
+.auth-box--right .auth-steps{
+  position: absolute;
+  left: 215px;
+  top: 291px;
+  width: 70px;
+  height: 10.5px;
+}
+.auth-box--right .auth-steps .dot{
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background:#ECECEC;
+}
+.auth-box--right .auth-steps .dot:nth-child(1){ left: 0px;   }
+.auth-box--right .auth-steps .dot:nth-child(2){ left: 30px;  }
+.auth-box--right .auth-steps .dot:nth-child(3){ left: 60px;  }
+.auth-box--right .auth-steps .dot.is-active{ background:#35C65E; }
+
+/* Group 194 — кнопка "Продовжити": 391×55 на (54px, 327px)
+   (866.91-812.91=54; 532-205=327)
+   По умолчанию БЕЛАЯ, на hover ЗЕЛЁНАЯ (как просил ранее) */
+.auth-box--right .r-auth-submit{
+  position: absolute;
+  left: 54px;
+  top: 327px;
+  width: 391px;
+  height: 55px;
+  box-sizing: border-box;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  color: #828181;
+  font: 500 14px/24px 'Ubuntu', sans-serif;
+
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.auth-box--right .r-auth-submit:hover,
+.auth-box--right .r-auth-submit:focus-visible{
+  background:#35C65E;
+  color:#FFFFFF;
+  border-color:#35C65E;
+  outline:none;
+}
+
+/* Group 741 — "або" + Google:
+   контейнер 391×94 на (54px, 406px) (866.91-812.91=54; 611-205=406) */
+.auth-box--right .r-auth-divider{
+  position: absolute;
+  left: 54px;
+  top: 406px;
+  width: 391px;
+  height: 94px;
+}
+
+/* "або" вверху */
+.auth-box--right .r-auth-divider__text{
+  position: absolute;
+  left: 47.06%;
+  right: 46.8%;
+  top: 0%;
+  height: 24px;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  color: #828181;
+  display:flex; align-items:center;
+}
+
+/* Кнопка Google: белая, на hover зелёная (с логотипом-изображением) */
+.auth-box--right .r-auth-google{
+  position: absolute;
+  left: 0%;
+  right: 0%;
+  top: 41.49%;
+  bottom: 0%;
+  width: 100%;
+  height: calc(100% - 41.49%);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+
+  background:#FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius:10px;
+  cursor:pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.auth-box--right .r-auth-google__img{
+  width:22px; height:22px; object-fit:contain; display:block;
+}
+.auth-box--right .r-auth-google__label{
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  color:#363535;
+}
+.auth-box--right .r-auth-google:hover,
+.auth-box--right .r-auth-google:focus-visible{
+  background:#35C65E;
+  border-color:#35C65E;
+  outline:none;
+}
+.auth-box--right .r-auth-google:hover .r-auth-google__label,
+.auth-box--right .r-auth-google:hover .r-auth-google__img{
+   filter: brightness(0) invert(1); 
+  }
+
+.auth-box--right .r-auth-title{
+  position: absolute;
+  left: 183px;
+  top: 60px;
+  width: 132px;
+  height: 36px;
+  margin: 0;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  text-align: center;
+  color: #35C65E;
+}
+/* Если понадобится, можно инвертировать картинку логотипа на зелёном фоне:
+.auth-box--right .r-auth-google:hover .r-auth-google__img{ filter: brightness(0) invert(1); }
+*/
+
+.decor {
+  position: absolute;
+  display: block;
+  pointer-events: none;   /* чтобы не мешали клику */
+  opacity: 1;
+  z-index: 1000;          /* поверх остального интерфейса */
+}
+
+
+/* Левый элемент */
+.decor--left {
+  width: 366.045px;
+  height: 312.746px;
+  left: -20px;
+  top: 311px;
+}
+
+/* Правый элемент */
+.decor--right {
+  width: 310.563px;
+  height: 265.342px;
+  left: 1376.25px;
+  top: 100.67px;
+}
