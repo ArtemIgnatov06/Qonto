@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import '../App.css';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import '../Styles/AdminDeletions.css';
 
 export default function AdminDeletions() {
   const { t, i18n } = useTranslation();
@@ -87,18 +88,18 @@ export default function AdminDeletions() {
                         boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
                       }}
                     >
-                      <td style={{ padding: '12px 16px' }}>{d.product_id}</td>
-                      <td style={{ padding: '12px 16px' }}>{d.title}</td>
-                      <td style={{ padding: '12px 16px' }}>{d.category}</td>
-                      <td style={{ padding: '12px 16px' }}>{money.format(Number(d.price) || 0)}</td>
-                      <td style={{ padding: '12px 16px' }}>
+                      <td className="pad-12-16">{d.product_id}</td>
+                      <td className="pad-12-16">{d.title}</td>
+                      <td className="pad-12-16">{d.category}</td>
+                      <td className="pad-12-16">{money.format(Number(d.price) || 0)}</td>
+                      <td className="pad-12-16">
                         {d.seller_first_name} {d.seller_last_name} ({d.seller_username})
                       </td>
-                      <td style={{ padding: '12px 16px' }}>
+                      <td className="pad-12-16">
                         {d.admin_first_name} {d.admin_last_name} ({d.admin_username})
                       </td>
                       <td style={{ padding: '12px 16px', color: '#d32f2f' }}>{d.reason}</td>
-                      <td style={{ padding: '12px 16px' }}>
+                      <td className="pad-12-16">
                         {dateTime.format(new Date(d.created_at))}
                       </td>
                     </tr>

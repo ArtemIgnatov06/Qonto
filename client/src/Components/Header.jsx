@@ -12,6 +12,7 @@ import { authSocket } from '../lib/socket';
 
 // 👇 иконка переводчика (оставляем её на самой кнопке)
 import TranslateIcon from '../assets/translator.png';
+import '../Styles/Header.css';
 
 const langs = [
   { code: 'uk', labelKey: 'lang.uk' },
@@ -166,7 +167,6 @@ const Header = () => {
   const { user, refresh } = useAuth();
   const [unread, setUnread] = useState(0); // ← непрочитанные
 
-  // применяем сохранённый язык
   useEffect(() => {
     const saved = localStorage.getItem('i18nextLng');
     if (saved && saved !== i18n.language) i18n.changeLanguage(saved);
@@ -183,51 +183,39 @@ const Header = () => {
     window.location.href = '/';
   };
 
-  // -------------------- ONLINE HEARTBEAT --------------------
-  // раз в 20 сек пингуем сервер, чтобы обновлять users.last_seen_at
+  // heartbeat
   useEffect(() => {
     if (!user) return;
     const tick = () =>
       fetch('http://localhost:5050/api/heartbeat', { method: 'POST', credentials: 'include' }).catch(() => {});
-    tick(); // сразу при маунте
+    tick();
     const id = setInterval(tick, 20000);
     return () => clearInterval(id);
   }, [user]);
-  // ----------------------------------------------------------
 
-  // -------------------- UNREAD + SOCKET ---------------------
+  // unread via socket
   useEffect(() => {
     if (!user) {
       setUnread(0);
       return;
     }
-
-    // первичная загрузка счётчика
     fetch('http://localhost:5050/api/chats/unread-count', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : { count: 0 }))
       .then((d) => setUnread(d.count || 0))
       .catch(() => {});
-
-    // подписка на сокеты
     const s = authSocket(user.id);
     const onAdd = (p) => setUnread((x) => Math.max(0, x + (p?.delta || 0)));
     const onReplace = (p) => setUnread(p?.total ?? 0);
-
     s.on('chat:unread', onAdd);
     s.on('chat:unread:replace', onReplace);
-
     return () => {
       s.off('chat:unread', onAdd);
       s.off('chat:unread:replace', onReplace);
     };
   }, [user]);
-  // ----------------------------------------------------------
 
-  // 👇 подготовим URL аватарки (если сохранена)
   const avatarUrl = user?.avatar_url
-    ? (String(user.avatar_url).startsWith('http')
-      ? user.avatar_url
-      : `http://localhost:5050${user.avatar_url}`)
+    ? (String(user.avatar_url).startsWith('http') ? user.avatar_url : `http://localhost:5050${user.avatar_url}`)
     : null;
 
   const userLetter =
@@ -248,15 +236,7 @@ const Header = () => {
       }}
     >
       {/* Левый блок: логотип + меню */}
-      <nav
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          flexGrow: 1,
-          minWidth: 0,
-        }}
-      >
+      <nav className="row-center gap-16">
         <img
           src={ReactLogo}
           alt="Logo"
@@ -273,14 +253,12 @@ const Header = () => {
           {t('nav.contacts')}
         </NavLink>
 
-        {/* NEW: ссылка на чаты с количеством */}
         {user && (
           <NavLink to="/chats" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
             {(t('chat.chats') || 'Чаты')}{unread > 0 ? ` (${unread})` : ''}
           </NavLink>
         )}
 
-        {/* Ссылка на корзину с количеством */}
         <NavLink
           to="/cart"
           className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}
@@ -289,7 +267,6 @@ const Header = () => {
           <CartBadge />
         </NavLink>
 
-        {/* Админские ссылки */}
         {user?.role === 'admin' && (
           <>
             <NavLink to="/admin/applications" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
@@ -301,7 +278,6 @@ const Header = () => {
           </>
         )}
 
-        {/* Если пользователь вошёл — блок с языком/валютой и аватаркой справа в навигации */}
         {user && (
           <div
             style={{
@@ -313,13 +289,8 @@ const Header = () => {
               marginRight: 'auto',
             }}
           >
-            {/* Селектор валют */}
             <CurrencySelect t={t} />
-
-            {/* Кнопка языка слева от аватарки */}
             <LanguageButton i18n={i18n} t={t} onChange={changeLang} />
-
-            {/* Аватарка / буква — КНОПКА ПРОФИЛЯ */}
             <div
               onClick={() => (window.location.href = '/profile')}
               title={t('nav.profile')}
@@ -353,8 +324,8 @@ const Header = () => {
         )}
       </nav>
 
-      {/* Правый блок: Войти/Выйти (и язык/валюта — если пользователь ещё не вошёл) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+      {/* Правый блок: Войти/Выйти */}
+      <div className="row-center gap-10">
         {!user && (
           <>
             <CurrencySelect t={t} />
@@ -363,7 +334,7 @@ const Header = () => {
         )}
 
         {user ? (
-          <button onClick={handleLogout} className="btn-login" style={{ padding: '6px 12px' }}>
+          <button onClick={handleLogout} className="btn-login pad-6-12">
             {t('auth.logout')}
           </button>
         ) : (

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import '../Styles/profile.css';
+import '../Styles/ProductNew.css';
 
 const API = process.env.REACT_APP_API || '';
 

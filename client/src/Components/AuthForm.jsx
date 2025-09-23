@@ -5,6 +5,7 @@ import GoogleSignIn from './GoogleSignIn';
 import OtpModal from './OtpModal';
 import '../Styles/auth.css';
 import { useTranslation } from 'react-i18next';
+import '../Styles/AuthForm.css';
 
 export const AuthForm = () => {
   const { t } = useTranslation(); // defaultNS: common
@@ -140,7 +141,7 @@ export const AuthForm = () => {
           </>
         ) : (
           <>
-            <div style={{display:'flex', gap:6, marginBottom:4, flexWrap:'wrap'}}>
+            <div className="row gap-6">
               <button
                 type="button"
                 className={loginBy==='email'?'active':''}

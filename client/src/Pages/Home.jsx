@@ -6,6 +6,7 @@ import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import '../App.css';
+import '../Styles/Home.css';
 
 const API = process.env.REACT_APP_API || '';
 
@@ -186,7 +187,7 @@ export default function Home() {
         <h2 className="heading-large">{t('home.title')}</h2>
 
         {/* Фильтр по категории */}
-        <div className="form-row" style={{ marginBottom: 12 }}>
+        <div className="form-row mb-12">
           <label htmlFor="category" style={{ display: 'block', marginBottom: 6 }}>
             {t('home.filters.category')}
           </label>
@@ -213,11 +214,11 @@ export default function Home() {
 
         {/* ── NEW: форма добавления категории для админа */}
         {user?.role === 'admin' && (
-          <div className="form-row" style={{ marginBottom: 16 }}>
+          <div className="form-row mb-16">
             <label htmlFor="new-category" style={{ display: 'block', marginBottom: 6 }}>
               {t('home.filters.addCategory')}
             </label>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="row gap-8">
               <input
                 id="new-category"
                 value={catName}
@@ -234,7 +235,7 @@ export default function Home() {
                 {t('home.buttons.add')}
               </button>
             </div>
-            {catErr && <div className="msg error" role="alert" style={{ marginTop: 6 }}>{catErr}</div>}
+            {catErr && <div className="msg error mt-6" role="alert">{catErr}</div>}
           </div>
         )}
 
@@ -263,10 +264,7 @@ export default function Home() {
                     </Link>
 
                     <div className="product-body">
-                      <div
-                        className="product-title"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
-                      >
+                      <div className="product-title row-center gap-8">
                         <Link to={`/product/${p.id}`} className="link-plain">
                           <span>{p.title}</span>
                         </Link>
@@ -295,15 +293,7 @@ export default function Home() {
                         <div className="product-desc">{p.description}</div>
                       )}
 
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: 12,
-                          marginTop: 8
-                        }}
-                      >
+                      <div className="row-center gap-12">
                         <div className="product-price">{priceText}</div>
 
                         <button
@@ -318,7 +308,7 @@ export default function Home() {
                       </div>
 
                       {p.seller_name && (
-                        <div className="product-seller" style={{ marginTop: 6 }}>
+                        <div className="product-seller mt-6">
                           {t('home.seller')}: {p.seller_name}
                         </div>
                       )}

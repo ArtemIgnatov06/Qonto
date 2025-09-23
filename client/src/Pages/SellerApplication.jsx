@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import '../Styles/SellerApplication.css';
 
 export default function SellerApplication() {
   const { t } = useTranslation();
@@ -34,14 +35,14 @@ export default function SellerApplication() {
   }, [user]);
 
   if (!user) {
-    return <div className="container" style={{ padding: '24px 16px' }}>{t('auth.required')}</div>;
+    return <div className="container pad-24-16">{t('auth.required')}</div>;
   }
 
   if (user.seller_status === 'approved') {
     return (
-      <div className="container" style={{ padding: '24px 16px' }}>
+      <div className="container pad-24-16">
         <h2>{t('sellerApply.alreadySeller')}</h2>
-        <button className="btn-login" onClick={() => navigate('/profile')} style={{ marginTop: 12 }}>
+        <button className="btn-login mt-12" onClick={() => navigate('/profile')}>
           {t('sellerApply.backToProfile')}
         </button>
       </div>
@@ -50,10 +51,10 @@ export default function SellerApplication() {
 
   if (user.seller_status === 'pending') {
     return (
-      <div className="container" style={{ padding: '24px 16px' }}>
+      <div className="container pad-24-16">
         <h2>{t('sellerApply.pending.title')}</h2>
         <p>{t('sellerApply.pending.text')}</p>
-        <button className="btn-login" onClick={() => navigate('/profile')} style={{ marginTop: 12 }}>
+        <button className="btn-login mt-12" onClick={() => navigate('/profile')}>
           {t('sellerApply.backToProfile')}
         </button>
       </div>
@@ -98,79 +99,90 @@ export default function SellerApplication() {
   };
 
   return (
-    <div className="container" style={{ padding: '24px 16px', maxWidth: 900, margin: '0 auto' }}>
-      <h2 style={{ marginBottom: 16 }}>{t('sellerApply.title')}</h2>
+    <div className="container page-container">
+      <h2 className="mb-16">{t('sellerApply.title')}</h2>
 
       {/* Блок с личными данными пользователя */}
-      <div style={{
-        border: '1px solid #e5e7eb', borderRadius: 12, padding: 16, marginBottom: 16, background: '#f9fafb'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div
+        style={{
+          border: '1px solid #e5e7eb',
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          background: '#f9fafb'
+        }}
+      >
+        <div className="grid-2 gap-12">
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280' }}>{t('forms.firstName')}</label>
-            <input value={user.first_name || ''} readOnly className="input" style={{ width: '100%' }} />
+            <label className="muted-12">{t('forms.firstName')}</label>
+            <input value={user.first_name || ''} readOnly className="input w-full" />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280' }}>{t('forms.lastName')}</label>
-            <input value={user.last_name || ''} readOnly className="input" style={{ width: '100%' }} />
+            <label className="muted-12">{t('forms.lastName')}</label>
+            <input value={user.last_name || ''} readOnly className="input w-full" />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280' }}>Email</label>
-            <input value={user.email || ''} readOnly className="input" style={{ width: '100%' }} />
+            <label className="muted-12">Email</label>
+            <input value={user.email || ''} readOnly className="input w-full" />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280' }}>{t('sellerApply.fields.phone')}</label>
-            <input value={user.phone || ''} readOnly className="input" style={{ width: '100%' }} />
+            <label className="muted-12">{t('sellerApply.fields.phone')}</label>
+            <input value={user.phone || ''} readOnly className="input w-full" />
           </div>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="grid-2 gap-12">
           <div>
-            <label style={{ fontSize: 12, color: '#374151' }}>{t('sellerApply.fields.company')} *</label>
+            <label style={{ fontSize: 12, color: '#374151' }}>
+              {t('sellerApply.fields.company')} *
+            </label>
             <input
               name="company_name"
               value={form.company_name}
               onChange={handleChange}
               required
-              className="input"
+              className="input w-full"
               placeholder={t('sellerApply.placeholders.company')}
-              style={{ width: '100%' }}
               aria-label={t('sellerApply.fields.company')}
             />
           </div>
 
           <div>
-            <label style={{ fontSize: 12, color: '#374151' }}>{t('sellerApply.fields.taxId')} *</label>
+            <label style={{ fontSize: 12, color: '#374151' }}>
+              {t('sellerApply.fields.taxId')} *
+            </label>
             <input
               name="tax_id"
               value={form.tax_id}
               onChange={handleChange}
               required
-              className="input"
+              className="input w-full"
               placeholder={t('sellerApply.placeholders.taxId')}
-              style={{ width: '100%' }}
               aria-label={t('sellerApply.fields.taxId')}
             />
           </div>
         </div>
 
         <div>
-          <label style={{ fontSize: 12, color: '#374151' }}>{t('sellerApply.fields.priceList')}</label>
+          <label style={{ fontSize: 12, color: '#374151' }}>
+            {t('sellerApply.fields.priceList')}
+          </label>
           <input
             name="price_list_url"
             value={form.price_list_url}
             onChange={handleChange}
-            className="input"
+            className="input w-full"
             placeholder="https://..."
-            style={{ width: '100%' }}
             aria-label={t('sellerApply.fields.priceList')}
           />
         </div>
 
         <div>
-          <label style={{ fontSize: 12, color: '#374151' }}>{t('sellerApply.fields.comment')}</label>
+          <label style={{ fontSize: 12, color: '#374151' }}>
+            {t('sellerApply.fields.comment')}
+          </label>
           <textarea
             name="comment"
             value={form.comment}
@@ -183,7 +195,7 @@ export default function SellerApplication() {
           />
         </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+        <div className="row gap-12">
           <button
             type="submit"
             className="btn-login"
@@ -191,7 +203,12 @@ export default function SellerApplication() {
           >
             {submitting ? t('sellerApply.sending') : t('sellerApply.send')}
           </button>
-          <button type="button" className="btn-login" onClick={() => navigate('/profile')} style={{ background: '#6b7280' }}>
+          <button
+            type="button"
+            className="btn-login"
+            onClick={() => navigate('/profile')}
+            style={{ background: '#6b7280' }}
+          >
             {t('sellerApply.backToProfile')}
           </button>
           {msg && <div style={{ color: '#0a7d16' }} role="status">{msg}</div>}

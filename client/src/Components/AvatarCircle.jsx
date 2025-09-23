@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import '../Styles/AvatarCircle.css';
 
 export default function AvatarCircle({
     src,                   // string | undefined

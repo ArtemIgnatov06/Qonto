@@ -6,6 +6,7 @@ import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { authSocket } from '../lib/socket';
 import AvatarCircle from '../Components/AvatarCircle';
+import '../Styles/ChatThread.css';
 
 const API = 'http://localhost:5050';
 
@@ -196,7 +197,7 @@ export default function ChatThread() {
     const href = `${API}${m.attachment_url}`;
     if (m.attachment_type?.startsWith?.('image/')) {
       return (
-        <div style={{ marginTop: 8 }}>
+        <div className="mt-8">
           <img
             src={href}
             alt={m.attachment_name || ''}
@@ -206,7 +207,7 @@ export default function ChatThread() {
       );
     }
     return (
-      <div style={{ marginTop: 8 }}>
+      <div className="mt-8">
         <a href={href} target="_blank" rel="noreferrer">📎 {m.attachment_name || 'Вложение'}</a>
       </div>
     );
@@ -229,7 +230,7 @@ export default function ChatThread() {
 
   return (
     <div className="profile-page">
-      <h2 style={{ marginBottom: 12 }}>{t('chat.thread') || 'Диалог'}</h2>
+      <h2 className="mb-12">{t('chat.thread') || 'Диалог'}</h2>
 
       <div
         className="card"
@@ -245,22 +246,8 @@ export default function ChatThread() {
         }}
       >
         {/* header (sticky) */}
-        <div
-          className="chat-header"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            padding: 12,
-            borderBottom: '1px solid #eef0f3',
-            background: '#fff',
-            position: 'sticky',
-            top: 0,
-            zIndex: 1
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="chat-header row-center gap-12">
+          <div className="row-center gap-12">
             <AvatarCircle
               src={other?.avatarUrl}
               firstName={other?.firstName}
@@ -272,10 +259,10 @@ export default function ChatThread() {
               online={!!other?.online}
             />
             <div>
-              <div style={{ fontWeight: 700 }}>
+              <div className="fw-700">
                 {(other?.firstName || '') + ' ' + (other?.lastName || '')}
               </div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>
+              <div className="muted-12">
                 {typing
                   ? (t('chat.typing') || 'печатает…')
                   : (other?.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети'))}
@@ -284,7 +271,7 @@ export default function ChatThread() {
           </div>
 
           {/* icon buttons */}
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div className="row gap-6">
             <button className="ghost-btn" onClick={toggleMute} title={muted ? 'Размутить' : 'Мут'}>
               {muted ? '🔊' : '🔇'}
             </button>
@@ -358,12 +345,12 @@ export default function ChatThread() {
                       />
                     ) : (
                       <>
-                        {m.body ? <div style={{ whiteSpace: 'pre-wrap' }}>{m.body}</div> : null}
+                        {m.body ? <div className="prewrap">{m.body}</div> : null}
                         {renderAttachment(m)}
                       </>
                     )}
 
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 6 }}>
+                    <div className="row gap-6">
                       <div className="time" style={{ fontSize: 11, color: '#6b7280' }}>
                         {new Date(m.created_at).toLocaleString()}
                         {m.edited_at && !m.deleted_at ? ' · ' + (t('chat.edited') || 'отредактировано') : ''}
@@ -397,19 +384,7 @@ export default function ChatThread() {
         </div>
 
         {/* footer (sticky) */}
-        <div
-          className="pm-input-bar"
-          style={{
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            padding: 12,
-            borderTop: '1px solid #eef0f3',
-            background: '#fff',
-            position: 'sticky',
-            bottom: 0
-          }}
-        >
+        <div className="pm-input-bar row gap-8">
           {/* attachments preview */}
           {files.length > 0 && (
             <div style={{ position: 'absolute', bottom: '100%', left: 12, marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -431,7 +406,7 @@ export default function ChatThread() {
             multiple
             accept="image/*,.pdf"
             onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            style={{ display: 'none' }}
+            className="hidden"
           />
 
           <input

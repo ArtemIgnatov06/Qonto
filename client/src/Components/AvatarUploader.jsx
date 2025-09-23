@@ -1,6 +1,7 @@
 // client/src/Components/AvatarUploader.jsx
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
+import '../Styles/AvatarUploader.css';
 
 const abs = (u) => (u && String(u).startsWith('http') ? u : u ? `http://localhost:5050${u}` : null);
 

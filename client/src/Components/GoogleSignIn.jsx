@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import OtpModal from './OtpModal';
 import { useTranslation } from 'react-i18next';
+import '../Styles/GoogleSignIn.css';
 
 export default function GoogleSignIn({ onSuccess }) {
   const { t, i18n } = useTranslation();

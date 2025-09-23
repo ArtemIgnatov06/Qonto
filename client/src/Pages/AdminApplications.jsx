@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import '../Styles/AdminApplications.css';
 
 export default function AdminApplications() {
   const { t } = useTranslation();
@@ -114,7 +115,7 @@ export default function AdminApplications() {
           )}
 
           {a.status === 'pending' ? (
-            <div style={{ marginTop: 8 }}>
+            <div className="mt-8">
               <button onClick={() => decide(a.id, 'approve')}>
                 {t('common.approve')}
               </button>

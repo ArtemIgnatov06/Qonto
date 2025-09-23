@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import '../Styles/CheckoutPage.css';
 
 export default function CheckoutPage() {
   const API = process.env.REACT_APP_API || '';
@@ -99,7 +100,9 @@ export default function CheckoutPage() {
       {step === 1 && (
         <div>
           <h3>1) {t('checkout.address.title')}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, maxWidth: 700 }}>
+
+          {/* FIX: правильный синтаксис className + style */}
+          <div className="grid-2 gap-12" style={{ maxWidth: 700 }}>
             <input
               placeholder={t('checkout.address.country')}
               value={address.country}
@@ -126,7 +129,8 @@ export default function CheckoutPage() {
               aria-label={t('checkout.address.postal')}
             />
           </div>
-          <div style={{ marginTop: 16 }}>
+
+          <div className="mt-16">
             <button onClick={() => nav('/cart')}>&larr; {t('checkout.backToCart')}</button>
             <button
               style={{ marginLeft: 8 }}
@@ -162,7 +166,7 @@ export default function CheckoutPage() {
               aria-label="CVC"
             />
           </div>
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-16">
             <button onClick={() => setStep(1)}>&larr; {t('checkout.backAddress')}</button>
             <button style={{ marginLeft: 8 }} disabled={loading || summary.items.length === 0} onClick={submit}>
               {loading ? t('checkout.paying') : t('checkout.payAndPlace')}

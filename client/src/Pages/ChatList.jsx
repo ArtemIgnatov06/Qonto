@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import AvatarCircle from '../Components/AvatarCircle';
+import '../Styles/ChatList.css';
 
 const API = 'http://localhost:5050';
 
@@ -59,15 +60,7 @@ export default function ChatList() {
             <Link
               key={c.id}
               to={`/chats/${c.id}`}
-              style={{
-                display: 'flex',
-                gap: 12,
-                padding: 12,
-                borderBottom: '1px solid #eee',
-                textDecoration: 'none',
-                color: 'inherit',
-                alignItems: 'center'
-              }}
+              className="row gap-12"
             >
               {/* Аватар с безопасным фолбэком-буквой */}
               <AvatarCircle
@@ -80,7 +73,7 @@ export default function ChatList() {
               />
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="row-center gap-8">
                   <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {otherName}
                   </div>

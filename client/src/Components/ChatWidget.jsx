@@ -1,10 +1,10 @@
-// client/src/components/ChatWidget.jsx
+// client/src/Components/ChatWidget.jsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../App.css';
 import { useTranslation } from 'react-i18next';
+import '../Styles/ChatWidget.css';
 
-// Можно переопределить базовый URL через REACT_APP_API_BASE
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5050';
 
 const TypingIndicator = () => (
@@ -85,6 +85,7 @@ export default function ChatWidget() {
               ✕
             </button>
           </div>
+
           <div
             className="chat-messages"
             ref={messagesRef}
@@ -101,7 +102,9 @@ export default function ChatWidget() {
             {isTyping && <TypingIndicator />}
             <div ref={bottomRef} />
           </div>
-          <div className="chat-input-area" style={{ display: 'flex', gap: 8, padding: '8px 12px' }}>
+
+          {/* фикс: объединённые классы без дублирования className */}
+          <div className="chat-input-area row gap-8">
             <input
               type="text"
               className="chat-input"
@@ -123,7 +126,6 @@ export default function ChatWidget() {
           </div>
         </div>
       ) : (
-        // ВАЖНО: используем chat.open (а не chat.openShort)
         <button className="button open-widget" onClick={() => setOpen(true)}>
           {t('chat.open')}
         </button>

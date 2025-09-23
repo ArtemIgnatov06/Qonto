@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PhoneBinder from './PhoneBinder';
 import { useTranslation } from 'react-i18next';
+import '../Styles/ProfileCard.css';
 
 export default function ProfileCard() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export default function ProfileCard() {
   return (
     <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr', maxWidth: 980, margin: '0 auto' }}>
       <div className="card" style={{ padding: 20, border: '1px solid #eee', borderRadius: 14 }}>
-        <h3 style={{ marginTop: 0 }}>{t('profile.title')}</h3>
+        <h3 className="mt-0">{t('profile.title')}</h3>
 
         <div style={{ display: 'grid', gap: 8 }}>
           <input

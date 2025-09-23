@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import '../Styles/UserProducts.css';
 
 const UserProducts = () => {
   const { t, i18n } = useTranslation();
@@ -62,7 +63,7 @@ const UserProducts = () => {
             {p.description && (
               <div style={{ fontSize: 14, color: '#666' }}>{p.description}</div>
             )}
-            <div style={{ marginTop: 6 }}>
+            <div className="mt-6">
               <button
                 className="btn-primary"
                 style={{ marginRight: 8 }}

@@ -5,6 +5,7 @@ import { useAuth } from '../Hooks/useAuth';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AvatarCircle from '../Components/AvatarCircle';
+import '../Styles/ProfilePublic.css';
 
 function makeAbs(url) {
   if (!url) return null;
@@ -143,13 +144,12 @@ export default function ProfilePublic() {
                   type="file"
                   accept="image/*"
                   onChange={onFileChange}
-                  style={{ display: 'none' }}
+                  className="hidden"
                 />
                 <button
-                  className="btn-primary"
+                  className="btn-primary mt-8"
                   onClick={onPickFile}
                   disabled={uploading}
-                  style={{ marginTop: 8 }}
                   aria-busy={uploading}
                 >
                   {uploading ? (t('common.loading') || 'Загрузка…') : (t('profile.uploadPhoto') || 'Загрузить фото')}
@@ -157,24 +157,24 @@ export default function ProfilePublic() {
               </>
             )}
 
-            <div className="muted" style={{ marginTop: 6 }}>
+            <div className="muted mt-6">
               {data.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети')}
             </div>
           </div>
 
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-16">
             <div className="muted">{t('product.rating') || 'Рейтинг'}</div>
             <div style={{ fontSize: 28, fontWeight: 600 }}>
               {data.rating != null ? data.rating : '—'}
             </div>
-            <div className="muted" style={{ marginTop: 8 }}>
+            <div className="muted mt-8">
               {t('profile.soldCount') || 'Продано товаров'}
             </div>
             <div style={{ fontSize: 22, fontWeight: 600 }}>{data.soldCount}</div>
           </div>
 
           {!isMe ? (
-            <button onClick={startChat} className="btn-primary" style={{ marginTop: 16 }}>
+            <button onClick={startChat} className="btn-primary mt-16">
               {t('chat.writeToSeller') || 'Написать продавцу'}
             </button>
           ) : (

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import '../Styles/ProductPage.css';
 
 function Stars({ value = 0 }) {
   const { t } = useTranslation();
@@ -166,9 +167,9 @@ export default function ProductPage() {
 
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
-      <h1 style={{ marginBottom: 8 }}>{item.title}</h1>
+      <h1 className="mb-8">{item.title}</h1>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+      <div className="row-center gap-12">
         <div style={{ fontSize: 22, fontWeight: 700 }}>
           {formatMoney(convertFromUAH(item.price || 0))}
         </div>
@@ -204,15 +205,15 @@ export default function ProductPage() {
         {t('productPage.seller')}: {sellerNode} · {t('productPage.category')}: {item.category || '—'}
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <div className="mb-16">
         <Stars value={avg} /> {avg} ({cnt})
       </div>
 
       <h3 style={{ margin: '12px 0 6px' }}>{t('productPage.description')}</h3>
-      <p style={{ marginBottom: 24 }}>{item.description}</p>
+      <p className="mb-24">{item.description}</p>
 
-      <h3 style={{ marginTop: 24 }}>{t('productPage.reviews')}</h3>
-      <form onSubmit={submitReview} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '12px 0' }}>
+      <h3 className="mt-24">{t('productPage.reviews')}</h3>
+      <form onSubmit={submitReview} className="row gap-8">
         <label>
           {t('productPage.rating')}:{' '}
           <input
@@ -221,7 +222,7 @@ export default function ProductPage() {
             max="5"
             value={myRating}
             onChange={(e) => setMyRating(Number(e.target.value))}
-            style={{ width: 60 }}
+            className="w-60"
           />
         </label>
         <textarea
@@ -231,7 +232,7 @@ export default function ProductPage() {
           rows={3}
           style={{ flex: 1, padding: 8 }}
         />
-        <button disabled={!canSubmit} style={{ padding: '8px 10px' }}>
+        <button disabled={!canSubmit} className="pad-8-10">
           {t('productPage.leaveReview')}
         </button>
       </form>
@@ -242,11 +243,11 @@ export default function ProductPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {reviews.map((r, i) => (
             <div key={r.id ?? i} style={{ background: '#fff', borderRadius: 10, padding: 12, border: '1px solid #e5e5e5' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <div className="row-center gap-6">
                 <Stars value={r.rating} />
                 <strong>— {r.user_name || t('productPage.customer')}</strong>
               </div>
-              <div style={{ whiteSpace: 'pre-wrap' }}>{r.comment}</div>
+              <div className="prewrap">{r.comment}</div>
               {r.created_at && (
                 <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
                   {dateTime.format(new Date(r.created_at))}

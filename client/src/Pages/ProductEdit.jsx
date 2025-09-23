@@ -4,6 +4,7 @@ import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import '../Styles/profile.css';
+import '../Styles/ProductEdit.css';
 
 const API = process.env.REACT_APP_API || '';
 

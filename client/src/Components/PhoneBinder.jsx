@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import '../Styles/PhoneBinder.css';
 
 export default function PhoneBinder() {
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ export default function PhoneBinder() {
 
   return (
     <div className="card phone-card" aria-label={t('phoneBinder.cardAria')}>
-      <h3 style={{ marginTop: 0 }}>{t('phoneBinder.title')}</h3>
+      <h3 className="mt-0">{t('phoneBinder.title')}</h3>
 
       <input
         type="tel"

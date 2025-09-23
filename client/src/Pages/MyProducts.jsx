@@ -5,6 +5,7 @@ import { useAuth } from '../Hooks/useAuth';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { useTranslation } from 'react-i18next';
 import '../App.css';
+import '../Styles/MyProducts.css';
 
 const API = process.env.REACT_APP_API || '';
 
@@ -87,9 +88,9 @@ export default function MyProducts() {
                       {p.category && <div className="text-muted" style={{margin:'4px 0 8px'}}>{p.category}</div>}
                       {p.description && <div className="product-desc">{p.description}</div>}
 
-                      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,marginTop:8}}>
+                      <div className="row-center gap-12">
                         <div className="product-price">{priceText}</div>
-                        <div style={{display:'flex',gap:8}}>
+                        <div className="row gap-8">
                           <Link className="btn-secondary" to={`/product/${p.id}/edit`}>
                             {t('product.edit')}
                           </Link>

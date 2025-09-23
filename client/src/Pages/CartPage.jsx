@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import '../Styles/CartPage.css';
 
 export default function CartPage() {
   const API = process.env.REACT_APP_API || '';
@@ -66,7 +67,7 @@ export default function CartPage() {
       {items.length === 0 ? (
         <div>
           {t('cart.empty')}
-          <div style={{ marginTop: 12 }}>
+          <div className="mt-12">
             <button onClick={() => nav('/')}>&larr; {t('cart.continueShopping')}</button>
           </div>
         </div>
@@ -109,7 +110,7 @@ export default function CartPage() {
                             Math.max(1, parseInt(e.target.value || '1', 10))
                           )
                         }
-                        style={{ width: 64 }}
+                        className="w-64"
                         aria-label={t('cart.qtyInputAria', { title: it.title })}
                       />
                     </td>

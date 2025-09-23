@@ -6,6 +6,7 @@ import { useAuth } from '../Hooks/useAuth';
 import PhoneBinder from '../Components/PhoneBinder';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import '../Styles/Profile2.css';
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -158,12 +159,12 @@ const Profile = () => {
 
           {['pending', 'approved', 'rejected'].includes(user?.seller_status) && (
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>{t('seller.status.title')}</h3>
+              <h3 className="mt-0">{t('seller.status.title')}</h3>
 
               {user.seller_status === 'pending' && (
                 <>
                   <div style={{ fontWeight: 600, marginTop: 6 }}>⏳ {t('seller.status.pending')}</div>
-                  <p className="muted" style={{ marginTop: 4 }}>
+                  <p className="muted mt-4">
                     {t('seller.status.pendingHint')}
                   </p>
                 </>
@@ -172,10 +173,10 @@ const Profile = () => {
               {user.seller_status === 'approved' && (
                 <>
                   <div style={{ fontWeight: 600, marginTop: 6 }}>✅ {t('seller.status.approved')}</div>
-                  <p className="muted" style={{ marginTop: 4 }}>
+                  <p className="muted mt-4">
                     {t('seller.status.approvedHint')}
                   </p>
-                  <div style={{ marginTop: 8 }}>
+                  <div className="mt-8">
                     {/* исправлено: путь формы добавления товара */}
                     <button className="btn-primary" onClick={() => navigate('/product/new')}>
                       {t('seller.actions.addProduct')}
@@ -188,11 +189,11 @@ const Profile = () => {
                 <>
                   <div style={{ fontWeight: 600, marginTop: 6 }}>❌ {t('seller.status.rejected')}</div>
                   {user.seller_rejection_reason && (
-                    <p className="muted" style={{ marginTop: 4 }}>
+                    <p className="muted mt-4">
                       {t('seller.status.reason')}: {user.seller_rejection_reason}
                     </p>
                   )}
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+                  <div className="row gap-12">
                     <button className="btn-primary" onClick={goApply}>
                       {t('seller.actions.applyAgain')}
                     </button>
@@ -204,11 +205,11 @@ const Profile = () => {
 
           {user?.seller_status !== 'approved' && (
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>{t('seller.become.title')}</h3>
-              <p className="muted" style={{ marginTop: 4 }}>
+              <h3 className="mt-0">{t('seller.become.title')}</h3>
+              <p className="muted mt-4">
                 {t('seller.become.text')}
               </p>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+              <div className="row gap-12">
                 <button
                   className="btn-primary"
                   onClick={goApply}
@@ -219,7 +220,7 @@ const Profile = () => {
                     : t('seller.actions.become')}
                 </button>
                 {user?.seller_status === 'rejected' && (
-                  <span style={{ color: '#6b7280' }}>
+                  <span className="muted">
                     {t('seller.become.rejectedNote')}
                   </span>
                 )}
@@ -229,11 +230,11 @@ const Profile = () => {
 
           {/* Заменили длинный список на одну кнопку */}
           {user?.seller_status === 'approved' && (
-            <div className="card" style={{ marginTop: 20 }}>
-              <h3 style={{ marginTop: 0 }}>
+            <div className="card mt-20">
+              <h3 className="mt-0">
                 {t('profile.myProducts.title', { defaultValue: 'Мои товары' })}
               </h3>
-              <p className="muted" style={{ marginTop: 4 }}>
+              <p className="muted mt-4">
                 {t('profile.myProducts.hint', {
                   defaultValue: 'Смотрите и редактируйте ваши товары на отдельной странице.'
                 })}
