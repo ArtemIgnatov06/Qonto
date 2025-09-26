@@ -15,6 +15,8 @@ import Footer from './Components/Footer';
 import ProfilePublic from './Pages/ProfilePublic.jsx';
 import ChatList from './Pages/ChatList.jsx';
 import ChatThread from './Pages/ChatThread.jsx';
+import Catalog from './Pages/Catalog';
+
 
 import AdminApplications from './Pages/AdminApplications.jsx';
 import SellerApplication from './Pages/SellerApplication';
@@ -81,7 +83,7 @@ export default function App() {
 
                 {/* Страница товара */}
                 <Route path="/product/:id" element={<ProductPage />} />
-
+                <Route path="/catalog" element={<Catalog />} />
                 {/* Корзина / оформление */}
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />

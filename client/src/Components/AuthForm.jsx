@@ -7,9 +7,8 @@ import '../Styles/auth.css';
 import { useTranslation } from 'react-i18next';
 
 export const AuthForm = () => {
-  const { t } = useTranslation(); // defaultNS: common
+  const { t } = useTranslation();
 
-  // режимы и способ входа (без TS-аннотаций)
   const [mode, setMode] = useState('login');          // 'login' | 'register'
   const [loginBy, setLoginBy] = useState('email');    // 'email' | 'phone' | 'phone_otp'
 
@@ -24,7 +23,7 @@ export const AuthForm = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // для SMS-OTP
+  // SMS-OTP
   const [showSmsModal, setShowSmsModal] = useState(false);
   const [smsPhone, setSmsPhone] = useState('');
 
@@ -52,7 +51,7 @@ export const AuthForm = () => {
           if (data.ok) { window.location.href = '/'; return; }
           setError(data.error || t('errors.loginFailed'));
         } else {
-          // phone_otp — запускаем отправку SMS и открываем модалку
+          // phone_otp
           if (!form.phone) { setError(t('errors.phoneRequired')); setLoading(false); return; }
           const { data } = await axios.post(
             '/api/auth/phone/start',
@@ -105,11 +104,11 @@ export const AuthForm = () => {
 
   return (
     <div className="auth-stage" aria-label={t('auth.formAria')}>
-      {/* Левая колонка — Вхід */}
+      {/* Левая колонка — Sign in */}
       <section className="auth-box auth-box--left" aria-label={t('auth.loginTab')}>
         <h4 className="auth-left-title">{t('auth.loginTab')}</h4>
 
-        {/* Мини-переключатель способов входа */}
+        {/* Переключатель способов входа */}
         <div className="login-switch" aria-hidden="false">
           <button
             type="button"
@@ -182,11 +181,11 @@ export const AuthForm = () => {
           {error && <div className="error-block">{error}</div>}
 
           <button type="submit" className="auth-submit" disabled={loading}>
-            {t('auth.continue')}
+            {t('auth.continue')} {/* в фигме — auth.continue, не "Войти" */}
           </button>
         </form>
 
-        {/* «або» + Google */}
+        {/* Google */}
         <div className="auth-divider">
           <span className="auth-divider__text">{t('common.or')}</span>
           <div className="auth-google">
@@ -195,7 +194,7 @@ export const AuthForm = () => {
         </div>
       </section>
 
-      {/* Правая колонка — Реєстрація */}
+      {/* Правая колонка — Sign up */}
       <section className="auth-box auth-box--right" aria-label={t('auth.registerTab')}>
         <h4 className="r-auth-title">{t('auth.registerTab')}</h4>
 
@@ -221,6 +220,7 @@ export const AuthForm = () => {
             />
           </label>
 
+          {/* точки шага */}
           <div className="auth-steps" aria-hidden="true">
             <span className="dot is-active" />
             <span className="dot" />

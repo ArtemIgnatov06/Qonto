@@ -697,7 +697,6 @@ body { position: relative; width: 1600px; height: 1300px; background:#fff; }
 /* большие изображения — общий шаблон (нижняя часть карточки) */
 .group-140 .gfx-hero,
 .group-141 .gfx-hero,
-.group-142 .gfx-hero,
 .group-143 .gfx-hero,
 .group-144 .gfx-hero {
   left: 6.4%;
@@ -705,7 +704,9 @@ body { position: relative; width: 1600px; height: 1300px; background:#fff; }
   top: 40%;
   bottom: 6%;
 }
-
+.group-142 .gfx-hero{
+  top: -50%;
+}
 /* правый верх: текст + маленькая иконка (как раньше) — координаты одинаковые */
 .group-140 .title-wrap,
 .group-141 .title-wrap,
