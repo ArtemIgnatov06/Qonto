@@ -11,6 +11,7 @@ import Contacts from './Pages/Contacts';
 import Profile from './Pages/Profile';
 import { AuthForm } from './Components/AuthForm';
 import Header from './Components/Header';
+import Footer from './Components/Footer';
 import ProfilePublic from './Pages/ProfilePublic.jsx';
 import ChatList from './Pages/ChatList.jsx';
 import ChatThread from './Pages/ChatThread.jsx';
@@ -86,6 +87,7 @@ export default function App() {
                 <Route path="/checkout" element={<CheckoutPage />} />
               </Routes>
             </main>
+            <Footer />
           </div>
         </Router>
       </I18nShell>

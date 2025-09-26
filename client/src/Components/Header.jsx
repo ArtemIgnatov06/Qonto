@@ -1,172 +1,33 @@
 // client/src/Components/Header.jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
-import ReactLogo from './logo192.png';
-import CartBadge from '../Components/CartBadge';
 import { useTranslation } from 'react-i18next';
-import { useCurrency, SUPPORTED } from '../contexts/CurrencyContext.jsx';
-import { flagByCurrency, flagByLang } from './Flag';
-// 👇 Socket.IO клиент
-import { authSocket } from '../lib/socket';
-
-// 👇 иконка переводчика (оставляем её на самой кнопке)
+import { flagByLang } from './Flag';
 import TranslateIcon from '../assets/translator.png';
 
-const langs = [
-  { code: 'uk', labelKey: 'lang.uk' },
-  { code: 'ru', labelKey: 'lang.ru' },
-  { code: 'en', labelKey: 'lang.en' },
-];
+// базовые стили из фигмы
+import '../Styles/header.css';
 
-function LanguageButton({ i18n, t, onChange }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
-  const btnRef = useRef(null);
-
-  useEffect(() => {
-    const onDocClick = (e) => {
-      if (!open) return;
-      const path = e.composedPath?.() || [];
-      if (!path.includes(menuRef.current) && !path.includes(btnRef.current)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [open]);
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <button
-        ref={btnRef}
-        onClick={() => setOpen((v) => !v)}
-        aria-haspopup="true"
-        aria-expanded={open}
-        aria-label="Change language"
-        title={t('nav.profile')}
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: '50%',
-          backgroundColor: '#2563eb',
-          border: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          flexShrink: 0,
-        }}
-      >
-        <img src={TranslateIcon} alt="" width={20} height={20} style={{ filter: 'invert(1)' }} />
-      </button>
-
-      {open && (
-        <div
-          ref={menuRef}
-          role="menu"
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 'calc(100% + 8px)',
-            background: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: 12,
-            padding: 6,
-            minWidth: 180,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-            zIndex: 30,
-          }}
-        >
-          {langs.map(({ code, labelKey }) => (
-            <button
-              key={code}
-              onClick={() => {
-                onChange(code);
-                setOpen(false);
-              }}
-              role="menuitem"
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 12px',
-                border: 'none',
-                background: i18n.language.startsWith(code) ? '#f3f4f6' : 'transparent',
-                borderRadius: 10,
-                cursor: 'pointer',
-                fontWeight: i18n.language.startsWith(code) ? 600 : 500,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <span style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
-                {flagByLang(code)}
-              </span>
-              {t(labelKey)}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Селектор валют
-function CurrencySelect({ t }) {
-  const { currency, setCurrency, isLoading, error } = useCurrency();
-
-  return (
-    <div
-      className="currency-switcher"
-      title={t('currency.change') || 'Сменить валюту'}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: 10,
-        padding: '6px 8px',
-      }}
-    >
-      <label htmlFor="currency-select" style={{ fontSize: 12, opacity: 0.75 }}>
-        {t('currency.label') || 'Валюта'}
-      </label>
-
-      {/* маленький флаг текущей валюты */}
-      <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
-        {flagByCurrency(currency)}
-      </span>
-
-      <select
-        id="currency-select"
-        value={currency}
-        onChange={(e) => setCurrency(e.target.value)}
-        style={{ border: 'none', outline: 'none', background: 'transparent', padding: '4px 2px', cursor: 'pointer' }}
-      >
-        {SUPPORTED.map((v) => (
-          <option key={v.code} value={v.code}>
-            {v.label}
-          </option>
-        ))}
-      </select>
-      {isLoading && <span style={{ fontSize: 12, opacity: 0.6 }}>…</span>}
-      {error && (
-        <span style={{ fontSize: 12, opacity: 0.7, color: '#b45309' }} title={error}>
-          !
-        </span>
-      )}
-    </div>
-  );
-}
-
-const Header = () => {
+export default function Header() {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { user, refresh } = useAuth();
-  const [unread, setUnread] = useState(0); // ← непрочитанные
 
-  // применяем сохранённый язык
+  const tt = (key, fallback) => {
+    const v = t(key);
+    return v === key ? fallback : v;
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    const ping = () =>
+      fetch('http://localhost:5050/api/heartbeat', { method: 'POST', credentials: 'include' }).catch(() => {});
+    ping();
+    const id = setInterval(ping, 20000);
+    return () => clearInterval(id);
+  }, [user]);
+
   useEffect(() => {
     const saved = localStorage.getItem('i18nextLng');
     if (saved && saved !== i18n.language) i18n.changeLanguage(saved);
@@ -180,200 +41,254 @@ const Header = () => {
   const handleLogout = async () => {
     await fetch('http://localhost:5050/api/logout', { method: 'POST', credentials: 'include' });
     await refresh();
-    window.location.href = '/';
+    navigate('/');
   };
 
-  // -------------------- ONLINE HEARTBEAT --------------------
-  // раз в 20 сек пингуем сервер, чтобы обновлять users.last_seen_at
+  const [q, setQ] = useState('');
+  const onSearch = (e) => {
+    e.preventDefault();
+    const query = q.trim();
+    if (!query) return;
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+
+  const langs = useMemo(
+    () => [
+      { code: 'uk', label: tt('lang.uk', 'Українська') },
+      { code: 'ru', label: tt('lang.ru', 'Русский') },
+      { code: 'en', label: tt('lang.en', 'English') },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [i18n.language]
+  );
+
+  const langBtnRef = useRef(null);
+  const menuRef = useRef(null);            // FIX: ref для поповера
+  const [langOpen, setLangOpen] = useState(false);
+  const [langPos, setLangPos] = useState({ left: 0, top: 0 });
+
+  const onToggleLang = () => {
+    if (!langBtnRef.current) return;
+    const r = langBtnRef.current.getBoundingClientRect();
+    setLangPos({ left: r.left, top: r.bottom + 8 });
+    setLangOpen((v) => !v);
+  };
+
   useEffect(() => {
-    if (!user) return;
-    const tick = () =>
-      fetch('http://localhost:5050/api/heartbeat', { method: 'POST', credentials: 'include' }).catch(() => {});
-    tick(); // сразу при маунте
-    const id = setInterval(tick, 20000);
-    return () => clearInterval(id);
-  }, [user]);
-  // ----------------------------------------------------------
+    const onDoc = (e) => {
+      if (!langOpen) return;
 
-  // -------------------- UNREAD + SOCKET ---------------------
-  useEffect(() => {
-    if (!user) {
-      setUnread(0);
-      return;
-    }
+      const path =
+        (typeof e.composedPath === 'function' && e.composedPath()) ||
+        e.path ||
+        [];
 
-    // первичная загрузка счётчика
-    fetch('http://localhost:5050/api/chats/unread-count', { credentials: 'include' })
-      .then((r) => (r.ok ? r.json() : { count: 0 }))
-      .then((d) => setUnread(d.count || 0))
-      .catch(() => {});
-
-    // подписка на сокеты
-    const s = authSocket(user.id);
-    const onAdd = (p) => setUnread((x) => Math.max(0, x + (p?.delta || 0)));
-    const onReplace = (p) => setUnread(p?.total ?? 0);
-
-    s.on('chat:unread', onAdd);
-    s.on('chat:unread:replace', onReplace);
-
-    return () => {
-      s.off('chat:unread', onAdd);
-      s.off('chat:unread:replace', onReplace);
+      // FIX: не закрывать, если клик внутри кнопки ИЛИ внутри поповера
+      if (path.includes(langBtnRef.current) || path.includes(menuRef.current)) {
+        return;
+      }
+      setLangOpen(false);
     };
-  }, [user]);
-  // ----------------------------------------------------------
+    const onEsc = (e) => e.key === 'Escape' && setLangOpen(false);
 
-  // 👇 подготовим URL аватарки (если сохранена)
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [langOpen]);
+
   const avatarUrl = user?.avatar_url
-    ? (String(user.avatar_url).startsWith('http')
+    ? String(user.avatar_url).startsWith('http')
       ? user.avatar_url
-      : `http://localhost:5050${user.avatar_url}`)
+      : `http://localhost:5050${user.avatar_url}`
     : null;
 
-  const userLetter =
-    user?.first_name?.[0]?.toUpperCase() ||
-    user?.username?.[0]?.toUpperCase() ||
-    'U';
-
   return (
-    <header
-      className="header-bar"
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '12px 24px',
-        background: '#f2f6fc',
-        gap: 16,
-      }}
-    >
-      {/* Левый блок: логотип + меню */}
-      <nav
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          flexGrow: 1,
-          minWidth: 0,
-        }}
-      >
-        <img
-          src={ReactLogo}
-          alt="Logo"
-          style={{ width: 36, height: 36, display: 'block', flexShrink: 0 }}
-        />
+    <div className="hdr-wrap">
+      <header className="hdr" role="banner">
+        <div className="hdr-bg" />
 
-        <NavLink to="/" end className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
-          {t('nav.home')}
-        </NavLink>
-        <NavLink to="/about" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
-          {t('nav.about')}
-        </NavLink>
-        <NavLink to="/contacts" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
-          {t('nav.contacts')}
+        {/* LOGO */}
+        <NavLink to="/" className="logo" aria-label="Home">
+          <span className="logo-text">Qonto</span>
+          <span className="logo-dot" aria-hidden="true" />
         </NavLink>
 
-        {/* NEW: ссылка на чаты с количеством */}
-        {user && (
-          <NavLink to="/chats" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
-            {(t('chat.chats') || 'Чаты')}{unread > 0 ? ` (${unread})` : ''}
-          </NavLink>
-        )}
+        {/* SEARCH */}
+        <form className="search-wrap" onSubmit={onSearch} role="search">
+          <input
+            className="search-input"
+            type="search"
+            placeholder={tt('search.placeholder', 'Пошук товарів…')}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <button className="search-btn" type="submit" aria-label={tt('search.search', 'Знайти')}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
+        </form>
 
-        {/* Ссылка на корзину с количеством */}
+        {/* AI */}
+        <button className="btn-ai" type="button" onClick={() => navigate('/ai')} title="AI">
+          <span className="ai-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7AD293" strokeWidth="2">
+              <rect x="3" y="7" width="18" height="12" rx="3" />
+              <circle cx="9" cy="13" r="1.5" />
+              <circle cx="15" cy="13" r="1.5" />
+              <path d="M12 7V4" />
+            </svg>
+          </span>
+          <span className="ai-label">AI</span>
+        </button>
+
+        {/* КАТАЛОГ */}
+        <NavLink to="/catalog" className="btn-cat" title={tt('catalog.catalog', 'Каталог')}>
+          <span className="cat-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7AD293" strokeWidth="2">
+              <rect x="4" y="4" width="6" height="6" rx="1" />
+              <rect x="14" y="4" width="6" height="6" rx="1" />
+              <rect x="4" y="14" width="6" height="6" rx="1" />
+              <rect x="14" y="14" width="6" height="6" rx="1" />
+            </svg>
+          </span>
+          <span className="cat-label">{tt('catalog.title', 'Каталог')}</span>
+        </NavLink>
+
+        {/* Язык */}
+        <button
+          ref={langBtnRef}
+          className="ico ico-lang"
+          type="button"
+          onClick={onToggleLang}
+          aria-haspopup="menu"
+          aria-expanded={langOpen}
+          title={tt('currency.change', 'Змінити мову')}
+        >
+          <img src={TranslateIcon} alt="" width="18" height="18" style={{ display: 'block' }} />
+        </button>
+
+        {/* Избранное */}
+        <NavLink to="/favorites" className="ico ico-heart" title={tt('favorites', 'Обране')}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ECECEC" strokeWidth="2" aria-hidden="true">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+          </svg>
+        </NavLink>
+
+        {/* Корзина */}
         <NavLink
           to="/cart"
-          className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}
-          title={t('cart.cart')}
+          className="ico ico-cart"
+          aria-label={tt('cart.cart', 'Кошик')}
+          title={tt('cart.cart', 'Кошик')}
         >
-          <CartBadge />
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ECECEC" strokeWidth="2" aria-hidden="true">
+            <circle cx="9" cy="21" r="1.5" />
+            <circle cx="17" cy="21" r="1.5" />
+            <path d="M3 3h2l2.5 12h11l2-8H7" />
+          </svg>
         </NavLink>
 
-        {/* Админские ссылки */}
-        {user?.role === 'admin' && (
-          <>
-            <NavLink to="/admin/applications" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
-              {t('nav.adminApplications')}
-            </NavLink>
-            <NavLink to="/admin/product-deletions" className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
-              {t('nav.adminDeletions')}
-            </NavLink>
-          </>
-        )}
-
-        {/* Если пользователь вошёл — блок с языком/валютой и аватаркой справа в навигации */}
-        {user && (
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12,
-              marginLeft: 24,
-              flexShrink: 0,
-              marginRight: 'auto',
-            }}
-          >
-            {/* Селектор валют */}
-            <CurrencySelect t={t} />
-
-            {/* Кнопка языка слева от аватарки */}
-            <LanguageButton i18n={i18n} t={t} onChange={changeLang} />
-
-            {/* Аватарка / буква — КНОПКА ПРОФИЛЯ */}
-            <div
-              onClick={() => (window.location.href = '/profile')}
-              title={t('nav.profile')}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                backgroundColor: '#2563eb',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: 14,
-                userSelect: 'none',
-              }}
-            >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="avatar"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
-              ) : (
-                userLetter
-              )}
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Правый блок: Войти/Выйти (и язык/валюта — если пользователь ещё не вошёл) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-        {!user && (
-          <>
-            <CurrencySelect t={t} />
-            <LanguageButton i18n={i18n} t={t} onChange={changeLang} />
-          </>
-        )}
-
+        {/* Профиль / Вход */}
         {user ? (
-          <button onClick={handleLogout} className="btn-login" style={{ padding: '6px 12px' }}>
-            {t('auth.logout')}
+          <button className="ico-user" type="button" onClick={() => navigate('/profile')} title={tt('nav.profile', 'Профіль')}>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="avatar"
+                style={{ width: 24, height: 24, objectFit: 'cover', borderRadius: 4, display: 'block' }}
+              />
+            ) : (
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+            )}
           </button>
         ) : (
-          <NavLink to="/auth">
-            <button className="btn-login">{t('auth.login')}</button>
+          <NavLink to="/auth" className="ico-user" title={tt('auth.login', 'Увійти')}>
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+            </svg>
           </NavLink>
         )}
-      </div>
-    </header>
-  );
-};
 
-export default Header;
+        {/* Выпадашка языка */}
+        {langOpen && (
+          <div
+            ref={menuRef}                   // FIX: привязка ref к поповеру
+            role="menu"
+            style={{
+              position: 'fixed',
+              left: langPos.left,
+              top: langPos.top,
+              background: '#fff',
+              border: '1px solid #e5e7eb',
+              borderRadius: 12,
+              padding: 6,
+              minWidth: 180,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+              zIndex: 9999,
+            }}
+          >
+            {langs.map(({ code, label }) => {
+              const active = i18n.language.startsWith(code);
+              return (
+                <button
+                  key={code}
+                  onClick={() => {
+                    changeLang(code);
+                    setLangOpen(false);
+                  }}
+                  role="menuitem"
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '10px 12px',
+                    border: 'none',
+                    background: active ? '#f3f4f6' : 'transparent',
+                    borderRadius: 10,
+                    cursor: 'pointer',
+                    fontWeight: active ? 700 : 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
+                    {flagByLang(code)}
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
+            {user && (
+              <button
+                onClick={handleLogout}
+                style={{
+                  marginTop: 6,
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '10px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 10,
+                  cursor: 'pointer',
+                  color: '#b91c1c',
+                  fontWeight: 600,
+                }}
+              >
+                {tt('auth.logout', 'Вийти')}
+              </button>
+            )}
+          </div>
+        )}
+      </header>
+    </div>
+  );
+}
