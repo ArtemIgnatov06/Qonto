@@ -1,4 +1,3 @@
-// client/src/Components/GoogleSignIn.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import OtpModal from './OtpModal';
@@ -35,7 +34,6 @@ export default function GoogleSignIn({ onSuccess }) {
             text: 'signin_with',
             logo_alignment: 'left'
           });
-          // Добавим подсказку по локали
           btnRef.current.setAttribute('aria-label', t('google.signIn'));
           btnRef.current.setAttribute('title', t('google.signIn'));
         }
@@ -57,7 +55,7 @@ export default function GoogleSignIn({ onSuccess }) {
       init();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i18n.language]); // если сменили язык, переинициализируем подписи
+  }, [i18n.language]);
 
   async function handleCredentialResponse(response) {
     try {
@@ -65,7 +63,7 @@ export default function GoogleSignIn({ onSuccess }) {
       setIdToken(id_token);
       const { data } = await axios.post(
         '/api/auth/google/start',
-        { id_token, lang: i18n.language }, // lang — опционально
+        { id_token, lang: i18n.language },
         { withCredentials: true }
       );
       if (data.ok) {
@@ -84,7 +82,7 @@ export default function GoogleSignIn({ onSuccess }) {
     try {
       const { data } = await axios.post(
         '/api/auth/google/verify',
-        { id_token: idToken, code, lang: i18n.language }, // lang — опционально
+        { id_token: idToken, code, lang: i18n.language },
         { withCredentials: true }
       );
       if (data.ok) {
@@ -105,12 +103,12 @@ export default function GoogleSignIn({ onSuccess }) {
     <>
       <div ref={btnRef} aria-label={t('google.signIn')} title={t('google.signIn')} />
       {status === 'missingId' && (
-        <div style={{ fontSize: 12, color: '#b00020', marginTop: 8 }}>
+        <div className="gs-status gs-error">
           {t('google.missingClientId')}
         </div>
       )}
       {status === 'scriptError' && (
-        <div style={{ fontSize: 12, color: '#b00020', marginTop: 8 }}>
+        <div className="gs-status gs-error">
           {t('google.scriptLoadError')}
         </div>
       )}

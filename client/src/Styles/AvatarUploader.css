@@ -1,3 +1,4 @@
+/* утилиты проекта — оставлены */
 .card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
 .fw-700 { font-weight: 700; }
 .gap-10 { gap: 10px; }
@@ -35,3 +36,70 @@
 .ta-center { text-align: center; }
 .w-60 { width: 60px; }
 .w-full { width: 100%; }
+
+/* ===== AvatarUploader specific ===== */
+
+.uploader-wrap {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avatar-wrap {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: visible;
+  background: #e5e7eb;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatar-letter {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  font-size: 42px;
+  user-select: none;
+}
+
+.status-dot {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
+  pointer-events: none;
+  z-index: 2;
+}
+.status-dot.online { background: #22c55e; }
+.status-dot.offline { background: #9ca3af; }
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.6);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #374151;
+}

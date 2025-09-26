@@ -1,3 +1,4 @@
+/* Утилиты (как в остальных файлах) */
 .card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
 .fw-700 { font-weight: 700; }
 .gap-10 { gap: 10px; }
@@ -35,3 +36,29 @@
 .ta-center { text-align: center; }
 .w-60 { width: 60px; }
 .w-full { width: 100%; }
+
+/* Локальные для ProductNew */
+.card-narrow { max-width: 640px; }
+
+/* превью изображения */
+.thumb-preview { margin: 12px 0; }
+.thumb-fixed {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  display: block;
+}
+
+/* элементы формы */
+.form-row {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.form-row label {
+  font-size: 14px;
+  color: #444;
+}

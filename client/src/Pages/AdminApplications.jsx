@@ -75,7 +75,7 @@ export default function AdminApplications() {
     <div className="container" aria-live="polite">
       <h2>{t('adminApplications.title')}</h2>
 
-      <div style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div className="row-center gap-8 mb-12">
         <label htmlFor="statusSelect">{t('adminApplications.filters.status')}</label>
         <select
           id="statusSelect"
@@ -91,10 +91,10 @@ export default function AdminApplications() {
       </div>
 
       {loading && <div>{t('common.loading')}</div>}
-      {err && <div style={{ color: 'red' }}>{err}</div>}
+      {err && <div className="text-danger">{err}</div>}
 
       {items.map((a) => (
-        <div key={a.id} className="card" style={{ padding: 12, marginBottom: 10 }}>
+        <div key={a.id} className="card mb-10">
           <div>
             <b>{a.company_name}</b> ({t('adminApplications.labels.inn')}: {a.tax_id})
           </div>
@@ -109,17 +109,17 @@ export default function AdminApplications() {
             </div>
           )}
           {a.comment && (
-            <div style={{ opacity: 0.8 }}>
+            <div className="text-dim">
               {t('adminApplications.labels.comment')}: {a.comment}
             </div>
           )}
 
           {a.status === 'pending' ? (
-            <div className="mt-8">
+            <div className="mt-8 row gap-8">
               <button onClick={() => decide(a.id, 'approve')}>
                 {t('common.approve')}
               </button>
-              <button onClick={() => decide(a.id, 'reject')} style={{ marginLeft: 8 }}>
+              <button onClick={() => decide(a.id, 'reject')}>
                 {t('common.reject')}
               </button>
             </div>

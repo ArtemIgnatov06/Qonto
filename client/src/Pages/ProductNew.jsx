@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
-import '../Styles/profile.css';
+import '../Styles/Profile.css';
 import '../Styles/ProductNew.css';
 
 const API = process.env.REACT_APP_API || '';
@@ -157,7 +157,7 @@ const ProductNew = () => {
   return (
     <div className="profile-page">
       <h2>{t('productNew.title')}</h2>
-      <form className="card" onSubmit={submit} style={{ maxWidth: 640 }}>
+      <form className="card card-narrow" onSubmit={submit}>
         <div className="form-row">
           <label htmlFor="pn-title">{t('productNew.fields.name')}</label>
           <input

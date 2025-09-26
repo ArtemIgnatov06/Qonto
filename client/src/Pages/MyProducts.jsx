@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../Hooks/useAuth';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
@@ -16,7 +16,6 @@ export default function MyProducts() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => { document.title = t('myProducts.metaTitle'); }, [t]);
 
@@ -31,7 +30,7 @@ export default function MyProducts() {
         try {
           r = await axios.get(`${API}/api/my/products`, { withCredentials: true });
         } catch (e1) {
-          if ([404,405].includes(e1?.response?.status)) {
+          if ([404, 405].includes(e1?.response?.status)) {
             r = await axios.get(`${API}/my/products`, { withCredentials: true });
           } else { throw e1; }
         }
@@ -54,7 +53,7 @@ export default function MyProducts() {
   return (
     <div className="page">
       <div className="card card-compact">
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+        <div className="mp-header">
           <h2 className="heading-large">{t('myProducts.title')}</h2>
           <Link className="btn-primary" to="/product/new">{t('myProducts.addNew')}</Link>
         </div>
@@ -69,23 +68,23 @@ export default function MyProducts() {
                 const priceText = formatMoney(convertFromUAH(Number(p.price) || 0));
                 return (
                   <div className="product-card" key={p.id}>
-                    <Link to={`/product/${p.id}`} style={{ display: 'block' }}>
+                    <Link to={`/product/${p.id}`} className="mp-block-link">
                       <img
                         className="product-thumb"
                         src={p.preview_image_url || '/placeholder.svg'}
                         alt={p.title}
                         loading="lazy"
                         referrerPolicy="no-referrer"
-                        onError={(e) => { e.currentTarget.onerror=null; e.currentTarget.src='/placeholder.svg'; }}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/placeholder.svg'; }}
                       />
                     </Link>
 
                     <div className="product-body">
-                      <div className="product-title" style={{display:'flex',justifyContent:'space-between',gap:8}}>
+                      <div className="product-title mp-titlebar">
                         <Link to={`/product/${p.id}`} className="link-plain"><span>{p.title}</span></Link>
                       </div>
 
-                      {p.category && <div className="text-muted" style={{margin:'4px 0 8px'}}>{p.category}</div>}
+                      {p.category && <div className="text-muted mp-category">{p.category}</div>}
                       {p.description && <div className="product-desc">{p.description}</div>}
 
                       <div className="row-center gap-12">

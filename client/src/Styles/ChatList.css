@@ -1,3 +1,4 @@
+/* утилиты — как в проекте */
 .card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
 .fw-700 { font-weight: 700; }
 .gap-10 { gap: 10px; }
@@ -35,3 +36,72 @@
 .ta-center { text-align: center; }
 .w-60 { width: 60px; }
 .w-full { width: 100%; }
+
+/* ===== ChatList specific ===== */
+
+.card-no-padding { padding: 0; }
+.empty-pad-16 { padding: 16px; }
+
+.chat-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: inherit;
+}
+.chat-item:last-child { border-bottom: none; }
+
+.flex-1 { flex: 1; }
+.min-w-0 { min-width: 0; }
+
+.name-ellipsis {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* state chips */
+.chip {
+  font-size: 11px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+.chip-archived {
+  color: #6b7280;
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+.chip-blocked {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+/* right controls */
+.right-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.icon-16 { font-size: 16px; }
+
+/* unread badges */
+.badge {
+  color: #fff;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 22px;
+  text-align: center;
+}
+.badge-muted { background: #e53935; }
+.badge-unread { background: #9ca3af; }

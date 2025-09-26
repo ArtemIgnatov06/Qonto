@@ -38,40 +38,12 @@ export default function AvatarUploader({ initialUrl, online, letter = 'U', onUpl
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 12 }}>
-      <div
-        onClick={pick}
-        title="Сменить фото"
-        style={{
-          position: 'relative',
-          width: 112,
-          height: 112,
-          borderRadius: '50%',
-          overflow: 'visible',
-          background: '#e5e7eb',
-          cursor: 'pointer',
-          display: 'grid',
-          placeItems: 'center',
-        }}
-      >
+    <div className="uploader-wrap">
+      <div onClick={pick} title="Сменить фото" className="avatar-wrap">
         {url ? (
-          <img src={url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          <img src={url} alt="avatar" className="avatar-img" />
         ) : (
-          <div
-            aria-hidden
-            style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              display: 'grid',
-              placeItems: 'center',
-              background: '#2563eb',
-              color: '#fff',
-              fontWeight: 700,
-              fontSize: 42,
-              userSelect: 'none',
-            }}
-          >
+          <div aria-hidden className="avatar-letter">
             {String(letter || 'U').slice(0, 1).toUpperCase()}
           </div>
         )}
@@ -79,29 +51,12 @@ export default function AvatarUploader({ initialUrl, online, letter = 'U', onUpl
         {typeof online === 'boolean' && (
           <span
             title={online ? 'в сети' : 'не в сети'}
-            style={{
-              position: 'absolute',
-              right: -4,
-              bottom: -4,
-              width: 18,
-              height: 18,
-              borderRadius: '50%',
-              background: online ? '#22c55e' : '#9ca3af',
-              border: '3px solid #fff',
-              boxShadow: '0 2px 6px rgba(0,0,0,.12)',
-              pointerEvents: 'none',
-              zIndex: 2,
-            }}
+            className={`status-dot ${online ? 'online' : 'offline'}`}
           />
         )}
 
         {loading && (
-          <div
-            style={{
-              position: 'absolute', inset: 0, background: 'rgba(255,255,255,.6)',
-              display: 'grid', placeItems: 'center', fontSize: 12, color: '#374151'
-            }}
-          >
+          <div className="loading-overlay">
             Загрузка…
           </div>
         )}
@@ -111,7 +66,7 @@ export default function AvatarUploader({ initialUrl, online, letter = 'U', onUpl
         {loading ? 'Загрузка…' : 'Загрузить фото'}
       </button>
 
-      <input ref={inputRef} type="file" accept="image/*" hidden onChange={onChange} />
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onChange} />
     </div>
   );
 }

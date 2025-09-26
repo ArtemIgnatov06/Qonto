@@ -35,7 +35,6 @@ export default function CartPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Сумма в UAH (исходные цены на сервере хранятся в гривне)
   const subtotalUAH = useMemo(
     () => items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 0), 0),
     [items]
@@ -57,11 +56,11 @@ export default function CartPage() {
     load();
   }
 
-  if (loading) return <div style={{ padding: 24, textAlign: 'center' }}>{t('common.loading')}</div>;
-  if (error) return <div style={{ padding: 24 }}>{t('common.errorWithMsg', { msg: error })}</div>;
+  if (loading) return <div className="pad-24 ta-center">{t('common.loading')}</div>;
+  if (error) return <div className="pad-24">{t('common.errorWithMsg', { msg: error })}</div>;
 
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+    <div className="cart-page">
       <h1>{t('cart.pageTitle')}</h1>
 
       {items.length === 0 ? (
@@ -73,13 +72,10 @@ export default function CartPage() {
         </div>
       ) : (
         <>
-          <table
-            style={{ width: '100%', borderCollapse: 'collapse', marginTop: 12 }}
-            aria-label={t('cart.tableAria')}
-          >
+          <table className="cart-table" aria-label={t('cart.tableAria')}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left' }}>{t('cart.cols.product')}</th>
+                <th className="th-left">{t('cart.cols.product')}</th>
                 <th>{t('cart.cols.price')}</th>
                 <th>{t('cart.cols.qty')}</th>
                 <th>{t('cart.cols.sum')}</th>
@@ -96,7 +92,7 @@ export default function CartPage() {
                 const rowSumText = formatMoney(convertFromUAH(rowSumUAH));
 
                 return (
-                  <tr key={it.product_id} style={{ borderTop: '1px solid #eee' }}>
+                  <tr key={it.product_id} className="row-divider">
                     <td>{it.title}</td>
                     <td>{priceText}</td>
                     <td>
@@ -129,18 +125,11 @@ export default function CartPage() {
             </tbody>
           </table>
 
-          <div
-            style={{
-              marginTop: 16,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
+          <div className="cart-footer">
             <button onClick={() => nav('/')}>&larr; {t('cart.continueShopping')}</button>
-            <div style={{ fontSize: 18 }}>
+            <div className="subtotal-line">
               {t('cart.subtotal')}: <strong>{formatMoney(convertFromUAH(subtotalUAH))}</strong>
-              <button onClick={() => nav('/checkout')} style={{ marginLeft: 12 }}>
+              <button onClick={() => nav('/checkout')} className="ml-12">
                 {t('cart.checkout')}
               </button>
             </div>

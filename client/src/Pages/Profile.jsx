@@ -1,19 +1,18 @@
 // client/src/Pages/Profile.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../Styles/profile.css';
+import '../Styles/Profile.css';
 import { useAuth } from '../Hooks/useAuth';
 import PhoneBinder from '../Components/PhoneBinder';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import '../Styles/Profile2.css';
 
 const Profile = () => {
   const { t } = useTranslation();
   const { user, refresh } = useAuth();
   const navigate = useNavigate();
 
-  // ✨ добавили contact_email
+  // ✨ contact_email
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', contact_email: '' });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -25,10 +24,9 @@ const Profile = () => {
     if (user) {
       setForm({
         first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        email: user.email || '',
-        // ✨ инициализация поля «Почта для связи»
-        contact_email: user.contact_email || ''
+        last_name:  user.last_name  || '',
+        email:      user.email      || '',
+        contact_email: user.contact_email || '',
       });
     }
   }, [user]);
@@ -47,7 +45,6 @@ const Profile = () => {
   const saveProfile = async () => {
     setSaving(true); setMsg(null); setErr(null);
     try {
-      // ✨ отправляем contact_email вместе с остальными полями
       const { data } = await axios.post('/api/me/update-profile', form, { withCredentials: true });
       if (data.ok) { setMsg(t('profile.saved')); await refresh(); }
       else setErr(data.error || t('profile.saveFailed'));
@@ -61,36 +58,12 @@ const Profile = () => {
   return (
     <div className="profile-page">
       {/* ✨ Заголовок + ссылка на Видимый профиль */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: 24,
-          marginBottom: 20,
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 28,
-            fontWeight: 700,
-            color: '#111827',
-          }}
-        >
+      <div className="profile-topbar">
+        <h2 className="profile-title">
           {t('profile.title') || 'Личный профиль'}
         </h2>
 
-        <Link
-          to="/profile/public"
-          style={{
-            fontSize: 18,
-            fontWeight: 600,
-            color: '#6d28d9', // фиолетовый
-            textDecoration: 'none',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-          onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-        >
+        <Link to="/profile/public" className="profile-link">
           {t('profile.publicTitle') || 'Видимый профиль'}
         </Link>
       </div>
@@ -163,7 +136,7 @@ const Profile = () => {
 
               {user.seller_status === 'pending' && (
                 <>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>⏳ {t('seller.status.pending')}</div>
+                  <div className="fw-600 mt-6">⏳ {t('seller.status.pending')}</div>
                   <p className="muted mt-4">
                     {t('seller.status.pendingHint')}
                   </p>
@@ -172,12 +145,11 @@ const Profile = () => {
 
               {user.seller_status === 'approved' && (
                 <>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>✅ {t('seller.status.approved')}</div>
+                  <div className="fw-600 mt-6">✅ {t('seller.status.approved')}</div>
                   <p className="muted mt-4">
                     {t('seller.status.approvedHint')}
                   </p>
                   <div className="mt-8">
-                    {/* исправлено: путь формы добавления товара */}
                     <button className="btn-primary" onClick={() => navigate('/product/new')}>
                       {t('seller.actions.addProduct')}
                     </button>
@@ -187,7 +159,7 @@ const Profile = () => {
 
               {user.seller_status === 'rejected' && (
                 <>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>❌ {t('seller.status.rejected')}</div>
+                  <div className="fw-600 mt-6">❌ {t('seller.status.rejected')}</div>
                   {user.seller_rejection_reason && (
                     <p className="muted mt-4">
                       {t('seller.status.reason')}: {user.seller_rejection_reason}
@@ -228,7 +200,6 @@ const Profile = () => {
             </div>
           )}
 
-          {/* Заменили длинный список на одну кнопку */}
           {user?.seller_status === 'approved' && (
             <div className="card mt-20">
               <h3 className="mt-0">

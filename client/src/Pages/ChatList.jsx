@@ -29,8 +29,8 @@ export default function ChatList() {
   return (
     <div className="profile-page">
       <h2>{t('chat.chats') || 'Чаты'}</h2>
-      <div className="card" style={{ padding: 0 }}>
-        {items.length === 0 && <div style={{ padding: 16 }}>{t('common.empty') || 'Пусто'}</div>}
+      <div className="card card-no-padding">
+        {items.length === 0 && <div className="empty-pad-16">{t('common.empty') || 'Пусто'}</div>}
 
         {items.map((c) => {
           const iamSeller = user.id === c.seller_id;
@@ -40,11 +40,10 @@ export default function ChatList() {
           const otherUser  = iamSeller ? c.buyer_username   : c.seller_username;
           const otherEmail = iamSeller ? c.buyer_email      : c.seller_email;
 
-          // возможные варианты поля с аватаром
           const otherAvatar =
             c.other_avatar_url ??
             (iamSeller ? c.buyer_avatar_url : c.seller_avatar_url) ??
-            c.avatar_url; // на всякий
+            c.avatar_url;
 
           const otherName =
             (`${otherFirst || ''} ${otherLast || ''}`.trim()) ||
@@ -60,7 +59,7 @@ export default function ChatList() {
             <Link
               key={c.id}
               to={`/chats/${c.id}`}
-              className="row gap-12"
+              className="row gap-12 chat-item"
             >
               {/* Аватар с безопасным фолбэком-буквой */}
               <AvatarCircle
@@ -72,73 +71,41 @@ export default function ChatList() {
                 size={40}
               />
 
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="flex-1 min-w-0">
                 <div className="row-center gap-8">
-                  <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="name-ellipsis">
                     {otherName}
                   </div>
 
                   {/* Чипы состояния */}
                   {archived && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: '#6b7280',
-                        background: '#f3f4f6',
-                        border: '1px solid #e5e7eb',
-                        padding: '0 6px',
-                        borderRadius: 9999
-                      }}
-                      title="В архиве"
-                    >
+                    <span className="chip chip-archived" title="В архиве">
                       Архив
                     </span>
                   )}
                   {blocked && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: '#991b1b',
-                        background: '#fee2e2',
-                        border: '1px solid #fecaca',
-                        padding: '0 6px',
-                        borderRadius: 9999
-                      }}
-                      title="Пользователь заблокирован вами"
-                    >
+                    <span className="chip chip-blocked" title="Пользователь заблокирован вами">
                       Блок
                     </span>
                   )}
                 </div>
 
-                <div
-                  className="muted"
-                  style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
+                <div className="muted ellipsis">
                   {c.last_text || t('chat.noMessages') || 'Пока нет сообщений'}
                 </div>
               </div>
 
               {/* Правый блок: иконка mute + бейджи */}
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="right-controls">
                 {muted && (
-                  <span title="Чат в муте" aria-label="muted" style={{ fontSize: 16 }}>🔇</span>
+                  <span title="Чат в муте" aria-label="muted" className="icon-16">🔇</span>
                 )}
 
                 {/* Красный бейдж — только для замьюченных чатов */}
                 {muted && mutedUnread > 0 && (
                   <span
                     title="Сообщений, которые «посереют»"
-                    style={{
-                      background: '#e53935',
-                      color: '#fff',
-                      borderRadius: 9999,
-                      padding: '2px 8px',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      minWidth: 22,
-                      textAlign: 'center'
-                    }}
+                    className="badge badge-muted"
                   >
                     {mutedUnread}
                   </span>
@@ -148,16 +115,7 @@ export default function ChatList() {
                 {!muted && unread > 0 && (
                   <span
                     title={t('chat.unread') || 'Непрочитанные'}
-                    style={{
-                      background: '#9ca3af',
-                      color: '#fff',
-                      borderRadius: 9999,
-                      padding: '2px 8px',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      minWidth: 22,
-                      textAlign: 'center'
-                    }}
+                    className="badge badge-unread"
                   >
                     {unread}
                   </span>

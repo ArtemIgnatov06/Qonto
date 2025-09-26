@@ -25,7 +25,6 @@ export default function SellerApplication() {
   }, [t]);
 
   useEffect(() => {
-    // Префилл из профиля
     if (user) {
       setForm(prev => ({
         ...prev,
@@ -90,7 +89,7 @@ export default function SellerApplication() {
       }
 
       setMsg(t('sellerApply.sent'));
-      await refresh(); // seller_status -> pending
+      await refresh();
     } catch (e2) {
       setErr(e2.message || t('sellerApply.errors.submitFailed'));
     } finally {
@@ -103,15 +102,7 @@ export default function SellerApplication() {
       <h2 className="mb-16">{t('sellerApply.title')}</h2>
 
       {/* Блок с личными данными пользователя */}
-      <div
-        style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-          background: '#f9fafb'
-        }}
-      >
+      <div className="user-info-box">
         <div className="grid-2 gap-12">
           <div>
             <label className="muted-12">{t('forms.firstName')}</label>
@@ -132,10 +123,10 @@ export default function SellerApplication() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
+      <form onSubmit={handleSubmit} className="form-grid-12">
         <div className="grid-2 gap-12">
           <div>
-            <label style={{ fontSize: 12, color: '#374151' }}>
+            <label className="label-12">
               {t('sellerApply.fields.company')} *
             </label>
             <input
@@ -150,7 +141,7 @@ export default function SellerApplication() {
           </div>
 
           <div>
-            <label style={{ fontSize: 12, color: '#374151' }}>
+            <label className="label-12">
               {t('sellerApply.fields.taxId')} *
             </label>
             <input
@@ -166,7 +157,7 @@ export default function SellerApplication() {
         </div>
 
         <div>
-          <label style={{ fontSize: 12, color: '#374151' }}>
+          <label className="label-12">
             {t('sellerApply.fields.priceList')}
           </label>
           <input
@@ -180,17 +171,16 @@ export default function SellerApplication() {
         </div>
 
         <div>
-          <label style={{ fontSize: 12, color: '#374151' }}>
+          <label className="label-12">
             {t('sellerApply.fields.comment')}
           </label>
           <textarea
             name="comment"
             value={form.comment}
             onChange={handleChange}
-            className="input"
+            className="input w-full textarea-vert"
             placeholder={t('sellerApply.placeholders.comment')}
             rows={6}
-            style={{ width: '100%', resize: 'vertical' }}
             aria-label={t('sellerApply.fields.comment')}
           />
         </div>
@@ -205,14 +195,13 @@ export default function SellerApplication() {
           </button>
           <button
             type="button"
-            className="btn-login"
+            className="btn-login btn-grey"
             onClick={() => navigate('/profile')}
-            style={{ background: '#6b7280' }}
           >
             {t('sellerApply.backToProfile')}
           </button>
-          {msg && <div style={{ color: '#0a7d16' }} role="status">{msg}</div>}
-          {err && <div style={{ color: '#b00020' }} role="alert">{err}</div>}
+          {msg && <div className="msg-ok" role="status">{msg}</div>}
+          {err && <div className="msg-err" role="alert">{err}</div>}
         </div>
       </form>
     </div>

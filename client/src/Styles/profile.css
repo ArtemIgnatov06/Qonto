@@ -1,30 +1,91 @@
-/* СКОПИРОВАНО: стили применяются ТОЛЬКО внутри .profile-page */
-/* Ничего на главной странице больше не затронем */
+/* ===== универсальные утилиты (бывш. Profile.css) ===== */
+.card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
+.fw-700 { font-weight: 700; }
+.fw-600 { font-weight: 600; } /* добавили */
+.gap-10 { gap: 10px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-6 { gap: 6px; }
+.gap-8 { gap: 8px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+.hidden { display: none; }
+.mb-10 { margin-bottom: 10px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-6 { margin-bottom: 6px; }
+.mb-8 { margin-bottom: 8px; }
+.mt-0  { margin-top: 0; }
+.mt-4  { margin-top: 4px; }
+.mt-6  { margin-top: 6px; }
+.mt-8  { margin-top: 8px; }
+.mt-10 { margin-top: 10px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.muted { color: #6b7280; }
+.muted-12 { font-size: 12px; color: #6b7280; }
+.muted-555 { color: #555; }
+.pad-16 { padding: 16px; }
+.pad-24 { padding: 24px; }
+.pad-24-16 { padding: 24px 16px; }
+.pad-8 { padding: 8px; }
+.page-container { padding: 24px 16px; max-width: 1000px; margin: 0 auto; }
+.prewrap { white-space: pre-wrap; }
+.row { display: flex; }
+.row-center { display: flex; align-items: center; }
+.ta-center { text-align: center; }
+.w-60 { width: 60px; }
+.w-full { width: 100%; }
+
+/* ===== специфичные стили профиля (бывш. profile.css) ===== */
+/* Стили применяются ТОЛЬКО внутри .profile-page */
 
 .profile-page {
   max-width: 1200px;
   margin: 24px auto;
   padding: 0 16px 40px;
   display: grid;
-  grid-template-columns: 1fr; /* сам контейнер — одна колонка */
+  grid-template-columns: 1fr;
   gap: 24px;
 }
 
 .profile-page h2 {
   margin: 0;
   font-weight: 700;
-  grid-column: 1 / -1; /* заголовок на всю ширину */
+  grid-column: 1 / -1;
 }
 
-/* ====== СЕТКА ВНУТРИ СТРАНИЦЫ (ДВЕ КОЛОНКИ) ====== */
+/* верхняя панель заголовка */
+.profile-topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.profile-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+.profile-link {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6d28d9;
+  text-decoration: none;
+}
+.profile-link:hover { text-decoration: underline; }
+
+/* сетка внутри страницы */
 .profile-grid {
   display: grid;
-  grid-template-columns: 1fr; /* по умолчанию одна колонка (мобилки) */
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: start;
 }
-
-/* на широких экранах — две колонки, левая чуть шире */
 @media (min-width: 900px) {
   .profile-grid {
     grid-template-columns: 2fr 1.5fr;
@@ -38,7 +99,7 @@
   gap: 20px;
 }
 
-/* Карточка ТОЛЬКО внутри страницы профиля */
+/* Карточки ТОЛЬКО внутри страницы профиля */
 .profile-page .card {
   background: #fff;
   border-radius: 14px;
@@ -95,8 +156,8 @@
 
 /* ряд кнопок в профиле */
 .profile-actions {
-   display: flex;
-  justify-content: flex-start; /* кнопки выровнены слева */
-  gap: 12px;                   /* ровный зазор между кнопками */
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
   margin-top: 12px;
 }

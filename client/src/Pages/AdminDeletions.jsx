@@ -56,38 +56,26 @@ export default function AdminDeletions() {
 
         {!loading && !error && (
           items.length ? (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-wrap">
               <table
-                className="table"
-                style={{
-                  width: '100%',
-                  marginTop: 16,
-                  borderCollapse: 'separate',
-                  borderSpacing: '0 8px',
-                }}
+                className="table admin-table"
                 aria-label={t('adminDeletions.tableAria')}
               >
                 <thead>
                   <tr>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.productId')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.title')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.category')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.price')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.seller')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.admin')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.reason')}</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left' }}>{t('adminDeletions.cols.date')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.productId')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.title')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.category')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.price')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.seller')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.admin')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.reason')}</th>
+                    <th className="th-cell">{t('adminDeletions.cols.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((d) => (
-                    <tr
-                      key={d.id}
-                      style={{
-                        background: '#fafafa',
-                        boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
-                      }}
-                    >
+                    <tr key={d.id} className="admin-row">
                       <td className="pad-12-16">{d.product_id}</td>
                       <td className="pad-12-16">{d.title}</td>
                       <td className="pad-12-16">{d.category}</td>
@@ -98,7 +86,7 @@ export default function AdminDeletions() {
                       <td className="pad-12-16">
                         {d.admin_first_name} {d.admin_last_name} ({d.admin_username})
                       </td>
-                      <td style={{ padding: '12px 16px', color: '#d32f2f' }}>{d.reason}</td>
+                      <td className="td-reason">{d.reason}</td>
                       <td className="pad-12-16">
                         {dateTime.format(new Date(d.created_at))}
                       </td>

@@ -31,9 +31,7 @@ export default function ChatWidget() {
   }, []);
 
   useEffect(() => {
-    if (open) {
-      setTimeout(scrollToBottom, 50);
-    }
+    if (open) setTimeout(scrollToBottom, 50);
   }, [open, scrollToBottom]);
 
   useEffect(() => {
@@ -67,7 +65,7 @@ export default function ChatWidget() {
     }
   };
 
-  const handleKeyDown = e => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') sendMessage();
   };
 
@@ -76,7 +74,7 @@ export default function ChatWidget() {
       {open ? (
         <div className="chat-box">
           <div className="chat-header">
-            <div>{t('chat.header')}</div>
+            <div className="chat-header__title">{t('chat.header')}</div>
             <button
               className="close-button"
               onClick={() => setOpen(false)}
@@ -86,11 +84,7 @@ export default function ChatWidget() {
             </button>
           </div>
 
-          <div
-            className="chat-messages"
-            ref={messagesRef}
-            style={{ overflowY: 'auto', flexGrow: 1, padding: '8px 12px' }}
-          >
+          <div className="chat-messages" ref={messagesRef}>
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -103,23 +97,20 @@ export default function ChatWidget() {
             <div ref={bottomRef} />
           </div>
 
-          {/* фикс: объединённые классы без дублирования className */}
           <div className="chat-input-area row gap-8">
             <input
               type="text"
               className="chat-input"
               placeholder={t('chat.placeholder')}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              style={{ flexGrow: 1 }}
               disabled={isTyping}
             />
             <button
               className="button send-button"
               onClick={sendMessage}
               disabled={isTyping}
-              style={{ minWidth: 80 }}
             >
               {isTyping ? t('chat.typing') : t('chat.send')}
             </button>

@@ -1,37 +1,61 @@
-.card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
-.fw-700 { font-weight: 700; }
-.gap-10 { gap: 10px; }
-.gap-12 { gap: 12px; }
-.gap-16 { gap: 16px; }
-.gap-6 { gap: 6px; }
-.gap-8 { gap: 8px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
-.hidden { display: none; }
-.mb-10 { margin-bottom: 10px; }
-.mb-12 { margin-bottom: 12px; }
-.mb-16 { margin-bottom: 16px; }
-.mb-20 { margin-bottom: 20px; }
-.mb-24 { margin-bottom: 24px; }
-.mb-6 { margin-bottom: 6px; }
-.mb-8 { margin-bottom: 8px; }
-.mt-10 { margin-top: 10px; }
-.mt-12 { margin-top: 12px; }
-.mt-16 { margin-top: 16px; }
-.mt-20 { margin-top: 20px; }
-.mt-24 { margin-top: 24px; }
-.mt-6 { margin-top: 6px; }
-.mt-8 { margin-top: 8px; }
-.muted { color: #6b7280; }
-.muted-12 { font-size: 12px; color: #6b7280; }
-.muted-555 { color: #555; }
-.pad-16 { padding: 16px; }
-.pad-24 { padding: 24px; }
-.pad-24-16 { padding: 24px 16px; }
-.pad-8 { padding: 8px; }
-.page-container { padding: 24px 16px; max-width: 1000px; margin: 0 auto; }
-.prewrap { white-space: pre-wrap; }
-.row { display: flex; }
-.row-center { display: flex; align-items: center; }
-.ta-center { text-align: center; }
-.w-60 { width: 60px; }
-.w-full { width: 100%; }
+/* ——— специфичные стили для AvatarCircle ——— */
+
+/* контейнер */
+.ac {
+  position: relative;
+  display: inline-block;
+}
+
+/* размеры (в проекте используются 40 и 112) */
+.ac.ac--40  { width: 40px;  height: 40px; }
+.ac.ac--112 { width: 112px; height: 112px; }
+
+/* круг-носитель */
+.ac__figure {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  user-select: none;
+}
+
+/* фон: с картинкой — светло-серый, без — фирменный синий */
+.ac__figure.has-image { background: #e5e7eb; }
+.ac__figure.no-image  { background: #2563eb; }
+
+/* картинка */
+.ac__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* буква */
+.ac__letter {
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* размер шрифта буквы под размер круга */
+.ac--40  .ac__letter { font-size: 17px; }   /* ~0.42 * 40 */
+.ac--112 .ac__letter { font-size: 47px; }   /* ~0.42 * 112 */
+
+/* онлайн-точка */
+.ac__dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  pointer-events: none;
+  z-index: 2;
+}
+.ac__dot.online  { background: #22c55e; }
+.ac__dot.offline { background: #9ca3af; }

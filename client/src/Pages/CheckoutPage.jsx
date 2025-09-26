@@ -20,18 +20,15 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // для дат/текста оставляем локаль, но валюту берём из CurrencyContext
   const locale = useMemo(
     () => (i18n.language?.startsWith('ua') || i18n.language?.startsWith('uk') ? 'uk-UA' : 'ru-RU'),
     [i18n.language]
   );
 
-  // заголовок вкладки
   useEffect(() => {
     document.title = t('checkout.title');
   }, [t]);
 
-  // сводка корзины
   useEffect(() => {
     (async () => {
       try {
@@ -83,11 +80,11 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
+    <div className="checkout-page">
       <h1>{t('checkout.title')}</h1>
-      {error && <div style={{ color: 'crimson', marginBottom: 12 }}>{error}</div>}
+      {error && <div className="error-msg">{error}</div>}
 
-      <div style={{ marginBottom: 16, background: '#fafafa', padding: 12, borderRadius: 8 }}>
+      <div className="summary-box">
         <strong>{t('checkout.summary')}</strong>{' '}
         {summary.items.length === 0
           ? t('cart.empty')
@@ -101,8 +98,7 @@ export default function CheckoutPage() {
         <div>
           <h3>1) {t('checkout.address.title')}</h3>
 
-          {/* FIX: правильный синтаксис className + style */}
-          <div className="grid-2 gap-12" style={{ maxWidth: 700 }}>
+          <div className="grid-2 gap-12 grid-max-700">
             <input
               placeholder={t('checkout.address.country')}
               value={address.country}
@@ -117,7 +113,7 @@ export default function CheckoutPage() {
             />
             <input
               placeholder={t('checkout.address.street')}
-              style={{ gridColumn: '1 / span 2' }}
+              className="street-span-2"
               value={address.street}
               onChange={(e) => setAddress({ ...address, street: e.target.value })}
               aria-label={t('checkout.address.street')}
@@ -133,7 +129,7 @@ export default function CheckoutPage() {
           <div className="mt-16">
             <button onClick={() => nav('/cart')}>&larr; {t('checkout.backToCart')}</button>
             <button
-              style={{ marginLeft: 8 }}
+              className="btn-ml-8"
               onClick={() => setStep(2)}
               disabled={!address.country || !address.city || !address.street || !address.postal}
             >
@@ -146,7 +142,7 @@ export default function CheckoutPage() {
       {step === 2 && (
         <div>
           <h3>2) {t('checkout.payment.title')}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12, maxWidth: 700 }}>
+          <div className="pay-grid">
             <input
               placeholder={t('checkout.payment.cardNumber')}
               value={payment.cardNumber}
@@ -168,11 +164,11 @@ export default function CheckoutPage() {
           </div>
           <div className="mt-16">
             <button onClick={() => setStep(1)}>&larr; {t('checkout.backAddress')}</button>
-            <button style={{ marginLeft: 8 }} disabled={loading || summary.items.length === 0} onClick={submit}>
+            <button className="btn-ml-8" disabled={loading || summary.items.length === 0} onClick={submit}>
               {loading ? t('checkout.paying') : t('checkout.payAndPlace')}
             </button>
           </div>
-          <div style={{ marginTop: 12, fontSize: 12, color: '#666' }}>
+          <div className="checkout-footnote">
             {t('checkout.demoNote.line1')}
             <br />
             {t('checkout.demoNote.line2')}

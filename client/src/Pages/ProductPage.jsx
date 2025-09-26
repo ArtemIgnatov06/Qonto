@@ -60,7 +60,7 @@ export default function ProductPage() {
       if (!r1.ok || !d1?.item) {
         setError(d1?.message || t('productPage.errors.notFound'));
         return;
-        }
+      }
       setItem(d1.item);
       const list = (Array.isArray(d2?.items) ? d2.items : [])
         .map((x, i) => normalizeReview(x, i))
@@ -132,10 +132,10 @@ export default function ProductPage() {
     }
   }
 
-  if (loading) return <div style={{ padding: 24, textAlign: 'center' }}>{t('common.loading')}</div>;
+  if (loading) return <div className="pad-24 ta-center">{t('common.loading')}</div>;
   if (error) {
     return (
-      <div style={{ padding: 24, textAlign: 'center' }}>
+      <div className="pad-24 ta-center">
         <h2>{t('common.error')}</h2>
         <div>{error}</div>
       </div>
@@ -145,7 +145,6 @@ export default function ProductPage() {
   const avg = item.avg_rating ?? item.ratingAvg ?? 0;
   const cnt = item.reviews_count ?? item.ratingCount ?? 0;
 
-  // ✨ Продавец как ссылка на публичный профиль, если есть seller_id
   const sellerNameText =
     item.seller_name ||
     `${(item.seller_first_name || '').trim()} ${(item.seller_last_name || '').trim()}`.trim() ||
@@ -154,9 +153,7 @@ export default function ProductPage() {
   const sellerNode = item.seller_id ? (
     <Link
       to={`/profile/public/${item.seller_id}`}
-      style={{ color: '#6d28d9', fontWeight: 500, textDecoration: 'none' }}
-      onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-      onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+      className="seller-link"
       title={t('productPage.viewSellerProfile')}
     >
       {sellerNameText}
@@ -166,17 +163,17 @@ export default function ProductPage() {
   );
 
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+    <div className="product-page">
       <h1 className="mb-8">{item.title}</h1>
 
       <div className="row-center gap-12">
-        <div style={{ fontSize: 22, fontWeight: 700 }}>
+        <div className="price">
           {formatMoney(convertFromUAH(item.price || 0))}
         </div>
 
         {/* Купить: положить в корзину и перейти в корзину */}
         <button
-          style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #000', cursor: 'pointer', background: '#fff' }}
+          className="btn-buy-now"
           onClick={async () => { if (await addToCart(item.id, 1)) nav('/cart'); }}
           title={t('productPage.buttons.buyNow')}
           aria-label={t('productPage.buttons.buyNow')}
@@ -186,7 +183,7 @@ export default function ProductPage() {
 
         {/* В корзину: положить и остаться на странице */}
         <button
-          style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #888', cursor: 'pointer', background: '#f6f6f6' }}
+          className="btn-add-to-cart"
           onClick={async () => { await addToCart(item.id, 1); }}
           title={t('productPage.buttons.addToCart')}
           aria-label={t('productPage.buttons.addToCart')}
@@ -196,12 +193,12 @@ export default function ProductPage() {
       </div>
 
       {added && (
-        <div style={{ margin: '8px 0 12px', fontSize: 14 }}>
+        <div className="added-note">
           {t('productPage.added')} <a href="/cart">{t('productPage.buttons.goToCart')} →</a>
         </div>
       )}
 
-      <div style={{ color: '#555', marginBottom: 10 }}>
+      <div className="seller-line">
         {t('productPage.seller')}: {sellerNode} · {t('productPage.category')}: {item.category || '—'}
       </div>
 
@@ -209,7 +206,7 @@ export default function ProductPage() {
         <Stars value={avg} /> {avg} ({cnt})
       </div>
 
-      <h3 style={{ margin: '12px 0 6px' }}>{t('productPage.description')}</h3>
+      <h3 className="mt-12 mb-6">{t('productPage.description')}</h3>
       <p className="mb-24">{item.description}</p>
 
       <h3 className="mt-24">{t('productPage.reviews')}</h3>
@@ -230,7 +227,7 @@ export default function ProductPage() {
           value={myComment}
           onChange={(e) => setMyComment(e.target.value)}
           rows={3}
-          style={{ flex: 1, padding: 8 }}
+          className="review-textarea"
         />
         <button disabled={!canSubmit} className="pad-8-10">
           {t('productPage.leaveReview')}
@@ -240,16 +237,16 @@ export default function ProductPage() {
       {reviews.length === 0 ? (
         <div>{t('productPage.noReviews')}</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="reviews-list">
           {reviews.map((r, i) => (
-            <div key={r.id ?? i} style={{ background: '#fff', borderRadius: 10, padding: 12, border: '1px solid #e5e5e5' }}>
+            <div key={r.id ?? i} className="review-card">
               <div className="row-center gap-6">
                 <Stars value={r.rating} />
                 <strong>— {r.user_name || t('productPage.customer')}</strong>
               </div>
               <div className="prewrap">{r.comment}</div>
               {r.created_at && (
-                <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
+                <div className="review-date">
                   {dateTime.format(new Date(r.created_at))}
                 </div>
               )}

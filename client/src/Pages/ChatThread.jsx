@@ -201,7 +201,7 @@ export default function ChatThread() {
           <img
             src={href}
             alt={m.attachment_name || ''}
-            style={{ maxWidth: 280, maxHeight: 360, borderRadius: 12, display: 'block' }}
+            className="attachment-img"
           />
         </div>
       );
@@ -217,7 +217,7 @@ export default function ChatThread() {
     if (m.sender_id !== user.id || m.deleted_at) return null;
     const isEditing = editingId === m.id;
     return (
-      <div className="msg-actions" style={{ opacity: 0, transition: 'opacity .15s' }}>
+      <div className="msg-actions">
         {!isEditing && (
           <>
             <button className="icon-btn" title="Редактировать" onClick={() => startEdit(m)}>✏️</button>
@@ -232,19 +232,7 @@ export default function ChatThread() {
     <div className="profile-page">
       <h2 className="mb-12">{t('chat.thread') || 'Диалог'}</h2>
 
-      <div
-        className="card"
-        style={{
-          display: 'grid',
-          gridTemplateRows: 'auto 1fr auto',
-          height: '72vh',
-          maxWidth: 720,
-          margin: '0 auto',
-          borderRadius: 16,
-          boxShadow: '0 8px 24px rgba(0,0,0,.06)',
-          overflow: 'hidden'
-        }}
-      >
+      <div className="card chat-card">
         {/* header (sticky) */}
         <div className="chat-header row-center gap-12">
           <div className="row-center gap-12">
@@ -285,11 +273,7 @@ export default function ChatThread() {
         </div>
 
         {/* messages */}
-        <div
-          ref={boxRef}
-          className="chat-messages"
-          style={{ overflowY: 'auto', padding: 16, background: '#f8fafc' }}
-        >
+        <div ref={boxRef} className="chat-messages">
           {(msgs || []).map((m) => {
             const mine = m.sender_id === user.id;
             const isEditing = editingId === m.id;
@@ -297,36 +281,15 @@ export default function ChatThread() {
               <div
                 key={m.id}
                 className={`message ${mine ? 'me' : 'other'}`}
-                style={{
-                  display: 'flex',
-                  justifyContent: mine ? 'flex-end' : 'flex-start',
-                  marginBottom: 10
-                }}
               >
                 <div
                   className="bubble-wrap"
-                  style={{ position: 'relative', maxWidth: 520 }}
-                  onMouseEnter={(e) => {
-                    const a = e.currentTarget.querySelector('.msg-actions');
-                    if (a) a.style.opacity = 1;
-                  }}
-                  onMouseLeave={(e) => {
-                    const a = e.currentTarget.querySelector('.msg-actions');
-                    if (a) a.style.opacity = 0;
-                  }}
                 >
                   <div
-                    className="bubble"
-                    style={{
-                      background: mine ? '#dbeafe' : '#fff',
-                      border: '1px solid #e5e7eb',
-                      padding: 10,
-                      borderRadius: 12,
-                      boxShadow: '0 1px 0 rgba(0,0,0,.03)'
-                    }}
+                    className={`bubble ${mine ? 'me' : ''}`}
                   >
                     {m.deleted_at ? (
-                      <div style={{ fontStyle: 'italic', color: '#6b7280' }}>
+                      <div className="deleted">
                         {t('chat.deleted') || 'Сообщение удалено'}
                       </div>
                     ) : isEditing ? (
@@ -338,10 +301,7 @@ export default function ChatThread() {
                           if (e.key === 'Enter' && !e.shiftKey) saveEdit(m);
                           if (e.key === 'Escape') cancelEdit();
                         }}
-                        style={{
-                          width: '100%', padding: '8px 10px', borderRadius: 8,
-                          border: '1px solid #cbd5e1', outline: 'none'
-                        }}
+                        className="edit-input"
                       />
                     ) : (
                       <>
@@ -351,7 +311,7 @@ export default function ChatThread() {
                     )}
 
                     <div className="row gap-6">
-                      <div className="time" style={{ fontSize: 11, color: '#6b7280' }}>
+                      <div className="time">
                         {new Date(m.created_at).toLocaleString()}
                         {m.edited_at && !m.deleted_at ? ' · ' + (t('chat.edited') || 'отредактировано') : ''}
                       </div>
@@ -359,16 +319,7 @@ export default function ChatThread() {
                   </div>
 
                   {/* hover actions */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: -8,
-                      right: mine ? -8 : 'auto',
-                      left: mine ? 'auto' : -8,
-                      display: 'flex',
-                      gap: 4
-                    }}
-                  >
+                  <div className={`hover-actions ${mine ? 'me' : 'other'}`}>
                     <MsgActions m={m} />
                     {editingId === m.id && (
                       <>
@@ -387,11 +338,11 @@ export default function ChatThread() {
         <div className="pm-input-bar row gap-8">
           {/* attachments preview */}
           {files.length > 0 && (
-            <div style={{ position: 'absolute', bottom: '100%', left: 12, marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="attachments-preview">
               {files.map((f, idx) => (
-                <div key={idx} style={{ fontSize: 12, border: '1px solid #eee', borderRadius: 8, padding: 6, background: '#fff' }}>
+                <div key={idx} className="preview-chip">
                   {f.type.startsWith('image/')
-                    ? <img src={URL.createObjectURL(f)} alt="" style={{ height: 56, borderRadius: 6 }} />
+                    ? <img src={URL.createObjectURL(f)} alt="" className="preview-img" />
                     : <span>📄 {f.name}</span>}
                 </div>
               ))}
@@ -399,7 +350,7 @@ export default function ChatThread() {
             </div>
           )}
 
-          <label htmlFor="chat-file-input" className="ghost-btn" title="Вложение" style={{ cursor: 'pointer' }}>📎</label>
+          <label htmlFor="chat-file-input" className="ghost-btn" title="Вложение">📎</label>
           <input
             id="chat-file-input"
             type="file"
@@ -415,10 +366,7 @@ export default function ChatThread() {
             onChange={handleTyping}
             placeholder={t('chat.placeholder') || 'Напишите сообщение...'}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-            style={{
-              flex: 1, height: 40, padding: '0 12px', borderRadius: 12,
-              border: '1px solid #e5e7eb', outline: 'none', fontSize: 14, background: '#f8fafc'
-            }}
+            className="input-text"
             disabled={blocked}
           />
 
@@ -426,32 +374,12 @@ export default function ChatThread() {
             onClick={send}
             disabled={blocked}
             className="primary-btn"
-            style={{
-              height: 40, padding: '0 16px', background: blocked ? '#9ca3af' : '#2563eb',
-              color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: blocked ? 'not-allowed' : 'pointer'
-            }}
             title={blocked ? 'Вы заблокировали пользователя' : undefined}
           >
             {blocked ? (t('chat.blocked') || 'Заблокировано') : (t('chat.send') || 'Отправить')}
           </button>
         </div>
       </div>
-
-      {/* лёгкие стили для кнопок */}
-      <style>{`
-        .ghost-btn, .icon-btn {
-          background: #f3f4f6;
-          border: 1px solid #e5e7eb;
-          border-radius: 10px;
-          height: 36px;
-          min-width: 36px;
-          display: grid;
-          place-items: center;
-          cursor: pointer;
-        }
-        .ghost-btn:hover, .icon-btn:hover { background: #e5e7eb; }
-        .icon-btn { height: 28px; min-width: 28px; font-size: 13px; }
-      `}</style>
     </div>
   );
 }

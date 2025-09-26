@@ -1,4 +1,3 @@
-// client/src/Components/UserProducts.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -50,23 +49,24 @@ const UserProducts = () => {
         <p className="text-muted">{t('userProducts.empty')}</p>
       )}
 
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      <ul className="up-list">
         {items.map((p) => (
           <li
             key={p.id}
-            style={{ marginBottom: 12, padding: 8, border: '1px solid #ddd', borderRadius: 8 }}
+            className="up-item"
             aria-label={t('userProducts.itemAria', { title: p.title })}
           >
             <div>
               <b>{p.title}</b> ({p.category}) — {money.format(Number(p.price) || 0)}
             </div>
+
             {p.description && (
-              <div style={{ fontSize: 14, color: '#666' }}>{p.description}</div>
+              <div className="up-desc">{p.description}</div>
             )}
-            <div className="mt-6">
+
+            <div className="up-actions mt-6">
               <button
-                className="btn-primary"
-                style={{ marginRight: 8 }}
+                className="btn-edit"
                 title={t('common.edit')}
                 aria-label={t('common.edit')}
                 // TODO: сюда повесить переход или модал редактирования
@@ -74,7 +74,7 @@ const UserProducts = () => {
                 {t('common.edit')}
               </button>
               <button
-                className="btn-logout"
+                className="btn-delete"
                 onClick={() => remove(p.id)}
                 title={t('common.delete')}
                 aria-label={t('common.delete')}

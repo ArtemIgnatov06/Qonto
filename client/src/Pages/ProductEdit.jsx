@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import '../Styles/profile.css';
+import '../Styles/Profile.css';
 import '../Styles/ProductEdit.css';
 
 const API = process.env.REACT_APP_API || '';
@@ -137,8 +137,8 @@ export default function ProductEdit() {
 
   return (
     <div className="profile-page">
-      <div className="card" style={{ maxWidth: 720 }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 12 }}>
+      <div className="card card-narrow">
+        <div className="row-center gap-12">
           <h2 className="heading-large">{t('productEdit.title')}</h2>
         </div>
 
@@ -148,9 +148,12 @@ export default function ProductEdit() {
           <form onSubmit={onSubmit}>
             <div className="form-row">
               <label htmlFor="pe-title">{t('productNew.fields.name')}</label>
-              <input id="pe-title" value={form.title}
+              <input
+                id="pe-title"
+                value={form.title}
                 onChange={(e)=>setForm({...form, title:e.target.value})}
-                required />
+                required
+              />
             </div>
 
             <div className="form-row">
@@ -160,9 +163,13 @@ export default function ProductEdit() {
               ) : catErr ? (
                 <div className="msg error" role="alert">{catErr}</div>
               ) : (
-                <select id="pe-category" value={form.category}
+                <select
+                  id="pe-category"
+                  value={form.category}
                   onChange={(e)=>setForm({...form, category:e.target.value})}
-                  required disabled={!categories.length}>
+                  required
+                  disabled={!categories.length}
+                >
                   {categories.map(c => (
                     <option key={c.id} value={c.name}>{c.name}</option>
                   ))}
@@ -172,29 +179,47 @@ export default function ProductEdit() {
 
             <div className="form-row">
               <label htmlFor="pe-price">{t('productNew.fields.price')}</label>
-              <input id="pe-price" type="number" step="0.01" min="0"
-                value={form.price} onChange={(e)=>setForm({...form, price:e.target.value})} required />
+              <input
+                id="pe-price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.price}
+                onChange={(e)=>setForm({...form, price:e.target.value})}
+                required
+              />
             </div>
 
             <div className="form-row">
               <label htmlFor="pe-qty">{t('productNew.fields.qty')}</label>
-              <input id="pe-qty" type="number" min="1"
-                value={form.qty} onChange={(e)=>setForm({...form, qty:e.target.value})} />
+              <input
+                id="pe-qty"
+                type="number"
+                min="1"
+                value={form.qty}
+                onChange={(e)=>setForm({...form, qty:e.target.value})}
+              />
             </div>
 
             <div className="form-row">
               <label htmlFor="pe-desc">{t('productNew.fields.description')}</label>
-              <textarea id="pe-desc" rows={5}
+              <textarea
+                id="pe-desc"
+                rows={5}
                 value={form.description}
-                onChange={(e)=>setForm({...form, description:e.target.value})} />
+                onChange={(e)=>setForm({...form, description:e.target.value})}
+              />
             </div>
 
             <div className="form-row">
               <label htmlFor="pe-img">{t('productNew.fields.previewUrl')}</label>
-              <input id="pe-img" type="url"
+              <input
+                id="pe-img"
+                type="url"
                 value={form.preview_image_url}
                 onChange={(e)=>setForm({...form, preview_image_url:e.target.value})}
-                placeholder="https://example.com/image.jpg" />
+                placeholder="https://example.com/image.jpg"
+              />
               <small>{t('productNew.hint.supported')}</small>
             </div>
 

@@ -83,7 +83,6 @@ export default function ProfilePublic() {
         fd,
         { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      // ожидаем, что сервер вернёт { url: "/uploads/..." } или { avatarUrl: "..." }
       const newUrl = makeAbs(resp.url || resp.avatarUrl);
       if (newUrl) setData((p) => ({ ...p, avatarUrl: newUrl }));
     } catch (e2) {
@@ -97,8 +96,8 @@ export default function ProfilePublic() {
   return (
     <div className="profile-page">
       {/* Шапка */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 24, marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#111827' }}>
+      <div className="profile-header">
+        <h2 className="profile-title">
           {t('profile.publicTitle') || 'Видимый профиль'}
         </h2>
         {isMe && (
@@ -106,13 +105,7 @@ export default function ProfilePublic() {
             to="/profile"
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: '#6d28d9',
-              textDecoration: hover ? 'underline' : 'none',
-              lineHeight: 1.3
-            }}
+            className={`link-profile ${hover ? 'is-hover' : ''}`}
           >
             {t('profile.title') || 'Личный профиль'}
           </Link>
@@ -121,9 +114,8 @@ export default function ProfilePublic() {
 
       <div className="profile-grid">
         {/* Левая колонка: аватар + онлайн + рейтинг */}
-        <div className="card" style={{ textAlign: 'center', overflow: 'visible' }}>
-          <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 8 }}>
-            {/* один аватар с инициалами «ВП» */}
+        <div className="card card-center">
+          <div className="profile-avatar-stack">
             <AvatarCircle
               src={data.avatarUrl}
               firstName={first}
@@ -136,7 +128,6 @@ export default function ProfilePublic() {
               online={!!data.online}
             />
 
-            {/* загрузка фото только кнопкой, без второго круга */}
             {isMe && (
               <>
                 <input
@@ -164,13 +155,13 @@ export default function ProfilePublic() {
 
           <div className="mt-16">
             <div className="muted">{t('product.rating') || 'Рейтинг'}</div>
-            <div style={{ fontSize: 28, fontWeight: 600 }}>
+            <div className="value-28-600">
               {data.rating != null ? data.rating : '—'}
             </div>
             <div className="muted mt-8">
               {t('profile.soldCount') || 'Продано товаров'}
             </div>
-            <div style={{ fontSize: 22, fontWeight: 600 }}>{data.soldCount}</div>
+            <div className="value-22-600">{data.soldCount}</div>
           </div>
 
           {!isMe ? (
@@ -178,35 +169,31 @@ export default function ProfilePublic() {
               {t('chat.writeToSeller') || 'Написать продавцу'}
             </button>
           ) : (
-            <Link
-              to="/chats"
-              className="btn-primary"
-              style={{ marginTop: 16, display: 'inline-block', textDecoration: 'none' }}
-            >
+            <Link to="/chats" className="btn-primary link-btn mt-16">
               {t('chat.chats') || 'Чаты'}
             </Link>
           )}
         </div>
 
         {/* Правая колонка: ФИО + связь */}
-        <div className="card" style={{ display: 'grid', gap: 12 }}>
+        <div className="card profile-info-grid">
           <div>
-            <div className="muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>
+            <div className="muted muted-12 upper">
               {t('forms.firstName') || 'Имя'}
             </div>
-            <div style={{ fontSize: 18 }}>{first || '—'}</div>
+            <div className="value-18">{first || '—'}</div>
           </div>
           <div>
-            <div className="muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>
+            <div className="muted muted-12 upper">
               {t('forms.lastName') || 'Фамилия'}
             </div>
-            <div style={{ fontSize: 18 }}>{last || '—'}</div>
+            <div className="value-18">{last || '—'}</div>
           </div>
-          <div style={{ borderTop: '1px solid #eee', paddingTop: 12 }}>
-            <div className="muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>
+          <div className="divider-top pt-12">
+            <div className="muted muted-12 upper">
               {t('profile.contact') || 'Связь'}
             </div>
-            <div style={{ fontSize: 18 }}>{data.contactEmail || 'не указана'}</div>
+            <div className="value-18">{data.contactEmail || 'не указана'}</div>
           </div>
         </div>
       </div>

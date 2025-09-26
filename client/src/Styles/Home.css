@@ -1,3 +1,4 @@
+/* утилиты — как в проекте */
 .card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
 .fw-700 { font-weight: 700; }
 .gap-10 { gap: 10px; }
@@ -35,3 +36,36 @@
 .ta-center { text-align: center; }
 .w-60 { width: 60px; }
 .w-full { width: 100%; }
+
+/* ===== Home specific ===== */
+
+/* мелкие утилиты под замену инлайна */
+.label-block { display: block; }
+.select-md { min-height: 40px; padding: 8px 10px; }
+.btn-compact { padding: 4px 8px; font-size: 12px; }
+.product-category { margin: 4px 0 8px; }
+.block { display: block; }
+
+/* при необходимости можно уточнить существующие классы каталога */
+.page-home { /* контейнер страницы — общий стиль уже в .page */ }
+
+.card-compact { padding: 16px; }
+
+.form-row { /* оболочка для формовых строк, если нужно что-то добавить позже */ }
+
+.products-grid { display: grid; gap: 16px; }
+.products-grid-3 { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+.product-card { border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: #fff; }
+.product-thumb { width: 100%; height: 180px; object-fit: cover; display: block; background: #f8fafc; }
+.product-body { padding: 12px; }
+.product-title { justify-content: space-between; }
+.link-plain { text-decoration: none; color: inherit; }
+.product-desc { color: #444; font-size: 14px; margin-bottom: 8px; }
+.product-price { font-weight: 700; font-size: 18px; }
+.product-seller { font-size: 12px; color: #6b7280; }
+
+/* сообщения */
+.msg.error { color: #b00020; }
+.text-muted { color: #6b7280; }
+.text-danger { color: #b00020; }

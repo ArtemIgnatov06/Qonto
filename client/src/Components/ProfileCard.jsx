@@ -45,23 +45,23 @@ export default function ProfileCard() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr', maxWidth: 980, margin: '0 auto' }}>
-      <div className="card" style={{ padding: 20, border: '1px solid #eee', borderRadius: 14 }}>
+    <div className="profilecard-wrap">
+      <div className="card card-large">
         <h3 className="mt-0">{t('profile.title')}</h3>
 
-        <div style={{ display: 'grid', gap: 8 }}>
+        <div className="form-grid">
           <input
             placeholder={t('forms.firstName')}
             value={form.first_name}
             onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-            style={{ padding: '10px', border: '1px solid #ddd', borderRadius: 10 }}
+            className="text-input"
             aria-label={t('forms.firstName')}
           />
           <input
             placeholder={t('forms.lastName')}
             value={form.last_name}
             onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-            style={{ padding: '10px', border: '1px solid #ddd', borderRadius: 10 }}
+            className="text-input"
             aria-label={t('forms.lastName')}
           />
           <input
@@ -69,14 +69,14 @@ export default function ProfileCard() {
             placeholder="Email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            style={{ padding: '10px', border: '1px solid #ddd', borderRadius: 10 }}
+            className="text-input"
             aria-label="Email"
           />
 
           <button
             onClick={saveProfile}
             disabled={saving}
-            style={{ padding: '10px 14px', borderRadius: 10, border: 'none', background: '#1a73e8', color: '#fff', cursor: 'pointer' }}
+            className="btn-save"
             aria-busy={saving}
             aria-label={saving ? t('profile.saving') : t('profile.save')}
             title={saving ? t('profile.saving') : t('profile.save')}
@@ -84,13 +84,13 @@ export default function ProfileCard() {
             {saving ? t('profile.saving') : t('profile.save')}
           </button>
 
-          {msg && <div style={{ color: '#0a7d16' }} role="status">{msg}</div>}
-          {err && <div style={{ color: '#b00020' }} role="alert">{err}</div>}
+          {msg && <div className="msg-ok" role="status">{msg}</div>}
+          {err && <div className="msg-err" role="alert">{err}</div>}
         </div>
       </div>
 
       {/* Блок привязки телефона и пароля для входа по телефону */}
-      <div className="card" style={{ padding: 20, border: '1px solid #eee', borderRadius: 14 }}>
+      <div className="card card-large">
         <PhoneBinder />
       </div>
     </div>

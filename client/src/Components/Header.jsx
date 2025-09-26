@@ -7,10 +7,8 @@ import CartBadge from '../Components/CartBadge';
 import { useTranslation } from 'react-i18next';
 import { useCurrency, SUPPORTED } from '../contexts/CurrencyContext.jsx';
 import { flagByCurrency, flagByLang } from './Flag';
-// 👇 Socket.IO клиент
 import { authSocket } from '../lib/socket';
 
-// 👇 иконка переводчика (оставляем её на самой кнопке)
 import TranslateIcon from '../assets/translator.png';
 import '../Styles/Header.css';
 
@@ -38,7 +36,7 @@ function LanguageButton({ i18n, t, onChange }) {
   }, [open]);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="lang-wrap">
       <button
         ref={btnRef}
         onClick={() => setOpen((v) => !v)}
@@ -46,39 +44,13 @@ function LanguageButton({ i18n, t, onChange }) {
         aria-expanded={open}
         aria-label="Change language"
         title={t('nav.profile')}
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: '50%',
-          backgroundColor: '#2563eb',
-          border: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          flexShrink: 0,
-        }}
+        className="lang-btn"
       >
-        <img src={TranslateIcon} alt="" width={20} height={20} style={{ filter: 'invert(1)' }} />
+        <img src={TranslateIcon} alt="" width={20} height={20} className="lang-icon" />
       </button>
 
       {open && (
-        <div
-          ref={menuRef}
-          role="menu"
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 'calc(100% + 8px)',
-            background: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: 12,
-            padding: 6,
-            minWidth: 180,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-            zIndex: 30,
-          }}
-        >
+        <div ref={menuRef} role="menu" className="lang-menu">
           {langs.map(({ code, labelKey }) => (
             <button
               key={code}
@@ -87,23 +59,9 @@ function LanguageButton({ i18n, t, onChange }) {
                 setOpen(false);
               }}
               role="menuitem"
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 12px',
-                border: 'none',
-                background: i18n.language.startsWith(code) ? '#f3f4f6' : 'transparent',
-                borderRadius: 10,
-                cursor: 'pointer',
-                fontWeight: i18n.language.startsWith(code) ? 600 : 500,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
+              className={`lang-item ${i18n.language.startsWith(code) ? 'active' : ''}`}
             >
-              <span style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
-                {flagByLang(code)}
-              </span>
+              <span className="flag-14">{flagByLang(code)}</span>
               {t(labelKey)}
             </button>
           ))}
@@ -118,25 +76,12 @@ function CurrencySelect({ t }) {
   const { currency, setCurrency, isLoading, error } = useCurrency();
 
   return (
-    <div
-      className="currency-switcher"
-      title={t('currency.change') || 'Сменить валюту'}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: 10,
-        padding: '6px 8px',
-      }}
-    >
-      <label htmlFor="currency-select" style={{ fontSize: 12, opacity: 0.75 }}>
+    <div className="currency-switcher" title={t('currency.change') || 'Сменить валюту'}>
+      <label htmlFor="currency-select" className="currency-label">
         {t('currency.label') || 'Валюта'}
       </label>
 
-      {/* маленький флаг текущей валюты */}
-      <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1, transform: 'translateY(1px)' }}>
+      <span aria-hidden="true" className="currency-flag">
         {flagByCurrency(currency)}
       </span>
 
@@ -144,7 +89,7 @@ function CurrencySelect({ t }) {
         id="currency-select"
         value={currency}
         onChange={(e) => setCurrency(e.target.value)}
-        style={{ border: 'none', outline: 'none', background: 'transparent', padding: '4px 2px', cursor: 'pointer' }}
+        className="currency-select"
       >
         {SUPPORTED.map((v) => (
           <option key={v.code} value={v.code}>
@@ -152,9 +97,9 @@ function CurrencySelect({ t }) {
           </option>
         ))}
       </select>
-      {isLoading && <span style={{ fontSize: 12, opacity: 0.6 }}>…</span>}
+      {isLoading && <span className="currency-loading">…</span>}
       {error && (
-        <span style={{ fontSize: 12, opacity: 0.7, color: '#b45309' }} title={error}>
+        <span className="currency-error" title={error}>
           !
         </span>
       )}
@@ -165,7 +110,7 @@ function CurrencySelect({ t }) {
 const Header = () => {
   const { t, i18n } = useTranslation();
   const { user, refresh } = useAuth();
-  const [unread, setUnread] = useState(0); // ← непрочитанные
+  const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('i18nextLng');
@@ -224,24 +169,10 @@ const Header = () => {
     'U';
 
   return (
-    <header
-      className="header-bar"
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '12px 24px',
-        background: '#f2f6fc',
-        gap: 16,
-      }}
-    >
+    <header className="header-bar">
       {/* Левый блок: логотип + меню */}
       <nav className="row-center gap-16">
-        <img
-          src={ReactLogo}
-          alt="Logo"
-          style={{ width: 36, height: 36, display: 'block', flexShrink: 0 }}
-        />
+        <img src={ReactLogo} alt="Logo" className="logo" />
 
         <NavLink to="/" end className={({ isActive }) => `brow-link${isActive ? ' active' : ''}`}>
           {t('nav.home')}
@@ -279,43 +210,16 @@ const Header = () => {
         )}
 
         {user && (
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12,
-              marginLeft: 24,
-              flexShrink: 0,
-              marginRight: 'auto',
-            }}
-          >
+          <div className="user-box">
             <CurrencySelect t={t} />
             <LanguageButton i18n={i18n} t={t} onChange={changeLang} />
             <div
               onClick={() => (window.location.href = '/profile')}
               title={t('nav.profile')}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                backgroundColor: '#2563eb',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: 14,
-                userSelect: 'none',
-              }}
+              className="avatar-btn"
             >
               {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="avatar"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+                <img src={avatarUrl} alt="avatar" className="avatar-img" />
               ) : (
                 userLetter
               )}

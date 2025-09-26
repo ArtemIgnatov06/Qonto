@@ -1,3 +1,4 @@
+/* утилиты — как в проекте */
 .card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
 .fw-700 { font-weight: 700; }
 .gap-10 { gap: 10px; }
@@ -35,3 +36,40 @@
 .ta-center { text-align: center; }
 .w-60 { width: 60px; }
 .w-full { width: 100%; }
+
+/* ===== CartPage specific ===== */
+
+.cart-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.th-left {
+  text-align: left;
+}
+
+.row-divider {
+  border-top: 1px solid #eee;
+}
+
+.w-64 { width: 64px; }
+
+.cart-footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subtotal-line {
+  font-size: 18px;
+}
+
+.ml-12 { margin-left: 12px; }

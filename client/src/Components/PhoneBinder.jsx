@@ -53,11 +53,11 @@ export default function PhoneBinder() {
         placeholder={t('phoneBinder.phonePlaceholder')}
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: 10, marginBottom: 8 }}
+        className="input-full mb-8"
         aria-label={t('phoneBinder.phonePlaceholder')}
       />
 
-      <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>
+      <div className="hint-text mb-6">
         {t('phoneBinder.hint')}
       </div>
 
@@ -66,14 +66,14 @@ export default function PhoneBinder() {
         placeholder={t('phoneBinder.passwordPlaceholder')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: 10 }}
+        className="input-full"
         aria-label={t('phoneBinder.passwordPlaceholder')}
       />
 
       <button
         onClick={save}
         disabled={loading}
-        style={{ marginTop: 10, width: '100%', padding: '10px 14px', borderRadius: 10, border: 'none', background: '#1a73e8', color: '#fff', cursor: 'pointer' }}
+        className="btn-full mt-10"
         aria-busy={loading}
         aria-label={loading ? t('phoneBinder.saving') : t('phoneBinder.save')}
         title={loading ? t('phoneBinder.saving') : t('phoneBinder.save')}
@@ -81,8 +81,8 @@ export default function PhoneBinder() {
         {loading ? t('phoneBinder.saving') : t('phoneBinder.save')}
       </button>
 
-      {msg && <div style={{ color: '#0a7d16', marginTop: 8 }} role="status">{msg}</div>}
-      {err && <div style={{ color: '#b00020', marginTop: 8 }} role="alert">{err}</div>}
+      {msg && <div className="msg-ok mt-8" role="status">{msg}</div>}
+      {err && <div className="msg-err mt-8" role="alert">{err}</div>}
     </div>
   );
 }

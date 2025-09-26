@@ -21,13 +21,11 @@ function pickMessage(r, data, fallback) {
 }
 
 async function fetchJsonWithFallback(pathApiFirst, opts) {
-  // 1) пытаемся на /api/...
   let r = await fetch(pathApiFirst, opts);
   let raw = await r.text();
   let data = raw ? (() => { try { return JSON.parse(raw); } catch { return {}; } })() : {};
   if (r.ok) return { r, data };
 
-  // если 404/405/Not Found — пробуем без /api
   if (r.status === 404 || r.status === 405) {
     const pathNoApi = pathApiFirst.replace('/api/', '/');
     r = await fetch(pathNoApi, opts);
@@ -45,7 +43,6 @@ export default function Home() {
   const [items, setItems] = useState([]);
   const [allItems, setAllItems] = useState([]);
 
-  // ── NEW: состояние для категорий из API
   const [categories, setCategories] = useState([]);
   const [catName, setCatName] = useState('');
   const [catLoading, setCatLoading] = useState(true);
@@ -65,7 +62,6 @@ export default function Home() {
     document.title = t('meta.title.home');
   }, [t]);
 
-  // ── NEW: загрузка категорий
   const loadCategories = async () => {
     setCatLoading(true);
     setCatErr('');
@@ -74,7 +70,6 @@ export default function Home() {
       if (!r.ok) throw new Error(pickMessage(r, data, t('home.errors.categoriesLoadFailed')));
       const items = Array.isArray(data.items) ? data.items : [];
       setCategories(items);
-      // если выбранная категория больше не существует — сбросим фильтр
       if (category && !items.some(c => c.name === category)) {
         setCategory('');
       }
@@ -90,7 +85,6 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // все товары — для каталога/удаления
   useEffect(() => {
     let abort = false;
     (async () => {
@@ -111,7 +105,6 @@ export default function Home() {
     return () => { abort = true; };
   }, [t]);
 
-  // товары по выбранной категории
   useEffect(() => {
     let abort = false;
     (async () => {
@@ -188,7 +181,7 @@ export default function Home() {
 
         {/* Фильтр по категории */}
         <div className="form-row mb-12">
-          <label htmlFor="category" style={{ display: 'block', marginBottom: 6 }}>
+          <label htmlFor="category" className="label-block mb-6">
             {t('home.filters.category')}
           </label>
 
@@ -201,7 +194,7 @@ export default function Home() {
               id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              style={{ minHeight: 40, padding: '8px 10px' }}
+              className="select-md"
               aria-label={t('home.filters.category')}
             >
               <option value="">{t('home.filters.all')}</option>
@@ -215,7 +208,7 @@ export default function Home() {
         {/* ── NEW: форма добавления категории для админа */}
         {user?.role === 'admin' && (
           <div className="form-row mb-16">
-            <label htmlFor="new-category" style={{ display: 'block', marginBottom: 6 }}>
+            <label htmlFor="new-category" className="label-block mb-6">
               {t('home.filters.addCategory')}
             </label>
             <div className="row gap-8">
@@ -249,7 +242,7 @@ export default function Home() {
                 const priceText = formatMoney(convertFromUAH(Number(p.price) || 0));
                 return (
                   <div className="product-card" key={p.id}>
-                    <Link to={`/product/${p.id}`} style={{ display: 'block' }}>
+                    <Link to={`/product/${p.id}`} className="block">
                       <img
                         className="product-thumb"
                         src={p.preview_image_url || '/placeholder.svg'}
@@ -273,10 +266,9 @@ export default function Home() {
                           <button
                             type="button"
                             onClick={() => handleAdminDelete(p)}
-                            className="btn-logout"
+                            className="btn-logout btn-compact"
                             title={t('home.buttons.deleteProduct')}
                             aria-label={t('home.buttons.deleteProduct')}
-                            style={{ padding: '4px 8px', fontSize: 12 }}
                           >
                             {t('common.delete')}
                           </button>
@@ -284,7 +276,7 @@ export default function Home() {
                       </div>
 
                       {p.category && (
-                        <div className="text-muted" style={{ margin: '4px 0 8px' }}>
+                        <div className="text-muted product-category">
                           {p.category}
                         </div>
                       )}
