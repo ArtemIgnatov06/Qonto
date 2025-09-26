@@ -10,12 +10,15 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 const express = require('express');
+
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const mysql = require('mysql2/promise');
 const axios = require('axios');
+
+
 
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
@@ -26,6 +29,9 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').sp
 
 // === Express app (создаём ДО любых app.use)
 const app = express();
+
+
+const PORT = process.env.PORT || 3000;
 
 // === Базовые middlewares
 app.use(cors({ origin: allowedOrigins, credentials: true }));
@@ -2168,7 +2174,7 @@ function detectBrand(n) {
 })();
 
 /* ===================== Запуск ===================== */
-const PORT = process.env.PORT || 5050;
+
 
 // Upload avatar
 app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res) => {

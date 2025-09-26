@@ -1,4 +1,3 @@
-// client/src/Components/Header.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
@@ -6,8 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { flagByLang } from './Flag';
 import TranslateIcon from '../assets/translator.png';
 
-// базовые стили из фигмы
+// базовые стили из фиги
 import '../Styles/header.css';
+
+// AI поповер-чат
+import ChatWidget from './ChatWidget';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -62,8 +64,9 @@ export default function Header() {
     [i18n.language]
   );
 
+  // ЯЗЫК
   const langBtnRef = useRef(null);
-  const menuRef = useRef(null);            // FIX: ref для поповера
+  const menuRef = useRef(null);
   const [langOpen, setLangOpen] = useState(false);
   const [langPos, setLangPos] = useState({ left: 0, top: 0 });
 
@@ -77,16 +80,11 @@ export default function Header() {
   useEffect(() => {
     const onDoc = (e) => {
       if (!langOpen) return;
-
       const path =
         (typeof e.composedPath === 'function' && e.composedPath()) ||
         e.path ||
         [];
-
-      // FIX: не закрывать, если клик внутри кнопки ИЛИ внутри поповера
-      if (path.includes(langBtnRef.current) || path.includes(menuRef.current)) {
-        return;
-      }
+      if (path.includes(langBtnRef.current) || path.includes(menuRef.current)) return;
       setLangOpen(false);
     };
     const onEsc = (e) => e.key === 'Escape' && setLangOpen(false);
@@ -98,6 +96,10 @@ export default function Header() {
       document.removeEventListener('keydown', onEsc);
     };
   }, [langOpen]);
+
+  // AI виджет
+  const aiBtnRef = useRef(null);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const avatarUrl = user?.avatar_url
     ? String(user.avatar_url).startsWith('http')
@@ -133,18 +135,27 @@ export default function Header() {
           </button>
         </form>
 
-        {/* AI */}
-        <button className="btn-ai" type="button" onClick={() => navigate('/ai')} title="AI">
-          <span className="ai-ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#7AD293" strokeWidth="2">
-              <rect x="3" y="7" width="18" height="12" rx="3" />
-              <circle cx="9" cy="13" r="1.5" />
-              <circle cx="15" cy="13" r="1.5" />
-              <path d="M12 7V4" />
-            </svg>
-          </span>
-          <span className="ai-label">AI</span>
+        {/* КНОПКА AI */}
+        <button
+          ref={aiBtnRef}
+          className="btn-ai"
+          type="button"
+          onClick={() => setAiOpen((v) => !v)}
+          aria-expanded={aiOpen}
+          aria-controls="ai-chat-popover"
+        >
+          <span className="ai-ico" aria-hidden="true">{/* svg */}</span>
+          <span className="ai-label">AI-Консультант</span>
         </button>
+
+        {/* ПОПОВЕР ПРЯМО ПОД КНОПКОЙ */}
+        {aiOpen && (
+          <ChatWidget
+            id="ai-chat-popover"
+            anchorRef={aiBtnRef}
+            onClose={() => setAiOpen(false)}
+          />
+        )}
 
         {/* КАТАЛОГ */}
         <NavLink to="/catalog" className="btn-cat" title={tt('catalog.catalog', 'Каталог')}>
@@ -221,7 +232,7 @@ export default function Header() {
         {/* Выпадашка языка */}
         {langOpen && (
           <div
-            ref={menuRef}                   // FIX: привязка ref к поповеру
+            ref={menuRef}
             role="menu"
             style={{
               position: 'fixed',
