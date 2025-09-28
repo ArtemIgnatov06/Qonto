@@ -6,8 +6,8 @@
 
 /* Бровка сверху */
 .top-brow {
-  background-color: #dce9f4; /* мягкий пастельный фон */
-  border-bottom: 1px solid rgba(31, 45, 58, 0.08);
+  background-color: #ffffff; /* мягкий пастельный фон */
+  
   font-size: 0.9rem;
 }
 

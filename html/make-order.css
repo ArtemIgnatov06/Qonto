@@ -1,0 +1,1367 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  top: 1000px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+  white-space: nowrap;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+  white-space: nowrap;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+/* Контейнер бокса по макету (Group 491) */
+.group-491{
+  position: absolute;
+  width: 392px;
+  height: 617px;
+  left: 1128px;
+  top: -13.9px;        /* именно так, как в ТЗ */
+  /* при необходимости выведи выше других слоёв: */
+  /* z-index: 10; */
+}
+
+/* Внутренний прямоугольник (Rectangle 66) — проценты считаются от .group-491 */
+.rect-66{
+  box-sizing: border-box;
+  position: absolute;
+
+  left: -0.11%;
+  right: 0.06%;
+  top: 0.02%;
+  bottom: 0.08%;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 13px;
+}
+
+/* Контейнер кнопки (проценты считаются от .group-491) */
+.group-491 .group-308{
+  position: absolute;
+  left: 5.41%;
+  right: 5.06%;
+  top: 87.06%;
+  bottom: 4.03%;
+}
+
+/* Кнопка (бывш. Rectangle 53 + текст) */
+.group-491 .rect-53{
+  position: absolute;
+  left: 0%;
+  right: 0%;
+  top: 0%;
+  bottom: 0%;
+  box-sizing: border-box;
+
+  border: 2px solid #ECECEC;
+  border-radius: 5px;
+  background: #FFFFFF;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #828181;
+  text-align: center;
+
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, filter 120ms ease;
+}
+
+/* Отключённое состояние (пока не заполнены 3 бокса) */
+.group-491 .rect-53[disabled]{
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Ховер — “загорается” зелёным */
+.group-491 .rect-53:hover{
+  background: #35C65E;
+  border-color: #35C65E;
+  color: #FFFFFF;
+}
+
+/* Фокус для доступности */
+.group-491 .rect-53:focus-visible{
+  outline: 2px solid #35C65E;
+  outline-offset: 2px;
+}
+
+/* базовые: проценты считаются от .group-491 */
+.group-491{ position: relative; }
+
+/* ==== Group 290 ==== */
+.group-491 .group-290{
+  position: absolute;
+  left: 13.04%;
+  right: 13.52%;
+  top: 61.96%;
+  bottom: 34.15%;
+  white-space: nowrap;
+}
+.group-491 .txt-290-left{
+  position: absolute;
+  left: 13.04%;
+  right: 74.97%;
+  top: 61.96%;
+  bottom: 34.15%;
+  white-space: nowrap;
+
+  display: flex; align-items: center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+.group-491 .txt-290-right{
+  position: absolute;
+  left: 73.72%;
+  right: 13.52%;
+  top: 61.96%;
+  bottom: 34.15%;
+  white-space: nowrap;
+
+  display: flex; align-items: center; text-align:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+/* ==== Group 289 ==== */
+.group-491 .group-289{
+  position: absolute;
+  left: 12.53%;
+  right: 12.67%;
+  top: 66.88%;
+  bottom: 29.24%;
+  white-space: nowrap;
+}
+.group-491 .txt-289-left{
+  position: absolute;
+  left: 12.53%;
+  right: 74.46%;
+  top: 66.88%;
+  bottom: 29.24%;
+  white-space: nowrap;
+
+  display:flex; align-items:center; text-align:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+.group-491 .txt-289-right{
+  position: absolute;
+  left: 73.56%;
+  right: 12.67%;
+  top: 66.88%;
+  bottom: 29.24%;
+  white-space: nowrap;
+
+  display:flex; align-items:center; text-align:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+/* ==== Group 287 ==== */
+.group-491 .group-287{
+  position: absolute;
+  left: 12.28%;
+  right: 12.97%;
+  top: 71.74%;
+  bottom: 24.37%;
+  white-space: nowrap;
+}
+.group-491 .txt-287-left{
+  position: absolute;
+  left: 12.28%;
+  right: 71.91%;
+  top: 71.74%;
+  bottom: 24.37%;
+  white-space: nowrap;
+
+  display:flex; align-items:center; text-align:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+.group-491 .txt-287-right{
+  position: absolute;
+  left: 74.27%;
+  right: 12.97%;
+  top: 71.74%;
+  bottom: 24.37%;
+  white-space: nowrap;
+
+  display:flex; align-items:center; text-align:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+/* область позиции (как было) — теперь еще и контекст для детей */
+.group-491 .group-305{
+  position: absolute;
+  left: 7.59%;
+  right: 11.92%;
+  top: 7.9%;
+  bottom: 77.43%;
+}
+
+/* ====== ВСЁ ДАЛЕЕ — ПРОЦЕНТЫ уже ОТ .group-305 ====== */
+
+/* превью (Rectangle 54) */
+.group-305 .rect-54{
+  position: absolute;
+  left: 9.32%;
+  right: 63.91%;
+  top: 0%;
+  bottom: 0%;
+
+  background: #D9D9D9;
+  border-radius: 15px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.group-305 .rect-54-img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* кол-во “х1” */
+.group-305 .prod-qty{
+  position: absolute;
+  left: 0%;
+  right: 94.92%;
+  top: 33.47%;
+  bottom: 40.01%;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+  white-space: nowrap;
+}
+
+/* заголовок */
+.group-305 .prod-title{
+  position: absolute;
+  left: 43.97%;
+  right: 0%;
+  top: 16.16%;
+  bottom: 57.33%;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#363535;
+  white-space: nowrap;
+}
+
+/* цена текущая */
+.group-305 .prod-price{
+  position: absolute;
+  left: 43.97%;
+  right: 39.61%;
+  top: 50.37%;
+  bottom: 19.43%;
+  white-space: nowrap;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:500; font-size:14px; line-height:24px;
+  color:#35C65E;
+}
+
+/* старая цена (зачеркнутая) */
+.group-305 .prod-old-price{
+  position: absolute;
+  left: 63.77%;
+  right: 19.8%;
+  top: 50.37%;
+  bottom: 19.43%;
+  white-space: nowrap;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181; text-decoration: line-through;
+}
+
+/* Область 2-го товара = система координат */
+.group-491 .group-504{
+  position: absolute;
+  left: 7.59%;
+  right: 11.92%;
+  top: 25.33%;
+  bottom: 60%;
+}
+
+/* ===== ВСЁ НИЖЕ — ПРОЦЕНТЫ ОТ .group-504 ===== */
+
+/* Превью (Rectangle 54) */
+.group-504 .rect-54-2{
+  position: absolute;
+  left: 9.32%;
+  right: 63.91%;
+  top: 0%;
+  bottom: 0%;
+
+  background: #D9D9D9;
+  border-radius: 15px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.group-504 .rect-54-2-img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Кол-во “х1” */
+.group-504 .prod-qty-2{
+  position: absolute;
+  left: 0%;
+  right: 94.92%;
+  top: 33.47%;
+  bottom: 40.01%;
+
+  display: flex; align-items: center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+/* Название */
+.group-504 .prod-title-2{
+  position: absolute;
+  left: 43.97%;
+  right: 0%;
+  top: 16.16%;
+  bottom: 57.33%;
+
+  display: flex; align-items: center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#363535;
+}
+
+/* Новая цена */
+.group-504 .prod-price-2{
+  position: absolute;
+  left: 43.97%;
+  right: 39.61%;
+  top: 50.37%;
+  bottom: 19.43%;
+
+  display: flex; align-items: center;
+  font-family:'Ubuntu',sans-serif; font-weight:500; font-size:14px; line-height:24px;
+  color:#35C65E;
+}
+
+/* Старая цена (зачёркнутая) */
+.group-504 .prod-old-price-2{
+  position: absolute;
+  left: 63.77%;
+  right: 19.8%;
+  top: 50.37%;
+  bottom: 19.43%;
+
+  display: flex; align-items: center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+  text-decoration: line-through;
+}
+/* Область 3-го товара = система координат (из макета) */
+.group-491 .group-505{
+  position: absolute;
+  left: 7.59%;
+  right: 11.92%;
+  top: 42.76%;
+  bottom: 42.57%;
+}
+
+/* ===== ВСЁ НИЖЕ — ПРОЦЕНТЫ ОТ .group-505 (как у 1-го и 2-го товара) ===== */
+
+/* Превью (Rectangle 54) */
+.group-505 .rect-54-3{
+  position: absolute;
+  left: 9.32%;
+  right: 63.91%;
+  top: 0%;
+  bottom: 0%;
+
+  background: #D9D9D9;
+  border-radius: 15px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.group-505 .rect-54-3-img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Кол-во “х1” */
+.group-505 .prod-qty-3{
+  position: absolute;
+  left: 0%;
+  right: 94.92%;
+  top: 33.47%;
+  bottom: 40.01%;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+/* Название */
+.group-505 .prod-title-3{
+  position: absolute;
+  left: 43.97%;
+  right: 0%;
+  top: 16.16%;
+  bottom: 57.33%;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#363535;
+}
+
+/* Новая цена */
+.group-505 .prod-price-3{
+  position: absolute;
+  left: 43.97%;
+  right: 39.61%;
+  top: 50.37%;
+  bottom: 19.43%;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:500; font-size:14px; line-height:24px;
+  color:#35C65E;
+}
+
+/* Старая цена (зачёркнутая) */
+.group-505 .prod-old-price-3{
+  position: absolute;
+  left: 63.77%;
+  right: 19.8%;
+  top: 50.37%;
+  bottom: 19.43%;
+
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+  text-decoration: line-through;
+}
+
+/* окно прокрутки только для списка товаров */
+.group-491 .cart-scroll{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 382px;              /* ~61.96% от 617px — как в макете зона до итогов */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #ECECEC transparent;
+}
+.group-491 .cart-scroll::-webkit-scrollbar{ width: 8px; }
+.group-491 .cart-scroll::-webkit-scrollbar-thumb{ background:#ECECEC; border-radius:8px; }
+.group-491 .cart-scroll::-webkit-scrollbar-track{ background:transparent; }
+
+/* ===== Контейнеры товаров внутри cart-scroll — вертикальные координаты в PX ===== */
+/* высота group-491 = 617px; у каждой строки высота ≈ 90.51px */
+.cart-scroll .group-305{
+  position: absolute;
+  left: 7.59%; right: 11.92%;
+  top: 48.74px;               /* 7.9% * 617 */
+  height: 90.51px;            /* (100 - 7.9 - 77.43)% * 617 */
+}
+.cart-scroll .group-504{
+  position: absolute;
+  left: 7.59%; right: 11.92%;
+  top: 156.29px;              /* 25.33% * 617 */
+  height: 90.51px;
+}
+.cart-scroll .group-505{
+  position: absolute;
+  left: 7.59%; right: 11.92%;
+  top: 263.83px;              /* 42.76% * 617 */
+  height: 90.51px;
+}
+
+/* контейнер строки (проценты от .group-491) */
+.group-491 .group-286{
+  position: absolute;
+  left: 11.16%;
+  right: 11.12%;
+  top: 78.43%;
+  bottom: 15.74%;
+}
+
+/* значение справа */
+.group-491 .total-value{
+  position: absolute;
+  left: 65.92%;
+  right: 11.12%;
+  top: 78.43%;
+  bottom: 15.74%;
+
+  display: flex; align-items: center; text-align: center;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal; font-weight: 500;
+  font-size: 25px; line-height: 36px;
+  color: #35C65E;
+  white-space: nowrap;
+}
+
+/* подпись слева */
+.group-491 .total-label{
+  position: absolute;
+  left: 11.16%;
+  right: 67.66%;
+  top: 78.43%;
+  bottom: 15.74%;
+
+  display: flex; align-items: center; text-align: center;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal; font-weight: 500;
+  font-size: 25px; line-height: 36px;
+  color: #35C65E;
+}
+
+/* общий базовый стиль для ссылок-заголовков */
+.group-305 .prod-title,
+.group-504 .prod-title-2,
+.group-505 .prod-title-3{
+  position: absolute;              /* сохранить твоё позиционирование */
+  left: 43.97%;
+  right: 0%;
+  top: 16.16%;
+  bottom: 57.33%;
+
+  display: flex;
+  align-items: center;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+
+  text-decoration: none;           /* без подчёркивания */
+  cursor: pointer;                 /* показать, что кликабельно */
+  outline: none;
+}
+
+/* ховер/фокус — лёгкий акцент, можно убрать */
+.group-305 .prod-title:hover,
+.group-504 .prod-title-2:hover,
+.group-505 .prod-title-3:hover{
+  text-decoration: underline;
+}
+
+.group-305 .prod-title:focus-visible,
+.group-504 .prod-title-2:focus-visible,
+.group-505 .prod-title-3:focus-visible{
+  outline: 2px solid #35C65E;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Опорный контейнер элемента */
+.frame-314{
+  position: absolute;
+  width: 976px;
+  height: 155px;
+  left: 80px;
+  top: 222.33px;
+  z-index: 3; /* выше rect-73 */
+}
+
+/* Кликабельный бокс = Rectangle 70 */
+.rect-70-btn{
+  box-sizing: border-box;
+  position: absolute;
+  width: 976.8px;
+  height: 154.5px;
+  left: 0px;
+  top: 0px;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+
+  padding: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+/* Ховер/фокус (по желанию) */
+.rect-70-btn:hover{ filter: brightness(1.02); }
+.rect-70-btn:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; }
+
+/* Иконка слева — подставь свой src */
+.delivery-icon{
+  position: absolute;
+  left: 33.9px;
+  top: 37.56px;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none; /* клики идут по кнопке */
+}
+
+/* Заголовок */
+.delivery-title{
+  position: absolute;
+  width: 187px;
+  height: 36px;
+  left: 89.36px;
+  top: 34.56px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #363535;
+  white-space: nowrap;
+}
+
+/* Подзаголовок */
+.delivery-sub{
+  position: absolute;
+  width: 165px;
+  height: 24px;
+  left: 89.36px;
+  top: 91.41px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* активное состояние — только цвет контура меняется */
+.rect-70-btn.is-active{
+  border-color: #35C65E;
+}
+
+/* по желанию, чтобы ховер на активном не гасил */
+.rect-70-btn.is-active:hover{
+  filter: brightness(1.02);
+}
+
+/* Контейнер второго бокса (ровно по ТЗ) */
+.frame-312{
+  position: absolute;
+  width: 976.8px;
+  height: 154.5px;
+  left: 79.64px;
+  top: 394.03px;
+}
+
+/* Кликабельный прямоугольник */
+.frame-312 .rect-70-btn{
+  box-sizing: border-box;
+  position: absolute;
+  width: 976.8px;
+  height: 154.5px;
+  left: 0;
+  top: 0;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+
+  padding: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  transition: border-color 120ms ease, filter 120ms ease;
+}
+
+/* активное состояние: зелёный контур */
+.frame-312 .rect-70-btn.is-active{ border-color:#35C65E; }
+.frame-312 .rect-70-btn:hover{ filter: brightness(1.02); }
+
+/* Иконка слева — подставь свой src */
+.frame-312 .delivery-icon{
+  position: absolute;
+  left: 33.9px;
+  top: 37.56px;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Заголовок */
+.frame-312 .delivery-title{
+  position: absolute;
+  width: 192px;       /* по макету для второго */
+  height: 36px;
+  left: 89.36px;
+  top: 34.56px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #363535;
+}
+
+/* Подзаголовок */
+.frame-312 .delivery-sub{
+  position: absolute;
+  width: 213px;       /* по макету для второго */
+  height: 24px;
+  left: 89.36px;
+  top: 91.41px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  color: #828181;
+}
+
+/* Контейнер третьего бокса — ИСПРАВЛЕННЫЕ координаты */
+.frame-313{
+  position: absolute;
+  width: 976.8px;
+  height: 154.5px;
+  left: 79.64px;
+  top: 565.45px;
+}
+
+/* Кликабельный прямоугольник (бывш. Rectangle 70) */
+.frame-313 .rect-70-btn{
+  box-sizing: border-box;
+  position: absolute;
+  width: 976.8px;
+  height: 154.5px;
+  left: 0;
+  top: 0;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+
+  padding: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  transition: border-color 120ms ease, filter 120ms ease;
+}
+
+/* активное состояние — зелёный контур */
+.frame-313 .rect-70-btn.is-active{ border-color:#35C65E; }
+.frame-313 .rect-70-btn:hover{ filter: brightness(1.02); }
+
+/* Иконка слева — подставь свой src */
+.frame-313 .delivery-icon{
+  position: absolute;
+  left: 33.9px;
+  top: 37.56px;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Заголовок (ширина 87px по макету) */
+.frame-313 .delivery-title{
+  position: absolute;
+  width: 87px;
+  height: 36px;
+  left: 89.36px;
+  top: 34.56px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #363535;
+}
+
+/* Подзаголовок (ширина 151px по макету) */
+.frame-313 .delivery-sub{
+  position: absolute;
+  width: 151px;
+  height: 24px;
+  left: 89.36px;
+  top: 91.41px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  color: #828181;
+}
+
+/* ========== Панель: по умолчанию скрыта, но анимируется ========== */
+.rect-73{
+  box-sizing: border-box;
+  position: absolute;
+  width: 976.8px;
+  height: 254.93px;
+  left: 79.64px;
+  top: 347.78px;
+  border: 2px solid #ECECEC;
+  background: #FFFFFF;
+  border-radius: 10px;
+
+  /* анимация */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 180ms ease-out, transform 200ms ease-out, visibility 0s linear 200ms;
+  will-change: opacity, transform;
+  pointer-events: none; /* пока закрыто — клики не ловит */
+  z-index: 2; /* под .frame-314 */
+}
+
+/* Открытое состояние панели */
+.f314-open .rect-73{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 180ms ease-out, transform 200ms ease-out, visibility 0s;
+  pointer-events: auto;
+}
+
+/* ========== Плавный сдвиг остальных блоков вниз/вверх ========== */
+.frame-312, .frame-313{
+  transition: top 220ms cubic-bezier(.2,.7,.2,1);
+  will-change: top;
+  z-index: 1; /* ниже панели и первого бокса */
+}
+
+/* Базовые (закрыто) координаты */
+.frame-312{
+  position: absolute; width: 976.8px; height: 154.5px;
+  left: 79.64px; top: 394.03px;
+}
+.frame-313{
+  position: absolute; width: 976.8px; height: 154.5px;
+  left: 79.64px; top: 565.45px;
+}
+
+/* Открыто — новые координаты (как просил) */
+.f314-open .frame-312{
+  position: absolute; width: 976px; height: 155px;
+  left: 80px; top: 619.93px;
+}
+.f314-open .frame-313{
+  position: absolute; width: 976px; height: 155px;
+  left: 80px; top: 790.93px;
+}
+
+/* Доступность: уважаем предпочитающих без анимации */
+@media (prefers-reduced-motion: reduce){
+  .rect-73, .frame-312, .frame-313{ transition: none !important; }
+}
+
+/* Базовый стиль инпута (общий) — с placeholder */
+.f314-input{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  padding: 0 14px;              /* внутренние отступы для текста */
+  outline: none;
+}
+
+/* placeholder как прежние лейблы */
+.f314-input::placeholder{
+  color: #828181;
+  opacity: 1;                   /* на всякий случай для некоторых браузеров */
+}
+
+/* зелёная обводка при фокусе */
+.f314-input:focus{
+  border-color:#35C65E;
+}
+
+/* ===================== Позиции ГРУПП (внутри rect-73) ===================== */
+/* ВАЖНО: координаты пересчитаны ОТ rect-73 (left:79.64; top:347.78) */
+.rect-73 .f314-g324{
+  position: absolute;
+  width: 435.57px;
+  height: 55px;
+  left: 38.92px;   /* 118.56 - 79.64 */
+  top: 61.41px;    /* 409.19 - 347.78 */
+}
+
+.rect-73 .f314-g326{
+  position: absolute;
+  width: 435.57px;
+  height: 55px;
+  left: 505.43px;  /* 585.07 - 79.64 */
+  top: 61.41px;    /* 409.19 - 347.78 */
+}
+
+.rect-73 .f314-g325{
+  position: absolute;
+  width: 435.57px;
+  height: 55px;
+  left: 38.92px;   /* 118.56 - 79.64 */
+  top: 126.29px;   /* 474.07 - 347.78 */
+}
+
+.rect-73 .f314-g327{
+  position: absolute;
+  width: 435.57px;
+  height: 55px;
+  left: 505.43px;  /* 585.07 - 79.64 */
+  top: 126.29px;   /* 474.07 - 347.78 */
+}
+
+/* ===================== Старые лейблы — отключаем ===================== */
+.rect-73 .f314-label-324,
+.rect-73 .f314-label-326,
+.rect-73 .f314-label-325,
+.rect-73 .f314-label-327{
+  display: none !important;
+  pointer-events: none;
+}
+
+.frame-312{ z-index: 3; }  /* 2-й бокс поверх своей панели */
+.rect-71  { z-index: 2; }  /* панель 2-го */
+.frame-313{ z-index: 1; }
+
+/* ===== Панель второго бокса (Rectangle 71) ===== */
+.rect-71{
+  box-sizing: border-box;
+  position: absolute;
+  width: 976.36px;
+  height: 254.18px;
+  left: 80px;
+  top: 519.9px;
+  border: 2px solid #ECECEC;
+  background: #FFFFFF;
+  border-radius: 10px;
+
+  /* плавное появление, как у rect-73 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 180ms ease-out, transform 200ms ease-out, visibility 0s linear 200ms;
+  will-change: opacity, transform;
+  pointer-events: none;
+}
+
+/* открыто (по классу на body) */
+.f312-open .rect-71{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 180ms ease-out, transform 200ms ease-out, visibility 0s;
+  pointer-events: auto;
+}
+
+/* плавный сдвиг 3-го бокса, когда открыт 2-й */
+.frame-313{
+  transition: top 220ms cubic-bezier(.2,.7,.2,1);
+}
+
+/* базовые координаты 3-го — как раньше (закрыто) */
+.frame-313{
+  position: absolute;
+  width: 976.8px;
+  height: 154.5px;
+  left: 79.64px;
+  top: 565.45px;
+}
+
+/* когда открыт 2-й — новые координаты 3-го */
+.f312-open .frame-313{
+  position: absolute;
+  width: 976px;
+  height: 154px;
+  left: 80px;
+  top: 791.51px;
+}
+
+/* уважение предпочитающим без анимаций */
+@media (prefers-reduced-motion: reduce){
+  .rect-71, .frame-313{ transition: none !important; }
+}
+
+/* ===== Инпуты второго окна ===== */
+.f312-input{
+  position:absolute; inset:0; width:100%; height:100%; box-sizing:border-box;
+  background:#FFFFFF; border:2px solid #ECECEC; border-radius:10px;
+  padding:0 14px;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px; color:#363535;
+  outline:none;
+}
+.f312-input::placeholder{ color:#828181; }
+.f312-input:focus{ border-color:#35C65E; }
+
+/* Группы (внутри rect-71) — пикс-в-пикс */
+.rect-71 .r71-g312{ position:absolute; width:435.38px; height:55px; left:38.71px;  top:60.35px; }
+.rect-71 .r71-g313{ position:absolute; width:435.38px; height:55px; left:38.71px;  top:125.24px; }
+.rect-71 .r71-g314{ position:absolute; width:435.38px; height:55px; left:505.01px; top:60.35px; }
+.rect-71 .r71-g315{ position:absolute; width:435.38px; height:55px; left:505.01px; top:125.24px; }
+
+/* ===== Кнопка “Кур’єр” (+120 грн) ===== */
+.rect-71 .r71-courier{
+  position:absolute;
+  left:505.01px;  /* 585.01 - 80 */
+  top:195.07px;   /* 714.97 - 519.9 */
+  width:237.92px; height:24px;   /* из макета Group 316 */
+}
+
+/* сама мини-кнопка (16.03×16.03 в точке 585.01/718.96 => от окна: 505.01/199.06) */
+.rect-71 .courier-toggle{
+  position:absolute;
+  left:0;                   /* внутри r71-courier */
+  top:3.99px;               /* 199.06 - 195.07 */
+  width:16.03px; height:16.03px;
+  box-sizing:border-box;
+  border:2px solid #ECECEC;
+  border-radius:5px;
+  background:#FFFFFF;
+  cursor:pointer;
+  -webkit-appearance:none; appearance:none; outline:none;
+  transition:background-color 120ms ease, border-color 120ms ease, filter 120ms ease;
+}
+.rect-71 .courier-toggle[aria-pressed="true"]{
+  border-color:#35C65E; background:#35C65E;
+}
+
+/* подписи */
+.rect-71 .courier-label{
+  position:absolute; left:35.4px; top:0;
+  width:47.96px; height:24px;
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+.rect-71 .courier-price{
+  position:absolute; left:171.69px; top:0;  /* 756.7-80 - (585.01-80) = 171.69 */
+  width:66.23px; height:24px;
+  display:flex; align-items:center;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+.frame-313{ z-index: 3; }
+.rect-72  { z-index: 2; }
+
+/* ===== Панель третьего бокса (Rectangle 72) ===== */
+.rect-72{
+  box-sizing: border-box;
+  position: absolute;
+  width: 976.8px;
+  height: 212.27px;
+  left: 79.64px;
+  top: 690.88px;
+  border: 2px solid #ECECEC;
+  background: #FFFFFF;
+  border-radius: 10px;
+
+  /* плавное появление (как у остальных) */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 180ms ease-out, transform 200ms ease-out, visibility 0s linear 200ms;
+  will-change: opacity, transform;
+  pointer-events: none;
+}
+
+/* открыто (по классу на body) */
+.f313-open .rect-72{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 180ms ease-out, transform 200ms ease-out, visibility 0s;
+  pointer-events: auto;
+}
+
+/* уважаем prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .rect-72{ transition: none !important; }
+}
+
+/* общий стиль полей для 3-й панели */
+.f313-input{
+  position:absolute; inset:0; width:100%; height:100%; box-sizing:border-box;
+  background:#FFFFFF; border:2px solid #ECECEC; border-radius:10px;
+  padding:0 14px;
+  font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px; color:#363535;
+  outline:none;
+}
+.f313-input::placeholder{ color:#828181; }
+.f313-input:focus{ border-color:#35C65E; }
+
+/* Group 321 — *Номер картки */
+.rect-72 .r72-g321{
+  position:absolute;
+  width:435.28px; height:55px;
+  left:39.25px;   /* 118.89 - 79.64 */
+  top:61.00px;    /* 751.88 - 690.88 */
+}
+
+/* Group 322 — мм/рррр */
+.rect-72 .r72-g322{
+  position:absolute;
+  width:211.93px; height:55px;
+  left:39.25px;   /* 118.89 - 79.64 */
+  top:126.00px;   /* 816.88 - 690.88 */
+}
+
+/* Group 323 — CCV */
+.rect-72 .r72-g323{
+  position:absolute;
+  width:211.93px; height:55px;
+  left:262.60px;  /* 342.24 - 79.64 */
+  top:126.00px;   /* 816.88 - 690.88 */
+}
+
+.cart-continue-btn[disabled]{
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+  pointer-events: none;
+}
+
+/* базовый стиль — как был */
+.rect-71 .courier-toggle{
+  position:absolute;
+  left:0; top:3.99px; width:16.03px; height:16.03px;
+  box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:5px;
+  background:#FFFFFF; cursor:pointer;
+  -webkit-appearance:none; appearance:none; outline:none;
+  transition:background-color 120ms ease, border-color 120ms ease, filter 120ms ease;
+}
+
+/* активное состояние — БОЛЕЕ СИЛЬНОЕ правило */
+.rect-71 .r71-courier .courier-toggle[aria-pressed="true"]{
+  border-color:#35C65E !important;
+  background:#35C65E !important;
+}
+
+/* опционально: контур по клавиатуре */
+.rect-71 .courier-toggle:focus-visible{
+  outline:2px solid #35C65E; outline-offset:2px;
+}
+
+/* Контейнер заголовка */
+.group-154{
+  position: absolute;
+  width: 448.79px;
+  height: 134.99px;
+  left: 90.67px;
+  top: 57.2px;
+}
+
+/* Внутренняя группа */
+.group-154 .group-20{
+  position: absolute;
+  left: 0%;
+  right: -108.22%;
+  top: 26.6%;
+  bottom: 0%;
+}
+
+/* Иконка слева (Frame 139) — подставь свой src */
+.group-154 .title-icon{
+  position: absolute;
+  left: 0%;
+  right: 89.97%;
+  top: 43%;
+  bottom: 20.4%;
+  width: auto;
+  height: 45px;               /* как у Vector */
+  object-fit: contain;
+  transform: rotate(0deg);     /* картинку не вращаем */
+  pointer-events: none;        /* клики не перехватывает */
+}
+
+/* Визуальная зеленая черта (Vector) — если нужна как отдельный элемент:
+   можно оставить, либо опустить если её заменяет иконка. */
+.group-154 .group-20::before{
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  height: 45px;
+  left: 0%;
+  right: 3.76%;
+  top: calc(50% - 45px/2 + 0.69px);
+  transform: rotate(90deg);
+}
+
+/* Заголовок “Про нас” */
+.group-154 .title-h3{
+  position: absolute;
+  left: 8.92%;
+  right: -108.22%;
+  top: 26.6%;
+  bottom: 0%;
+
+  margin: 0;
+  display: flex; align-items: center;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal; font-weight: 500;
+  font-size: 37.5px; line-height: 43px;
+  color: #35C65E;
+  white-space: nowrap;
+}

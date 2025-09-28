@@ -9,11 +9,19 @@ import '../Styles/AuthForm.css';
 
 export const AuthForm = () => {
   const { t } = useTranslation(); // defaultNS: common
-  const [mode, setMode] = useState('login');         // 'login' | 'register'
-  const [loginBy, setLoginBy] = useState('email');   // 'email' | 'phone' | 'phone_otp'
+
+  // режимы и способ входа (без TS-аннотаций)
+  const [mode, setMode] = useState('login');          // 'login' | 'register'
+  const [loginBy, setLoginBy] = useState('email');    // 'email' | 'phone' | 'phone_otp'
+
   const [form, setForm] = useState({
-    firstName:'', lastName:'', password:'', phone:'', email:''
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
   });
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,21 +31,35 @@ export const AuthForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); setLoading(true);
+    setError(null);
+    setLoading(true);
+
     try {
       if (mode === 'login') {
         if (loginBy === 'email') {
-          const { data } = await axios.post('/api/login-email', { email: form.email, password: form.password }, { withCredentials:true });
+          const { data } = await axios.post(
+            '/api/login-email',
+            { email: form.email, password: form.password },
+            { withCredentials: true }
+          );
           if (data.ok) { window.location.href = '/'; return; }
           setError(data.error || t('errors.loginFailed'));
         } else if (loginBy === 'phone') {
-          const { data } = await axios.post('/api/login-phone', { phone: form.phone, password: form.password }, { withCredentials:true });
+          const { data } = await axios.post(
+            '/api/login-phone',
+            { phone: form.phone, password: form.password },
+            { withCredentials: true }
+          );
           if (data.ok) { window.location.href = '/'; return; }
           setError(data.error || t('errors.loginFailed'));
         } else {
           // phone_otp — запускаем отправку SMS и открываем модалку
           if (!form.phone) { setError(t('errors.phoneRequired')); setLoading(false); return; }
-          const { data } = await axios.post('/api/auth/phone/start', { phone: form.phone }, { withCredentials:true });
+          const { data } = await axios.post(
+            '/api/auth/phone/start',
+            { phone: form.phone },
+            { withCredentials: true }
+          );
           if (data.ok) {
             setSmsPhone(form.phone);
             setShowSmsModal(true);
@@ -46,8 +68,14 @@ export const AuthForm = () => {
           }
         }
       } else {
-        const payload = { firstName: form.firstName, lastName: form.lastName, password: form.password, phone: form.phone, email: form.email };
-        const { data } = await axios.post('/api/register-email', payload, { withCredentials:true });
+        const payload = {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+        };
+        const { data } = await axios.post('/api/register-email', payload, { withCredentials: true });
         if (data.ok) { alert(t('auth.registrationSuccess')); setMode('login'); }
         else setError(data.error || t('errors.registerFailed'));
       }
@@ -60,7 +88,11 @@ export const AuthForm = () => {
 
   async function verifySms(code) {
     try {
-      const { data } = await axios.post('/api/auth/phone/verify', { phone: smsPhone, code }, { withCredentials:true });
+      const { data } = await axios.post(
+        '/api/auth/phone/verify',
+        { phone: smsPhone, code },
+        { withCredentials: true }
+      );
       if (data.ok) {
         setShowSmsModal(false);
         window.location.href = '/';
@@ -73,162 +105,146 @@ export const AuthForm = () => {
   }
 
   return (
-    <div className="auth-container" aria-label={t('auth.formAria')}>
-      <div className="auth-tabs" role="tablist" aria-label={t('auth.tablistAria')}>
-        <button
-          className={mode === 'login' ? 'active' : ''}
-          onClick={() => setMode('login')}
-          role="tab"
-          aria-selected={mode === 'login'}
-        >
-          {t('auth.loginTab')}
-        </button>
-        <button
-          className={mode === 'register' ? 'active' : ''}
-          onClick={() => setMode('register')}
-          role="tab"
-          aria-selected={mode === 'register'}
-        >
-          {t('auth.registerTab')}
-        </button>
-      </div>
+    <div className="auth-stage" aria-label={t('auth.formAria')}>
+      {/* Левая колонка — Вхід */}
+      <section className="auth-box auth-box--left" aria-label={t('auth.loginTab')}>
+        <h4 className="auth-left-title">{t('auth.loginTab')}</h4>
 
-      <div className="auth-third-party">
-        <GoogleSignIn onSuccess={() => (window.location.href = '/')} />
-      </div>
-      <div className="auth-divider"><span>{t('common.or')}</span></div>
+        {/* Мини-переключатель способов входа */}
+        <div className="login-switch" aria-hidden="false">
+          <button
+            type="button"
+            className={loginBy === 'email' ? 'is-active' : ''}
+            onClick={() => setLoginBy('email')}
+          >
+            {t('auth.byEmail')}
+          </button>
+          <button
+            type="button"
+            className={loginBy === 'phone' ? 'is-active' : ''}
+            onClick={() => setLoginBy('phone')}
+          >
+            {t('auth.byPhonePass')}
+          </button>
+          <button
+            type="button"
+            className={loginBy === 'phone_otp' ? 'is-active' : ''}
+            onClick={() => setLoginBy('phone_otp')}
+          >
+            {t('auth.byPhoneOtp')}
+          </button>
+        </div>
 
-      <form className="auth-form" onSubmit={handleSubmit}>
-        {mode === 'register' ? (
-          <>
+        <form onSubmit={handleSubmit}>
+          {/* Email / Телефон */}
+          {loginBy !== 'phone' ? (
+            <label className="auth-input-wrap auth-input-wrap--email">
+              <input
+                type="email"
+                className="auth-input auth-input--email"
+                placeholder="*Email"
+                aria-label="Email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </label>
+          ) : (
+            <label className="auth-input-wrap auth-input-wrap--email">
+              <input
+                className="auth-input auth-input--email"
+                placeholder={t('forms.phone')}
+                aria-label={t('forms.phone')}
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+            </label>
+          )}
+
+          {/* Пароль (не нужен для OTP) */}
+          {loginBy !== 'phone_otp' && (
+            <label className="auth-input-wrap auth-input-wrap--password">
+              <input
+                type="password"
+                className="auth-input auth-input--password"
+                placeholder={t('forms.password')}
+                aria-label={t('forms.password')}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+              <button type="button" className="auth-pass-toggle" aria-label="Toggle password">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#35C65E" strokeWidth="1.5" />
+                  <circle cx="12" cy="12" r="3" stroke="#35C65E" strokeWidth="1.5" />
+                </svg>
+              </button>
+            </label>
+          )}
+
+          {error && <div className="error-block">{error}</div>}
+
+          <button type="submit" className="auth-submit" disabled={loading}>
+            {t('auth.continue')}
+          </button>
+        </form>
+
+        {/* «або» + Google */}
+        <div className="auth-divider">
+          <span className="auth-divider__text">{t('common.or')}</span>
+          <div className="auth-google">
+            <GoogleSignIn onSuccess={() => (window.location.href = '/')} />
+          </div>
+        </div>
+      </section>
+
+      {/* Правая колонка — Реєстрація */}
+      <section className="auth-box auth-box--right" aria-label={t('auth.registerTab')}>
+        <h4 className="r-auth-title">{t('auth.registerTab')}</h4>
+
+        <form onSubmit={handleSubmit}>
+          <label className="r-auth-input-wrap r-auth-input-wrap--name">
             <input
-              name="firstName"
+              className="r-auth-input r-auth-input--name"
               placeholder={t('forms.firstName')}
-              value={form.firstName}
-              onChange={e=>setForm({...form, firstName:e.target.value})}
               aria-label={t('forms.firstName')}
+              value={form.firstName}
+              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
             />
+          </label>
+
+          <label className="r-auth-input-wrap r-auth-input-wrap--email">
             <input
-              name="lastName"
-              placeholder={t('forms.lastName')}
-              value={form.lastName}
-              onChange={e=>setForm({...form, lastName:e.target.value})}
-              aria-label={t('forms.lastName')}
-            />
-            <input
-              name="phone"
-              placeholder={t('forms.phone')}
-              value={form.phone}
-              onChange={e=>setForm({...form, phone:e.target.value})}
-              aria-label={t('forms.phone')}
-            />
-            <input
-              name="email"
               type="email"
+              className="r-auth-input r-auth-input--email"
               placeholder="Email"
-              value={form.email}
-              onChange={e=>setForm({...form, email:e.target.value})}
               aria-label="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
-            <input
-              name="password"
-              type="password"
-              placeholder={t('forms.password')}
-              value={form.password}
-              onChange={e=>setForm({...form, password:e.target.value})}
-              aria-label={t('forms.password')}
-            />
-          </>
-        ) : (
-          <>
-            <div className="row gap-6">
-              <button
-                type="button"
-                className={loginBy==='email'?'active':''}
-                onClick={()=>setLoginBy('email')}
-                aria-pressed={loginBy==='email'}
-              >
-                {t('auth.byEmail')}
-              </button>
-              <button
-                type="button"
-                className={loginBy==='phone'?'active':''}
-                onClick={()=>setLoginBy('phone')}
-                aria-pressed={loginBy==='phone'}
-              >
-                {t('auth.byPhonePass')}
-              </button>
-              <button
-                type="button"
-                className={loginBy==='phone_otp'?'active':''}
-                onClick={()=>setLoginBy('phone_otp')}
-                aria-pressed={loginBy==='phone_otp'}
-              >
-                {t('auth.byPhoneOtp')}
-              </button>
+          </label>
+
+          <div className="auth-steps" aria-hidden="true">
+            <span className="dot is-active" />
+            <span className="dot" />
+            <span className="dot" />
+          </div>
+
+          <button
+            type="submit"
+            className="r-auth-submit"
+            disabled={loading}
+            onClick={() => setMode('register')}
+          >
+            {t('auth.continue')}
+          </button>
+
+          <div className="r-auth-divider">
+            <span className="r-auth-divider__text">{t('common.or')}</span>
+            <div className="r-auth-google">
+              <GoogleSignIn onSuccess={() => (window.location.href = '/')} />
             </div>
-
-            {loginBy === 'email' && (
-              <>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={e=>setForm({...form, email:e.target.value})}
-                  aria-label="Email"
-                />
-                <input
-                  name="password"
-                  type="password"
-                  placeholder={t('forms.password')}
-                  value={form.password}
-                  onChange={e=>setForm({...form, password:e.target.value})}
-                  aria-label={t('forms.password')}
-                />
-              </>
-            )}
-
-            {loginBy === 'phone' && (
-              <>
-                <input
-                  name="phone"
-                  placeholder={t('forms.phone')}
-                  value={form.phone}
-                  onChange={e=>setForm({...form, phone:e.target.value})}
-                  aria-label={t('forms.phone')}
-                />
-                <input
-                  name="password"
-                  type="password"
-                  placeholder={t('forms.password')}
-                  value={form.password}
-                  onChange={e=>setForm({...form, password:e.target.value})}
-                  aria-label={t('forms.password')}
-                />
-              </>
-            )}
-
-            {loginBy === 'phone_otp' && (
-              <>
-                <input
-                  name="phone"
-                  placeholder={t('forms.phone')}
-                  value={form.phone}
-                  onChange={e=>setForm({...form, phone:e.target.value})}
-                  aria-label={t('forms.phone')}
-                />
-                {/* Кнопка Submit запустит отправку кода и откроет модалку */}
-              </>
-            )}
-          </>
-        )}
-
-        {error && <div className="error" role="alert">{error}</div>}
-        <button type="submit" disabled={loading}>
-          {mode==='login' ? t('auth.login') : t('auth.register')}
-        </button>
-      </form>
+          </div>
+        </form>
+      </section>
 
       {showSmsModal && (
         <OtpModal
