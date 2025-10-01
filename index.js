@@ -2182,6 +2182,20 @@ app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res
   }
 });
 
+
+// ===== Serve React build (SPA) =====
+const clientBuild = path.join(__dirname, 'client', 'build');
+if (fs.existsSync(clientBuild)) {
+  app.use(express.static(clientBuild));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuild, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('Dev mode: run "cd client && npm start" or build the client.');
+  });
+}
+
 server.listen(PORT, () => {
   console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
 });
