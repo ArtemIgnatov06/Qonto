@@ -1,0 +1,716 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+
+
+/* Контейнер: можно сдвигать от левого края, размеры по ТЗ */
+.hero-banners{
+  --offset: 24px;
+  position:absolute; left:var(--offset); top:0;
+  width:1440px; height:461px;
+  background:#D9D9DF;
+}
+
+/* Настройки вида */
+.hero-banners__viewport{
+  --peek: 28px;              /* видимая кромка слева/справа */
+  --gap:  24px;              /* зазор между баннерами */
+
+  --pad: calc(var(--peek) + var(--gap)/2);
+  --contentW: calc(100% - 2 * var(--pad)); /* ВНУТРЕННЯЯ ширина окна */
+  --slideW:   var(--contentW);             /* ширина каждого баннера */
+  --step:     calc(var(--slideW) + var(--gap));
+
+  position:relative;
+  width:100%; height:100%;
+  overflow:hidden;
+  box-sizing:border-box;
+  padding-left:  var(--pad);
+  padding-right: var(--pad);
+}
+
+/* Лента */
+.hero-banners__track{
+  display:flex;
+  height:100%;
+  gap:var(--gap);
+  will-change:transform;
+
+  transform: translate3d(calc(-1 * var(--step) + var(--pad)), 0, 0);
+  animation: hero-peek 16.5s linear infinite;
+}
+.hero-banners__viewport:hover .hero-banners__track{ animation-play-state:paused; }
+
+/* Проставки по краям — одинаковые всегда */
+.hero-banners__spacer{
+  flex:0 0 var(--pad);
+  height:100%;
+}
+
+/* Слайды: собственное скругление и аккуратный зазор по половине с каждой стороны */
+.hero-banners__slide{
+  position:relative;
+  flex:0 0 var(--slideW);
+  height:100%;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+.hero-banners__slide > img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+
+/* Кнопка */
+.hero-banners__btn{
+  position:absolute; right:32px; top:50%; transform:translateY(-50%);
+  padding:14px 22px; border-radius:14px; text-decoration:none;
+  background:#34C759; color:#fff; font-weight:700;
+  box-shadow:0 6px 14px rgba(0,0,0,.15);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.hero-banners__btn:hover{ transform:translateY(calc(-50% - 1px)); box-shadow:0 10px 20px rgba(0,0,0,.2); }
+.hero-banners__btn:active{ transform:translateY(-50%); }
+
+@keyframes hero-peek{
+  /* S1 на экране */
+  0%        { transform:translate3d(calc(-1 * var(--step) + var(--pad)), 0, 0); }
+  30.303%   { transform:translate3d(calc(-1 * var(--step) + var(--pad)), 0, 0); } /* 5.0s */
+  33.333%   { transform:translate3d(calc(-2 * var(--step) + var(--pad)), 0, 0); } /* +0.5s */
+
+  /* S2 на экране */
+  63.636%   { transform:translate3d(calc(-2 * var(--step) + var(--pad)), 0, 0); } /* 10.5s */
+  66.667%   { transform:translate3d(calc(-3 * var(--step) + var(--pad)), 0, 0); } /* 11.0s */
+
+  /* S3 на экране */
+  96.970%   { transform:translate3d(calc(-3 * var(--step) + var(--pad)), 0, 0); } /* 16.0s */
+  100%      { transform:translate3d(calc(-4 * var(--step) + var(--pad)), 0, 0); } /* 16.5s → клон S1 */
+}
+
+/* Системное «меньше анимаций» */
+@media (prefers-reduced-motion: reduce){
+  .hero-banners__track{ animation:none; }
+}
+
+/* ==========================================================
+   ADAPTIVE LAYER (geometry-preserving)
+   База: 1600px (хедер/футер). Герой 1440×461 масштабируется внутри.
+   Ниже 1600px все px → px * s. На ≥1600px — как в макете.
+   ========================================================== */
+@layer adaptive {
+  :root{
+    --design-w: 1600;           /* базовая ширина страницы (хедер/футер) */
+  }
+
+  @media (max-width: calc(var(--design-w) * 1px)) {
+    :root{
+      --s: calc(100vw / (var(--design-w) * 1px));  /* коэффициент масштаба */
+    }
+
+    /* ---------- HEADER ---------- */
+    .hdr{
+      width:  calc(1600px * var(--s));
+      height: calc(105px  * var(--s));
+      left:   calc(0.21px * var(--s));
+      top:    calc(0px    * var(--s));
+      font-size: calc(16px * var(--s)); /* шрифт контейнера */
+    }
+    .hdr-bg{
+      width:  calc(1600px * var(--s));
+      height: calc(105px  * var(--s));
+      left:0; top:0;
+    }
+
+    /* LOGO */
+    .logo{
+      width:  calc(126px * var(--s));
+      height: calc(47px  * var(--s));
+      left:   calc(80px  * var(--s));
+      top:    calc(29px  * var(--s));
+    }
+    .logo-text{
+      width:  calc(126px * var(--s));
+      height: calc(47px  * var(--s));
+      left:0; top:0;
+      font-size: calc(38.6596px * var(--s));
+      line-height: calc(47px * var(--s));
+    }
+    .logo-dot{
+      width:  calc(15.11px * var(--s));
+      height: calc(15.11px * var(--s));
+      left:   calc(8.6px  * var(--s));
+      top:    calc(15.94px * var(--s));
+      border-radius: calc(2px * var(--s));
+    }
+
+    /* SEARCH */
+    .search-wrap{
+      width:  calc(714.29px * var(--s));
+      height: calc(40px    * var(--s));
+      left:   calc(251.71px * var(--s));
+      top:    calc(32.5px   * var(--s));
+    }
+    .search-input{
+      padding: 0 calc(48px * var(--s)) 0 calc(16px * var(--s));
+      border-width: calc(2px * var(--s));
+      border-radius: calc(10px * var(--s));
+      font-size: calc(12px * var(--s));
+      line-height: calc(14px * var(--s));
+    }
+    .search-ico,
+    .search-btn{
+      width:  calc(26px * var(--s));
+      height: calc(26px * var(--s));
+      right:  calc(7px  * var(--s));
+      top:    calc(7px  * var(--s));
+      border-radius: calc(6px * var(--s));
+    }
+    .search-ico svg,
+    .search-btn svg{
+      width:  calc(26px * var(--s));
+      height: calc(26px * var(--s));
+    }
+
+    /* КНОПКА AI */
+    .btn-ai{
+      left:   calc(991px * var(--s));
+      top:    calc(32.5px * var(--s));
+      width:  calc(156px * var(--s));
+      height: calc(40px  * var(--s));
+      border-width: calc(2px * var(--s));
+      border-radius: calc(9px * var(--s));
+      font-size: calc(12px * var(--s));
+      line-height: calc(24px * var(--s));
+    }
+    .ai-ico{
+      left:   calc(12px * var(--s));
+      width:  calc(20px * var(--s));
+      height: calc(20px * var(--s));
+    }
+    .ai-ico svg{ width:calc(20px * var(--s)); height:calc(20px * var(--s)); }
+    .ai-label{
+      left: calc(42px * var(--s));
+      font-size: calc(12px * var(--s));
+      line-height: calc(24px * var(--s));
+    }
+
+    /* КНОПКА КАТАЛОГ */
+    .btn-cat{
+      left:   calc(1172px * var(--s));
+      top:    calc(32.5px  * var(--s));
+      width:  calc(104px   * var(--s));
+      height: calc(40px    * var(--s));
+      border-width: calc(2px * var(--s));
+      border-radius: calc(9px * var(--s));
+      font-size: calc(12px * var(--s));
+      line-height: calc(24px * var(--s));
+    }
+    .cat-ico{
+      left:   calc(12px * var(--s));
+      width:  calc(20px * var(--s));
+      height: calc(20px * var(--s));
+    }
+    .cat-ico svg{ width:calc(20px * var(--s)); height:calc(20px * var(--s)); }
+    .cat-label{
+      left: calc(42px * var(--s));
+      font-size: calc(12px * var(--s));
+      line-height: calc(24px * var(--s));
+    }
+
+    /* ИКОНКИ 3–5 */
+    .ico{
+      width:  calc(30px * var(--s));
+      height: calc(30px * var(--s));
+      border-radius: calc(8px * var(--s));
+      box-shadow: 0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(0,0,0,.25);
+    }
+    .ico svg{ width:calc(18px * var(--s)); height:calc(18px * var(--s)); }
+
+    .ico-lang { left: calc(1315px * var(--s)); top: calc(37.5px * var(--s)); }
+    .ico-heart{ left: calc(1370px * var(--s)); top: calc(37.5px * var(--s)); }
+    .ico-cart { left: calc(1425px * var(--s)); top: calc(37.5px * var(--s)); }
+
+    /* АККАУНТ */
+    .ico-user{
+      left: calc(1480px * var(--s));
+      top:  calc(37.5px  * var(--s));
+      width:  calc(30px * var(--s));
+      height: calc(30px * var(--s));
+      border-radius: calc(6px * var(--s));
+      box-shadow: 0 calc(2px * var(--s)) calc(8px * var(--s)) rgba(0,0,0,.25);
+    }
+    .ico-user svg{ width:calc(24px * var(--s)); height:calc(24px * var(--s)); }
+
+    /* ---------- HERO (баннер) ---------- */
+    .hero-banners{
+      left:  calc(24px * var(--s)); /* --offset */
+      top:   calc(0px  * var(--s));
+      width:  calc(1440px * var(--s));
+      height: calc(461px  * var(--s));
+    }
+    .hero-banners__viewport{
+      /* «пики» и зазор — от отдельной базы 1440 */
+      --peek: calc(28px * var(--s));
+      --gap:  calc(24px * var(--s));
+      padding-left:  calc((var(--peek) + var(--gap)/2));
+      padding-right: calc((var(--peek) + var(--gap)/2));
+      box-shadow: none;
+    }
+    .hero-banners__slide{
+      border-radius: calc(15px * var(--s));
+      box-shadow: 0 calc(8px * var(--s)) calc(24px * var(--s)) rgba(0,0,0,.08);
+    }
+    .hero-banners__btn{
+      right: calc(32px * var(--s));
+      padding: calc(14px * var(--s)) calc(22px * var(--s));
+      border-radius: calc(14px * var(--s));
+      box-shadow: 0 calc(6px * var(--s)) calc(14px * var(--s)) rgba(0,0,0,.15);
+    }
+    /* если у тебя есть модификатор второй кнопки (Rectangle 3) */
+    .hero-banners__btn--s2{
+      width:  calc(232px * var(--s));
+      height: calc(55px  * var(--s));
+      border-width: calc(2px * var(--s));
+      border-radius: calc(10px * var(--s));
+    }
+    /* и координаты этой кнопки задавай через var(--s) в HTML:
+       style="--btn-top: calc(328px * var(--s)); --btn-left: calc(121px * var(--s)); --btn-ty:0" */
+
+    /* ---------- FOOTER ---------- */
+    .ftr{
+      width:  calc(1600px * var(--s));
+      height: calc(388px  * var(--s));
+      left:   calc(0.21px * var(--s));
+      bottom: calc(0.18px * var(--s));
+      font-size: calc(16px * var(--s));
+    }
+    .ftr-bg{
+      width:  calc(1600px * var(--s));
+      height: calc(388.01px * var(--s));
+      left:0; top:0;
+    }
+
+    .ftr-h4{
+      font-size:  calc(25px * var(--s));
+      line-height: calc(36px * var(--s));
+    }
+    .ftr-h4--social{ left: calc(935px * var(--s));  top: calc(60.82px * var(--s)); width: calc(305px * var(--s)); height: calc(36px * var(--s)); }
+    .ftr-h4--info{   left: calc(80px * var(--s));   top: calc(51.1px  * var(--s)); width: calc(324.28px * var(--s)); height: calc(56.46px * var(--s)); }
+    .ftr-h4--help{   left: calc(446px * var(--s));  top: calc(51.1px  * var(--s)); width: calc(230.62px * var(--s)); height: calc(56.46px * var(--s)); }
+    .ftr-h4--sellers{left: calc(690px * var(--s));  top: calc(51.1px  * var(--s)); width: calc(230.62px * var(--s)); height: calc(56.46px * var(--s)); }
+
+    .ftr-list{
+      font-size:  calc(14px * var(--s));
+      line-height: calc(24px * var(--s));
+    }
+    .ftr-list--info{    left: calc(80px * var(--s));  top: calc(122.39px * var(--s)); width: calc(238.77px * var(--s)); height: calc(127.91px * var(--s)); }
+    .ftr-list--help{    left: calc(446px * var(--s)); top: calc(122.39px * var(--s)); width: calc(238.77px * var(--s)); height: calc(127.91px * var(--s)); }
+    .ftr-list--sellers{ left: calc(690px * var(--s)); top: calc(122.39px * var(--s)); width: calc(238.77px * var(--s)); height: calc(127.91px * var(--s)); }
+
+    .ftr-soc{
+      width:  calc(35px * var(--s));
+      height: calc(35px * var(--s));
+      border-radius: calc(8px * var(--s));
+    }
+    .ftr-soc--ig{ left: calc(935px * var(--s));  top: calc(117.34px * var(--s)); }
+    .ftr-soc--fb{ left: calc(1000px * var(--s)); top: calc(117.34px * var(--s)); }
+    .ftr-soc--tt{ left: calc(1065px * var(--s)); top: calc(117.34px * var(--s)); }
+
+    .ftr-copy{
+      left:  calc(498px * var(--s));
+      top:   calc(320.97px * var(--s));
+      width: calc(660px * var(--s));
+      height: calc(24px * var(--s));
+      font-size:  calc(14px * var(--s));
+      line-height: calc(24px * var(--s));
+    }
+
+    .ftr-mascot{
+      right: calc(-160px * var(--s));
+      bottom: calc(-160px * var(--s));
+      width:  calc(500px * var(--s));
+      height: calc(500px * var(--s));
+    }
+
+    /* ---------- универсальные «карманы» для блоков с absolute ---------- */
+    .slot{
+      width: min(100%, calc(1440px * var(--s)));
+      margin: calc(24px * var(--s)) auto 0;
+    }
+    .slot--hero{ aspect-ratio: 1440 / 461; }
+    .slot > .hero-banners{
+      inset: 0; width:100%; height:100%;
+    }
+  }
+}
+
+
+
