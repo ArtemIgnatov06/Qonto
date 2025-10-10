@@ -1,0 +1,101 @@
+/* =========================
+   Return page — clean & isolated
+   ========================= */
+
+/* Палитра / контейнер */
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+  --page-max:1120px;
+}
+
+.return-page{ background: transparent; }
+
+.return-container{
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 32px 16px 96px;   /* запас снизу под футер */
+  color: #111;               /* тёмный читаемый текст */
+  box-sizing: border-box;
+  background: transparent;   /* убираем любые подложки */
+}
+
+/* если вдруг внутрь попадут чужие .hdr/.ftr — прячем */
+.return-page .hdr,
+.return-page .ftr{ display:none !important; }
+
+/* ——— Санитайзер старого HTML с абсолютами ——— */
+/* сбрасываем позиционирование у типичных «фигма»-блоков */
+.return-container [class^="group-"],
+.return-container .legal-wrap,
+.return-container .about-title,
+.return-container .about-desc,
+.return-container .about-icon,
+.return-container .about-icon__img,
+.return-container .about-icon__vector{
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important; right: auto !important; top: auto !important; bottom: auto !important;
+  transform: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0; padding: 0;
+}
+
+/* ——— Герой-блок (иконка + зелёный заголовок) ——— */
+.return-hero{
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 4px 0 10px;
+}
+.return-hero__icon{
+  width:44px;height:44px;display:inline-grid;place-items:center;border-radius:8px;
+  color:var(--accent);font-size:26px;line-height:1;
+}
+.return-hero__title{
+  margin:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight:700;
+  font-size:clamp(32px,4.2vw,56px);
+  line-height:1.1;
+  color:#35C65E;
+}
+
+/* ——— Контент ——— */
+.return-content h2{
+  margin:28px 0 12px;
+  font-weight:700;
+  font-size:clamp(22px,2.2vw,28px);
+  color:#111;
+}
+.return-content h3{
+  margin:20px 0 10px;
+  font-weight:600;
+  font-size:clamp(18px,1.8vw,22px);
+  color:#111;
+}
+.return-content p{ margin:0 0 12px; line-height:1.65; color:#111; }
+.return-content ul, .return-content ol{ margin:0 0 14px 0; padding-left:1.25rem; color:#111; }
+.return-content li{ margin:6px 0; }
+.return-content a{ color:#0b0b0b; text-decoration:underline; }
+.return-content a:hover{ color:#000; }
+
+/* таблицы/медиа */
+.return-content img,
+.return-content video,
+.return-content iframe,
+.return-content table{ max-width:100%; height:auto; }
+.return-content table{
+  width:100%; border-collapse:collapse; margin:10px 0 16px;
+}
+.return-content th, .return-content td{
+  border-bottom:1px solid #e5e7eb; padding:8px 10px; text-align:left; color:#111;
+}
+
+/* на всякий: убираем прозрачности/фильтры у потомков */
+.return-container *{ opacity:1 !important; filter:none !important; }

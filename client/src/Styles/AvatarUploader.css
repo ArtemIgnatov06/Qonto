@@ -1,0 +1,105 @@
+/* утилиты проекта — оставлены */
+.card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
+.fw-700 { font-weight: 700; }
+.gap-10 { gap: 10px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-6 { gap: 6px; }
+.gap-8 { gap: 8px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+.hidden { display: none; }
+.mb-10 { margin-bottom: 10px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-6 { margin-bottom: 6px; }
+.mb-8 { margin-bottom: 8px; }
+.mt-10 { margin-top: 10px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mt-6 { margin-top: 6px; }
+.mt-8 { margin-top: 8px; }
+.muted { color: #6b7280; }
+.muted-12 { font-size: 12px; color: #6b7280; }
+.muted-555 { color: #555; }
+.pad-16 { padding: 16px; }
+.pad-24 { padding: 24px; }
+.pad-24-16 { padding: 24px 16px; }
+.pad-8 { padding: 8px; }
+.page-container { padding: 24px 16px; max-width: 1000px; margin: 0 auto; }
+.prewrap { white-space: pre-wrap; }
+.row { display: flex; }
+.row-center { display: flex; align-items: center; }
+.ta-center { text-align: center; }
+.w-60 { width: 60px; }
+.w-full { width: 100%; }
+
+/* ===== AvatarUploader specific ===== */
+
+.uploader-wrap {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avatar-wrap {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: visible;
+  background: #e5e7eb;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatar-letter {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  font-size: 42px;
+  user-select: none;
+}
+
+.status-dot {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
+  pointer-events: none;
+  z-index: 2;
+}
+.status-dot.online { background: #22c55e; }
+.status-dot.offline { background: #9ca3af; }
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.6);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #374151;
+}

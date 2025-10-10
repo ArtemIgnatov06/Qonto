@@ -1,0 +1,244 @@
+/* index.css — сброс и базовая типографика */
+:root {
+  --bg: #ffffff;
+  --card-bg: #ffffff;
+  --primary-text: #1f2d3a;
+  --muted-text: #6b7a8c;
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(31, 45, 58, 0.08);
+  --border: 1px solid rgba(31, 45, 58, 0.1);
+  --link: #5f9ea0;
+  --link-hover: #476f7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--primary-text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.heading-large {
+  font-size: 1.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.text-muted {
+  color: var(--muted-text);
+  margin: 0;
+}
+
+.link {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.button {
+  background-color: #d0e3f2; /* нежный пастельный */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color .2s ease;
+}
+
+.button:hover {
+  background-color: #b5d4ea;
+}
+
+.page {
+  padding: 2rem 0;
+}
+
+/* === products grid === */
+/* компактная карточка-контейнер на главной */
+.page-home .card.card-compact{
+  padding: 16px 18px;          /* было слишком много — уменьшаем */
+  max-width: 1500px;           /* чтобы контент не “плавал” по ширине */
+  margin: 16px auto;           /* меньше отступы вокруг */
+}
+
+/* сетка товаров: 3 в ряд на десктопе */
+.products-grid{
+  display:grid;
+  gap:16px;                    /* компактнее */
+  margin-top:12px;
+}
+.products-grid-3{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* карточка товара — квадратная плитка */
+.product-card{
+  background:#fff;
+  border:1px solid #e6e6e6;
+  border-radius:12px;
+  padding:12px;                /* меньше внутренние отступы */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  transition: box-shadow .2s;
+}
+.product-card:hover{ box-shadow:0 4px 12px rgba(0,0,0,.06); }
+
+/* квадратная картинка */
+.product-thumb{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:8px;
+  margin-bottom:8px;
+}
+
+/* текстовые блоки */
+.product-title{ font-weight:600; margin-bottom:4px; }
+.product-desc{ font-size:.92rem; color:#555; margin-bottom:6px; }
+.product-price{ font-weight:700; margin-bottom:4px; }
+.product-seller{ font-size:.82rem; color:#8a8a8a; }
+
+
+/* ===== Product page layout ===== */
+.product-page {
+  max-width: 960px;          /* сожмём контент, чтобы не растягивался */
+  margin: 0 auto;
+  padding: 8px;
+}
+
+.product-page .row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 12px;
+}
+
+.product-page .price {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* ===== Reviews ===== */
+.review-form {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: start;
+  margin: 12px 0 16px;
+}
+
+.review-form select {
+  min-height: 36px;
+}
+
+.review-form textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  padding: 8px;
+  line-height: 1.3;
+}
+
+/* Список отзывов: вертикальный поток с отступами */
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+
+/* Карточка одного отзыва */
+.review {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+/* Заголовок отзыва (оценка + автор) */
+.review .head {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* Текст комментария: переносить длиннющие слова/строки */
+.review .comment {
+  white-space: pre-wrap;      /* уважаем переносы и \n */
+  word-break: break-word;     /* переносим длинные слова */
+  overflow-wrap: anywhere;    /* ещё агрессивнее переносить */
+  line-height: 1.35;
+}
+
+/* Дата мелким серым */
+.review .ts {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #667085;
+}
+
+/* Контейнер для превью на карточке */
+.product-card .thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;     /* квадрат, современный способ */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+  margin-bottom: 12px;
+}
+
+/* Само изображение — заполняет контейнер без искажений */
+.thumb-fixed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* центрируем и кропаем по контейнеру */
+  display: block;
+}
+
+/* Плейсхолдер, если картинки нет */
+.thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+  
+/* Небольшой предпросмотр в форме создания */
+.thumb-preview {
+  margin: 8px 0 16px;
+  width: 200px;
+  aspect-ratio: 1/1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+/* App.css или общий css */
+.product-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* квадрат */
+  object-fit: cover;     /* заполняем без искажений */
+  display: block;
+  border-radius: 12px;
+  background: #f3f4f6;   /* серый фон, если нет картинки */
+}
+

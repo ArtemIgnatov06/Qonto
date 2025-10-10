@@ -1,0 +1,256 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+  white-space: nowrap;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+  white-space: nowrap;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+:root{
+  --accent:#35C65E;
+  --stroke:#ECECEC;
+}
+
+.success-title{
+  position: absolute;
+  width: 289px;
+  height: 36px;
+  left: 244.92px;
+  top: 280.28px;
+  white-space: nowrap;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  color: #35C65E;
+}
+
+.success-text{
+  position: absolute;
+  width: 381px;
+  height: 48px;
+  left: 244.92px;
+  top: 320.28px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+}
+
+/* Общая база для кнопок */
+.success-btn{
+  position:absolute;
+  height:55px;
+  border-radius:10px;
+  font:500 14px/24px 'Ubuntu', sans-serif;
+  display:flex; 
+  align-items:center; 
+  justify-content:flex-start;   /* выравнивание текста и иконки */
+  padding-left:20px;            /* смещение текста внутрь */
+  gap:10px;                     /* отступ между текстом и иконкой */
+  cursor:pointer;
+  transition: all .2s ease;
+}
+
+/* За покупками — зелёная, 205×55 @ 245/393 */
+.success-btn--primary{
+  width:205px; left:245px; top:393px;
+  background:var(--accent);
+  border:2px solid var(--accent);
+  color:#fff;
+}
+.success-btn--primary:hover{ background:#2eaa50; }
+.success-btn--primary:active{ transform:translateY(1px); }
+
+/* До профілю — белая с серой обводкой, 190×55 @ 245/463 */
+.success-btn--ghost{
+  width:190px; left:245px; top:463px;
+  background:#fff;
+  border:2px solid var(--stroke);
+  color:#828181;
+}
+.success-btn--ghost:hover{ border-color:#dcdcdc; color:#363535; }
+.success-btn--ghost:active{ transform:translateY(1px); }
+
+/* Иконки внутри кнопок */
+.success-btn img{
+  width:20px; height:20px;
+  object-fit:contain;
+  pointer-events:none;
+}
+
+/* Плейсхолдеры-изображения рядом с кнопками */
+.success-icon{
+  position:absolute;
+  display:block;
+  object-fit:contain;
+  pointer-events:none;
+}
+
+/* Стрелка (Frame 99) — 22.82×22.13 @ 397/409.83 */
+.success-icon--arrow{
+  width:22.82px; height:22.13px;
+  left:397px; top:409.83px;
+  /* transform: rotate(90deg); если нужно */
+}
+
+/* Иконка профиля — 37×37 @ 375/472 */
+.success-icon--user{
+  width:37px; height:37px;
+  left:375px; top:472px;
+}
+
+.decor {
+  position: absolute;
+  display: block;
+  pointer-events: none;   /* чтобы не мешали клику */
+  opacity: 1;
+  z-index: 1000;          /* поверх остального интерфейса */
+}
+
+
+/* Левый элемент */
+.decor--left {
+  width: 366.045px;
+  height: 312.746px;
+  left: -20px;
+  top: 311px;
+}
+
+/* Правый элемент */
+.decor--right {
+  width: 310.563px;
+  height: 265.342px;
+  left: 1376.25px;
+  top: 100.67px;
+}
+
+/* Новое большое изображение справа */
+.success-img-main{
+  position:absolute;
+  width:602.79px;
+  height:406.26px;
+  left:717.42px;
+  top:276.8px;
+  object-fit:contain;
+}

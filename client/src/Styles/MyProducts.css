@@ -1,0 +1,27 @@
+/* Специфичные стили страницы "Мои товары".
+   Общие утилиты (.row, .gap-*, .card, .text-muted и т.п.) — в utilities.css / базовых стилях. */
+
+.text-danger { color: #b00020; }
+
+/* верхняя панель заголовка + кнопка */
+.mp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ссылка-обёртка превью как блочный элемент */
+.mp-block-link { display: block; }
+
+/* полоска с заголовком карточки товара */
+.mp-titlebar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* категория под заголовком */
+.mp-category {
+  margin: 4px 0 8px;
+}

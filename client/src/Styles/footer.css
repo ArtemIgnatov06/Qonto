@@ -1,0 +1,129 @@
+/* =========================
+   FOOTER — full width + sticky bottom + figma layout
+   ========================= */
+
+:root{
+  --footer-bg: #363535;
+  --footer-fg: #ECECEC;
+  --footer-accent: #7AD293;
+  /* ширина контента по центру (похоже на макет) */
+  --footer-container: 1120px;
+}
+
+/* ——— каркас-«липучка» внизу: работает без position:fixed ——— */
+html, body, #root { height: 100%; }
+#root { display: flex; flex-direction: column; }
+#root > *:not(.ftr-wrap) { flex-shrink: 0; }
+main, .page, .app-content { flex: 1 0 auto; } /* если у вас есть основной контейнер */
+.ftr-wrap { flex-shrink: 0; }
+
+/* ——— фон тянется на всю ширину страницы ——— */
+.ftr-wrap{
+  position: relative;
+  width: 100%;
+  background: var(--footer-bg);
+  overflow: clip;
+}
+
+/* ——— внутренний контейнер по центру + сетка 4 колонки ——— */
+.ftr{
+  position: relative;
+  max-width: var(--footer-container);
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  color: var(--footer-fg);
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  column-gap: 56px;
+  row-gap: 10px;
+  align-items: start;
+}
+
+/* общий блок колонки */
+.ftr-col{ min-width: 0; }
+
+/* заголовки колонок */
+.ftr-h4{
+  margin: 0 0 12px;
+  font-family: Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  color: var(--footer-accent);
+}
+
+/* списки */
+.ftr-list{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 24px;
+}
+.ftr-list a{
+  color: var(--footer-fg);
+  text-decoration: none;
+}
+.ftr-list a:hover{ color: #fff; }
+
+/* соц.иконки в строку */
+.ftr-col--social .ftr-soc-row{
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 6px;
+}
+.ftr-soc{
+  width: 35px; height: 35px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+}
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{ filter: brightness(1.15); }
+
+/* копирайт на всю ширину сетки, по центру */
+.ftr-copy{
+  grid-column: 1 / -1;
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--footer-fg);
+  opacity: .95;
+}
+
+/* старые «пикс-в-пикс» правила из фигмы отключаем */
+.ftr-bg{ display:none !important; }
+.ftr h4, .ftr ul, .ftr a, .ftr p{ position: static !important; }
+
+/* ——— Маскот — всегда у правого края ВЬЮПОРТА, вывален наружу ——— */
+.ftr-mascot{
+  position: absolute;
+  /* прижим к правому краю экрана, а не контейнера:
+     -180px — постоянный «вылет» за край, как в макете
+     max() не даст уйти внутрь при узких экранах
+  */
+  right: max(-180px, calc((100vw - var(--footer-container)) / 2 - 460px));
+  bottom: -160px;          /* как в фигме — немного ниже нижней кромки */
+  width: 500px;            /* размер как в макете; при желании подгони */
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* планшеты: меньше “вылет”, чтобы не упирался в текст */
+@media (max-width: 1100px){
+  .ftr-mascot{
+    right: -90px;
+    bottom: -130px;
+    width: 420px;
+  }
+}
+
+/* мобильный: прячем (в макете его нет) */
+@media (max-width: 700px){
+  .ftr-mascot{ display: none; }
+}

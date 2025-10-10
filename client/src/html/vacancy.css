@@ -1,0 +1,209 @@
+/* =========================
+   Vacancies page (clean + light)
+   ========================= */
+
+/* Палитра / контейнер */
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+  --page-max:1120px;
+}
+
+.vacancy-page{
+  background: transparent; /* не красим фон страницы — пусть живёт тема приложения */
+}
+
+.vacancy-container{
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 32px 16px 96px; /* запас снизу, чтобы футер не наезжал */
+  color: #111;            /* ЧЁРНЫЙ текст по умолчанию */
+  box-sizing: border-box;
+  background: transparent; /* убираем любую подложку */
+}
+
+/* Жёсткая изоляция: если внезапно попадут внутрь страницы — скрываем */
+.vacancy-page .hdr,
+.vacancy-page .ftr{
+  display: none !important;
+}
+
+/* ─── Герой-блок ─── */
+.vacancy-hero{
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 4px 0 10px;
+  background: transparent !important; /* никакой синей подложки */
+}
+.vacancy-hero__icon{
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 26px;
+  line-height: 1;
+}
+.vacancy-hero__title{
+  margin: 0;
+  font-family: 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(32px, 4.2vw, 56px);
+  line-height: 1.1;
+  color: #35C65E; /* как на макете */
+}
+
+/* Лид-абзац */
+.vacancy-lead{
+  margin: 10px 0 6px;
+  font-size: 14px;
+  line-height: 24px;
+  color: #222;     /* тёмный, читаемый */
+  opacity: 1;      /* без приглушения */
+  background: transparent !important;
+}
+
+/* ─── Сетка вакансий ─── */
+.jobs-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 16px;
+  margin: 24px 0 0;
+}
+@media (max-width: 1100px){
+  .jobs-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 680px){
+  .jobs-grid{ grid-template-columns: 1fr; }
+}
+
+/* Карточка вакансии — белая и контрастная */
+.job-card{
+  background: #ffffff !important;                 /* белый фон */
+  border: 1px solid #e5e7eb !important;           /* светло-серая рамка */
+  border-radius: 12px;
+  padding: 16px;
+  color: #111 !important;                          /* чёрный текст */
+  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.job-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(0,0,0,.12);
+  border-color: rgba(122,210,147,.6);
+}
+.job-card h3{
+  margin: 0 0 8px;
+  color: #111 !important;
+}
+.job-meta{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #555 !important;
+  margin: 0 0 10px;
+}
+.job-desc{
+  font-size: 14px;
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Кнопки */
+.job-actions{ display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+.btn,
+.btn-outline{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.btn{
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  color: #1E1E1E; /* контрастная надпись */
+}
+.btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.btn:active{ transform: translateY(0); box-shadow: none; }
+
+.btn-outline{
+  background: transparent;
+  border: 2px solid #9ca3af;  /* заметнее, чем var(--stroke) на белом */
+  color: #111;
+}
+.btn-outline:hover{
+  border-color: var(--accent);
+  color: #000;
+}
+
+/* ─── Базовые элементы контента ─── */
+.vacancy-container h2{
+  margin: 28px 0 12px;
+  font-weight: 700;
+  font-size: clamp(22px,2.2vw,28px);
+  color: #111;
+}
+.vacancy-container h3{
+  margin: 20px 0 10px;
+  font-weight: 600;
+  font-size: clamp(18px,1.8vw,22px);
+  color: #111;
+}
+.vacancy-container p{ margin: 0 0 12px; line-height: 1.65; color: #111; }
+.vacancy-container ul,
+.vacancy-container ol{ margin: 0 0 14px 0; padding-left: 1.25rem; color: #111; }
+.vacancy-container li{ margin: 6px 0; }
+.vacancy-container a{
+  color: #0b0b0b;             /* тёмные ссылки */
+  text-decoration: underline;
+}
+.vacancy-container a:hover{ color: #000; }
+
+/* Медиа/таблицы */
+.vacancy-container img,
+.vacancy-container video,
+.vacancy-container iframe,
+.vacancy-container table{
+  max-width: 100%;
+  height: auto;
+  background: transparent !important;
+}
+.vacancy-container table{
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 16px;
+}
+.vacancy-container th,
+.vacancy-container td{
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  text-align: left;
+  color: #111;
+}
+
+/* Любые «панели/секции» из старого HTML — без фона */
+.vacancy-container .section,
+.vacancy-container article,
+.vacancy-container .panel,
+.vacancy-container .box{
+  background: transparent !important;
+}
+
+/* На всякий: убираем прозрачности и фильтры у всех потомков,
+   чтобы текст не выглядел «приглушённым» */
+.vacancy-container *{
+  opacity: 1 !important;
+  filter: none !important;
+}

@@ -1,0 +1,61 @@
+/* ——— специфичные стили для AvatarCircle ——— */
+
+/* контейнер */
+.ac {
+  position: relative;
+  display: inline-block;
+}
+
+/* размеры (в проекте используются 40 и 112) */
+.ac.ac--40  { width: 40px;  height: 40px; }
+.ac.ac--112 { width: 112px; height: 112px; }
+
+/* круг-носитель */
+.ac__figure {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  user-select: none;
+}
+
+/* фон: с картинкой — светло-серый, без — фирменный синий */
+.ac__figure.has-image { background: #e5e7eb; }
+.ac__figure.no-image  { background: #2563eb; }
+
+/* картинка */
+.ac__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* буква */
+.ac__letter {
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* размер шрифта буквы под размер круга */
+.ac--40  .ac__letter { font-size: 17px; }   /* ~0.42 * 40 */
+.ac--112 .ac__letter { font-size: 47px; }   /* ~0.42 * 112 */
+
+/* онлайн-точка */
+.ac__dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  pointer-events: none;
+  z-index: 2;
+}
+.ac__dot.online  { background: #22c55e; }
+.ac__dot.offline { background: #9ca3af; }
