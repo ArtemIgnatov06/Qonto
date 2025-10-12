@@ -797,3 +797,369 @@
   text-decoration-thickness: 1px;
 }
 
+
+
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*СТИЛИ ЭЛЕМЕНТОВ, КОТОРЫЕ ПОЯВЛЯЮТСЯ ПРИ НАЛИЧИИ ТОВАРА В КОРЗИНЕ */
+/*НИЖЕ НИЖЕ НИЖЕ НИЖЕЕЕЕЕЕЕЕЕЕЕЕЕЕ */
+
+
+
+
+/* ===== Group 296 (контейнер) 488×323.67 @ (1030.88, 104.7) ===== */
+.box-296{
+  position: absolute;
+  width: 488px;
+  height: 323.67px;
+  left: 1030.88px;
+  top: 104.7px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+/* Rectangle 66 — белый фон с рамкой и радиусом */
+.rect-66{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 488px;
+  height: 323.67px;
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 13px;
+  box-sizing: border-box;
+}
+
+/* ===== Текстовые строки (Group 297) ===== */
+/* Базовая типографика для маленьких строк */
+.box-296 .label,
+.box-296 .value{
+  position: absolute;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px; /* 171% */
+  color: #828181;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Row 1: Товари — 328.33×24 @ (71.39, 71.17) относительно .box-296 */
+.row-1 .label.goods{
+  left: 71.39px; top: 71.17px; width: 47px; height: 24px;
+}
+.row-1 .value.goods-sum{
+  left: 349.72px; top: 71.17px; width: 50px; height: 24px;
+}
+
+/* Row 2: Знижка — 328.32×24 @ (71.40, 101.49) */
+.row-2 .label.discount{
+  left: 71.40px; top: 101.49px; width: 51px; height: 24px;
+}
+.row-2 .value.discount-sum{
+  left: 345.72px; top: 101.49px; width: 54px; height: 24px;
+}
+
+/* Row 3: Доставка — 326.32×24 @ (71.40, 131.49) */
+.row-3 .label.delivery{
+  left: 71.40px; top: 131.49px; width: 62px; height: 24px;
+}
+.row-3 .value.delivery-sum{
+  left: 347.72px; top: 131.49px; width: 50px; height: 24px;
+}
+
+/* ===== Всього (Group 286) 363.27×43 @ (59.48, 181.81) ===== */
+.total .total-label{
+  position: absolute;
+  left: 59.48px; top: 181.81px; width: 125px; height: 43px;
+  font-weight: 500; font-size: 37.5px; line-height: 43px;
+  color: #35C65E; text-align: center; white-space: nowrap;
+}
+.total .total-sum{
+  position: absolute;
+  left: 288.75px; top: 181.81px; width: 134px; height: 43px;
+  font-weight: 500; font-size: 37.5px; line-height: 43px;
+  color: #35C65E; text-align: center; white-space: nowrap;
+}
+
+/* ===== Кнопка (Group 172 + Rectangle 53 + текст) ===== */
+/* Сам прямоугольник кнопки: 433.82×55 @ (27.08, 243.25) */
+/* Кнопка — как было */
+.cta{
+  position: absolute;
+  left: 27.08px;
+  top: 243.25px;
+  width: 433.82px;
+  height: 55px;
+  border: 0;
+  border-radius: 5px;
+  background: #35C65E;
+  cursor: pointer;
+
+  /* добавляем точный центровщик */
+  display: flex;
+  align-items: center;     /* по вертикали по центру */
+  justify-content: center; /* по горизонтали по центру */
+
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+
+/* Текст — без абсолютного позиционирования, жирный */
+.cta .cta-text{
+  position: static;          /* СНИМАЕМ left/top/width/height */
+  margin: 0;
+  font-weight: 700;          /* жирный */
+  font-size: 14px;
+  line-height: 24px;
+  color: #FFFFFF;
+  white-space: nowrap;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* Ховер/актив состояния (без изменения геометрии макета) */
+.cta:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(53,198,94,0.25);
+  filter: brightness(1.03);
+}
+.cta:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* Доступность: фокус обводкой, не влияющей на размеры */
+.cta:focus-visible{
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(53,198,94,0.5);
+}
+
+/* Контейнер карточки 270×356 @ (80, 317.95) */
+.product-card.trash-card{
+  position: absolute;
+  left: 80px;
+  top: 317.95px;
+  width: 270px;
+  height: 356px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+/* Маска фото ровно 270×270 (скругления + отсечение) */
+.product-card.trash-card .photo-mask{
+  position: absolute; left: 0; top: 0;
+  width: 270px; height: 270px;
+  overflow: hidden; border-radius: 15px;
+}
+
+/* Подложка под фото (как Rectangle 13 в макете) */
+.product-card.trash-card .photo-bg{
+  position: absolute; left: 0; top: 0;
+  width: 270px; height: 270px;
+  border-radius: 15px; box-sizing: border-box;
+}
+
+/* Фото: заполняет маску без искажений (ты можешь заменить на свои offsets) */
+.product-card.trash-card .photo-img{
+  position: absolute; left: 0; top: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  display: block;
+}
+
+/* Внешняя рамка (Rectangle 14) */
+.product-card.trash-card .card-frame{
+  position: absolute; left: 0; top: 0;
+  width: 270px; height: 356px;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: transparent;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Клика по фото */
+.product-card.trash-card .product-link{
+  position: absolute; inset: 0 0 auto 0; /* только зона фото */
+  height: 270px;
+  z-index: 1; cursor: pointer; text-decoration: none;
+}
+
+/* --- Ниже: текст/рейтинг/цены (позиции как в твоих предыдущих карточках) --- */
+.product-card.trash-card .title{
+  position: absolute; left: 20px; top: 283px;
+  width: 228px; height: 24px;
+  font-weight: 400; font-size: 14px; line-height: 24px; color:#363535;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.product-card.trash-card .rating .star{
+  position: absolute; left: 208px; top: 287.5px; width:17px; height:17px; display:block;
+}
+.product-card.trash-card .rating .star img{ width:100%; height:100%; object-fit:contain; display:block; }
+.product-card.trash-card .rating .val{
+  position: absolute; left: 228px; top: 283px; width:20px; height:24px;
+  font-weight: 400; font-size: 14px; line-height: 24px; color:#828181;
+}
+.product-card.trash-card .price-row{
+  position: absolute; left: 20px; top: 315px; width: 228px; height: 24px;
+}
+.product-card.trash-card .price-now{
+  position: absolute; left: 0; top: 0; width: 43px; height: 24px;
+  font-weight: 500; font-size: 12px; line-height: 24px; color:#35C65E;
+}
+.product-card.trash-card .price-old{
+  position: absolute; left: 66.39px; top: 7px; width:36px; height:11px;
+  font-weight: 400; font-size: 10px; line-height: 11px;
+  color:#828181; text-decoration: line-through; opacity:.5; white-space: nowrap;
+}
+.product-card.trash-card .btn-ghost{
+  position: absolute; left: 175px; top: 2.5px; width:21px; height:20px;
+  padding:0; background:#fff; border:1.5px solid #363535; box-sizing:border-box;
+  border-radius:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2;
+}
+.product-card.trash-card .btn-green{
+  position: absolute; left: 208px; top: 2.5px; width:20px; height:20px;
+  padding:0; background:#fff; border:1.5px solid #35C65E; box-sizing:border-box;
+  border-radius:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2;
+}
+.product-card.trash-card .btn-ghost img,
+.product-card.trash-card .btn-green img{ max-width:100%; max-height:100%; display:block; }
+
+/* ===== ДОП. ИКОНКА TRASH (строго по координатам) ===== */
+/* Контейнер-кнопка 24×24 @ (226, 18) внутри карточки */
+.product-card.trash-card .btn-trash{
+  position: absolute;
+  left: 226px; top: 18px;
+  width: 24px; height: 24px;
+  padding: 0;
+  border: 1.5px solid #363535;   /* как в макете */
+  box-sizing: border-box;
+  cursor: pointer;
+  z-index: 3;                    /* поверх рамки и фото */
+  display: block;
+}
+
+/* Внутри — твой файл иконки */
+.product-card.trash-card .btn-trash > img{
+  width: 100%; height: 100%;
+  object-fit: contain; display: block; pointer-events: none;
+}
+
+/* (опция) лёгкий hover без смещения геометрии */
+.product-card.trash-card .btn-trash:hover{
+  filter: brightness(0.95);
+}
+.product-card.trash-card .btn-trash:focus-visible{
+  outline: 2px solid #35C65E; outline-offset: 1px;
+}
+
+/* Убрать контур у trash-иконки */
+.product-card.trash-card .btn-trash{
+  border: none;           /* было: 1.5px solid #363535 */
+  background: transparent;
+  box-shadow: none;
+}
+
+/* по желанию: кастомный фокус без контура браузера */
+.product-card.trash-card .btn-trash:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(53,198,94,0.4); /* можно убрать/оставить */
+}
+
+/* Group 154 */
+.group-154{
+  position: absolute;
+  width: 448.79px;
+  height: 134.99px;
+  left: 91.62px;
+  top: 139.96px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+
+/* Group 20 */
+.group-154 .group-20{
+  position: absolute;
+  left: 0%;
+  right: -108.22%;
+  top: 26.6%;
+  bottom: 0%;
+}
+
+/* Frame 139 — зона під іконку (відсотки як у макеті) */
+.group-154 .icon-left{
+  position: absolute;
+  left: 0%;
+  right: 89.97%;
+  top: 47%;
+  bottom: 20.4%;
+  display: block;
+  width: auto; height: auto;   /* лишаємо як є в контейнері */
+  max-width: 10.03%;           /* щоби не виходило за рамки за замовчуванням */
+  max-height: 32.6%;
+  object-fit: contain;
+}
+
+/* Vector — лінія під кутом 90° (строго за макетом) */
+.group-154 .vector-line{
+  box-sizing: border-box;
+  position: absolute;
+  left: 0%;
+  right: 2.76%;
+  top: calc(50% - 45px/2 + 0.69px);
+
+  width: 0;           /* креслимо лінію бордером */
+  height: 45px;
+  transform: rotate(90deg);
+}
+
+/* Про нас — h2 */
+.group-154 .about-title{
+  position: absolute;
+  left: 5.92%;
+  right: -108.22%;
+  top: 26.6%;
+  bottom: 0%;
+
+  margin: 0;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 64px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+
+  white-space: nowrap; /* щоб не переносився текст */
+}
+
+/* ===== Group — 422.07×360.61 @ (1019.37, 468.32), rotate(17.51deg) ===== */
+.tilt-group{
+  position: absolute;
+  left: 1019.37px;
+  top: 468.32px;
+  width: 422.07px;
+  height: 360.61px;
+  transform: rotate(17.51deg);
+  transform-origin: 50% 50%;
+}
+
+/* Картинка внутри — растягиваем ровно в рамку */
+.tilt-img{
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;     /* если нужно другое кадрирование — скажи */
+}
