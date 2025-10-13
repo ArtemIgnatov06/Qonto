@@ -344,3 +344,48 @@ body { padding-top: var(--header-h); }
 @media (max-width: 1700px){
   .hdr-wrap .hdr{ width: 95%; max-width: 1600px; }
 }
+
+/* логотип */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;            /* высота хедера */
+  padding: 0 8px 0 0;
+  margin-right: 16px;
+}
+.logo-svg {
+  display: block;
+  height: 32px;            /* подгони при желании 26–32px */
+  width: auto;
+}
+
+/* выравнивание иконок */
+.btn-ai, .btn-cat, .ico, .ico-user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+}
+
+.btn-ai .ai-ico svg,
+.btn-cat .cat-ico svg,
+.ico svg,
+.ico-user svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+
+/* кнопки-иконки без текста (язык/сердце/корзина/юзер) */
+.ico, .ico-user {
+  width: 40px;
+  padding: 0;
+}
+
+/* подпись у AI/Каталог */
+.ai-label, .cat-label {
+  font-weight: 600;
+}
