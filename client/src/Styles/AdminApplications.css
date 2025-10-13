@@ -1,0 +1,37 @@
+/* AdminApplications — page-specific styles only.
+   Общие утилиты (.card, .row, .gap-*, .mb-* и т.д.) живут в utilities.css / базовых стилях. */
+
+.text-danger { color: #b00020; }
+.text-dim    { opacity: 0.8; }
+
+/* панель фильтров вверху */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* карточка заявки — компактный отступ снизу (если не используете утилиту .mb-10) */
+.application-card {
+  padding: 12px;              /* если .card уже задаёт паддинг — можно удалить эту строку */
+  margin-bottom: 10px;        /* или заменить на утилиту .mb-10 в JSX */
+}
+
+/* блок с кнопками решений */
+.decision-bar {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+/* необязательно: приглушённый текст комментария */
+.application-comment {
+  opacity: 0.8;
+}
+
+/* ссылка на прайс-лист (если нужно чуть выделить) */
+.price-list-link {
+  text-decoration: none;
+}
+.price-list-link:hover { text-decoration: underline; }

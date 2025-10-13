@@ -1,0 +1,183 @@
+/* === базові змінні === */
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+
+/* ====== cart summary right (піксель-перфект) ====== */
+.group-491{position:absolute;width:392px;height:617px;left:1128px;top:-13.9px;}
+.rect-66{box-sizing:border-box;position:absolute;left:-0.11%;right:0.06%;top:0.02%;bottom:0.08%;background:#fff;border:2px solid var(--stroke);border-radius:13px;}
+.group-491 .group-308{position:absolute;left:5.41%;right:5.06%;top:87.06%;bottom:4.03%;}
+.group-491 .rect-53{position:absolute;left:0;right:0;top:0;bottom:0;box-sizing:border-box;border:2px solid var(--stroke);border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 14px;font-family:'Ubuntu',sans-serif;font-weight:500;font-size:14px;line-height:24px;color:#828181;cursor:pointer;appearance:none;outline:none;transition:background-color .12s,border-color .12s,color .12s,filter .12s;}
+.group-491 .rect-53[disabled]{opacity:.5;cursor:not-allowed;pointer-events:none;}
+.group-491 .rect-53:hover{background:#35C65E;border-color:#35C65E;color:#fff;}
+.group-491 .rect-53:focus-visible{outline:2px solid #35C65E;outline-offset:2px;}
+.group-491 .group-290{position:absolute;left:13.04%;right:13.52%;top:61.96%;bottom:34.15%;}
+.group-491 .txt-290-left{position:absolute;left:13.04%;right:74.97%;top:61.96%;bottom:34.15%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.group-491 .txt-290-right{position:absolute;left:73.72%;right:13.52%;top:61.96%;bottom:34.15%;display:flex;align-items:center;text-align:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.group-491 .group-289{position:absolute;left:12.53%;right:12.67%;top:66.88%;bottom:29.24%;}
+.group-491 .txt-289-left{position:absolute;left:12.53%;right:74.46%;top:66.88%;bottom:29.24%;display:flex;align-items:center;text-align:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.group-491 .txt-289-right{position:absolute;left:73.56%;right:12.67%;top:66.88%;bottom:29.24%;display:flex;align-items:center;text-align:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.group-491 .group-287{position:absolute;left:12.28%;right:12.97%;top:71.74%;bottom:24.37%;}
+.group-491 .txt-287-left{position:absolute;left:12.28%;right:71.91%;top:71.74%;bottom:24.37%;display:flex;align-items:center;text-align:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.group-491 .txt-287-right{position:absolute;left:74.27%;right:12.97%;top:71.74%;bottom:24.37%;display:flex;align-items:center;text-align:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+
+/* items in the scroll */
+.group-491 .group-305{position:absolute;left:7.59%;right:11.92%;top:7.9%;bottom:77.43%;}
+.group-305 .rect-54{position:absolute;left:9.32%;right:63.91%;top:0;bottom:0;background:#D9D9D9;border-radius:15px;overflow:hidden;box-sizing:border-box;}
+.group-305 .rect-54-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.group-305 .prod-qty{position:absolute;left:0;right:94.92%;top:33.47%;bottom:40.01%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.group-305 .prod-title{position:absolute;left:43.97%;right:0;top:16.16%;bottom:57.33%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#363535;white-space:nowrap;text-decoration:none;}
+.group-305 .prod-title:hover{text-decoration:underline;}
+.group-305 .prod-price{position:absolute;left:43.97%;right:39.61%;top:50.37%;bottom:19.43%;display:flex;align-items:center;font:500 14px/24px 'Ubuntu',sans-serif;color:#35C65E;}
+.group-305 .prod-old-price{position:absolute;left:63.77%;right:19.8%;top:50.37%;bottom:19.43%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;text-decoration:line-through;}
+
+/* item 2 */
+.group-491 .group-504{position:absolute;left:7.59%;right:11.92%;top:25.33%;bottom:60%;}
+.group-504 .rect-54-2{position:absolute;left:9.32%;right:63.91%;top:0;bottom:0;background:#D9D9D9;border-radius:15px;overflow:hidden;box-sizing:border-box;}
+.group-504 .rect-54-2-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.group-504 .prod-qty-2{position:absolute;left:0;right:94.92%;top:33.47%;bottom:40.01%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;}
+.group-504 .prod-title-2{position:absolute;left:43.97%;right:0;top:16.16%;bottom:57.33%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#363535;text-decoration:none;}
+.group-504 .prod-title-2:hover{text-decoration:underline;}
+.group-504 .prod-price-2{position:absolute;left:43.97%;right:39.61%;top:50.37%;bottom:19.43%;display:flex;align-items:center;font:500 14px/24px 'Ubuntu',sans-serif;color:#35C65E;}
+.group-504 .prod-old-price-2{position:absolute;left:63.77%;right:19.8%;top:50.37%;bottom:19.43%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;text-decoration:line-through;}
+
+/* item 3 */
+.group-491 .group-505{position:absolute;left:7.59%;right:11.92%;top:42.76%;bottom:42.57%;}
+.group-505 .rect-54-3{position:absolute;left:9.32%;right:63.91%;top:0;bottom:0;background:#D9D9D9;border-radius:15px;overflow:hidden;box-sizing:border-box;}
+.group-505 .rect-54-3-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.group-505 .prod-qty-3{position:absolute;left:0;right:94.92%;top:33.47%;bottom:40.01%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;}
+.group-505 .prod-title-3{position:absolute;left:43.97%;right:0;top:16.16%;bottom:57.33%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#363535;text-decoration:none;}
+.group-505 .prod-title-3:hover{text-decoration:underline;}
+.group-505 .prod-price-3{position:absolute;left:43.97%;right:39.61%;top:50.37%;bottom:19.43%;display:flex;align-items:center;font:500 14px/24px 'Ubuntu',sans-serif;color:#35C65E;}
+.group-505 .prod-old-price-3{position:absolute;left:63.77%;right:19.8%;top:50.37%;bottom:19.43%;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;text-decoration:line-through;}
+
+/* scroll */
+.group-491 .cart-scroll{position:absolute;left:0;right:0;top:0;height:382px;overflow-y:auto;overflow-x:hidden;padding-right:6px;scrollbar-width:thin;scrollbar-color:#ECECEC transparent;}
+.group-491 .cart-scroll::-webkit-scrollbar{width:8px;}
+.group-491 .cart-scroll::-webkit-scrollbar-thumb{background:#ECECEC;border-radius:8px;}
+.group-491 .cart-scroll::-webkit-scrollbar-track{background:transparent;}
+.cart-scroll .group-305{position:absolute;left:7.59%;right:11.92%;top:48.74px;height:90.51px;}
+.cart-scroll .group-504{position:absolute;left:7.59%;right:11.92%;top:156.29px;height:90.51px;}
+.cart-scroll .group-505{position:absolute;left:7.59%;right:11.92%;top:263.83px;height:90.51px;}
+
+.group-491 .group-286{position:absolute;left:11.16%;right:11.12%;top:78.43%;bottom:15.74%;}
+.group-491 .total-value{position:absolute;left:65.92%;right:11.12%;top:78.43%;bottom:15.74%;display:flex;align-items:center;text-align:center;font:500 25px/36px 'Ubuntu',sans-serif;color:#35C65E;white-space:nowrap;}
+.group-491 .total-label{position:absolute;left:11.16%;right:67.66%;top:78.43%;bottom:15.74%;display:flex;align-items:center;text-align:center;font:500 25px/36px 'Ubuntu',sans-serif;color:#35C65E;}
+
+/* ——— LEFT side blocks (accordion) ——— */
+.frame-314{position:absolute;width:976px;height:155px;left:80px;top:222.33px;z-index:3;}
+.rect-70-btn{box-sizing:border-box;position:absolute;width:976.8px;height:154.5px;left:0;top:0;background:#fff;border:2px solid var(--stroke);border-radius:10px;padding:0;cursor:pointer;appearance:none;outline:none;}
+.rect-70-btn:hover{filter:brightness(1.02);}
+.rect-70-btn:focus-visible{outline:2px solid #35C65E;outline-offset:2px;}
+.delivery-icon{position:absolute;left:33.9px;top:37.56px;width:30px;height:30px;object-fit:contain;pointer-events:none;}
+.delivery-title{position:absolute;width:187px;height:36px;left:89.36px;top:34.56px;margin:0;font:400 25px/36px 'Ubuntu',sans-serif;color:#363535;white-space:nowrap;}
+.delivery-sub{position:absolute;width:165px;height:24px;left:89.36px;top:91.41px;margin:0;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;white-space:nowrap;}
+.rect-70-btn.is-active{border-color:#35C65E;}
+.rect-70-btn.is-active:hover{filter:brightness(1.02);}
+
+.frame-312{position:absolute;width:976.8px;height:154.5px;left:79.64px;top:394.03px;z-index:3;}
+.frame-312 .rect-70-btn{box-sizing:border-box;position:absolute;width:976.8px;height:154.5px;left:0;top:0;background:#fff;border:2px solid var(--stroke);border-radius:10px;transition:border-color .12s,filter .12s;}
+.frame-312 .rect-70-btn.is-active{border-color:#35C65E;}
+.frame-312 .delivery-icon{position:absolute;left:33.9px;top:37.56px;width:30px;height:30px;object-fit:contain;pointer-events:none;}
+.frame-312 .delivery-title{position:absolute;width:192px;height:36px;left:89.36px;top:34.56px;margin:0;font:400 25px/36px 'Ubuntu',sans-serif;color:#363535;}
+.frame-312 .delivery-sub{position:absolute;width:213px;height:24px;left:89.36px;top:91.41px;margin:0;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;}
+
+.frame-313{position:absolute;width:976.8px;height:154.5px;left:79.64px;top:565.45px;z-index:3;}
+.frame-313 .rect-70-btn{box-sizing:border-box;position:absolute;width:976.8px;height:154.5px;left:0;top:0;background:#fff;border:2px solid var(--stroke);border-radius:10px;transition:border-color .12s,filter .12s;}
+.frame-313 .rect-70-btn.is-active{border-color:#35C65E;}
+.frame-313 .delivery-icon{position:absolute;left:33.9px;top:37.56px;width:30px;height:30px;object-fit:contain;pointer-events:none;}
+.frame-313 .delivery-title{position:absolute;width:87px;height:36px;left:89.36px;top:34.56px;margin:0;font:400 25px/36px 'Ubuntu',sans-serif;color:#363535;}
+.frame-313 .delivery-sub{position:absolute;width:151px;height:24px;left:89.36px;top:91.41px;margin:0;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;}
+
+/* панель 1 */
+.rect-73{box-sizing:border-box;position:absolute;width:976.8px;height:254.93px;left:79.64px;top:347.78px;border:2px solid var(--stroke);background:#fff;border-radius:10px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .18s ease-out,transform .2s ease-out,visibility 0s linear .2s;pointer-events:none;z-index:2;}
+.f314-open .rect-73{opacity:1;visibility:visible;transform:translateY(0);transition:opacity .18s ease-out,transform .2s ease-out,visibility 0s;pointer-events:auto;}
+
+.frame-312,.frame-313{transition:top .22s cubic-bezier(.2,.7,.2,1);z-index:1;}
+.f314-open .frame-312{left:80px;top:619.93px;width:976px;height:155px;}
+.f314-open .frame-313{left:80px;top:790.93px;width:976px;height:155px;}
+
+.f314-input{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;background:#fff;border:2px solid var(--stroke);border-radius:10px;font:400 14px/24px 'Ubuntu',sans-serif;color:#363535;padding:0 14px;outline:none;}
+.f314-input::placeholder{color:#828181;}
+.f314-input:focus{border-color:#35C65E;}
+
+.rect-73 .f314-g324{position:absolute;width:435.57px;height:55px;left:38.92px;top:61.41px;}
+.rect-73 .f314-g326{position:absolute;width:435.57px;height:55px;left:505.43px;top:61.41px;}
+.rect-73 .f314-g325{position:absolute;width:435.57px;height:55px;left:38.92px;top:126.29px;}
+.rect-73 .f314-g327{position:absolute;width:435.57px;height:55px;left:505.43px;top:126.29px;}
+
+/* панель 2 */
+.rect-71{box-sizing:border-box;position:absolute;width:976.36px;height:254.18px;left:80px;top:519.9px;border:2px solid var(--stroke);background:#fff;border-radius:10px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .18s ease-out,transform .2s ease-out,visibility 0s linear .2s;pointer-events:none;z-index:2;}
+.f312-open .rect-71{opacity:1;visibility:visible;transform:translateY(0);transition:opacity .18s ease-out,transform .2s ease-out,visibility 0s;pointer-events:auto;}
+.f312-open .frame-313{left:80px;top:791.51px;width:976px;height:154px;}
+.f312-input{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;background:#fff;border:2px solid var(--stroke);border-radius:10px;padding:0 14px;font:400 14px/24px 'Ubuntu',sans-serif;color:#363535;outline:none;}
+.f312-input::placeholder{color:#828181;}
+.f312-input:focus{border-color:#35C65E;}
+.rect-71 .r71-g312{position:absolute;width:435.38px;height:55px;left:38.71px;top:60.35px;}
+.rect-71 .r71-g313{position:absolute;width:435.38px;height:55px;left:38.71px;top:125.24px;}
+.rect-71 .r71-g314{position:absolute;width:435.38px;height:55px;left:505.01px;top:60.35px;}
+.rect-71 .r71-g315{position:absolute;width:435.38px;height:55px;left:505.01px;top:125.24px;}
+
+.rect-71 .r71-courier{position:absolute;left:505.01px;top:195.07px;width:237.92px;height:24px;}
+.rect-71 .courier-toggle{position:absolute;left:0;top:3.99px;width:16.03px;height:16.03px;box-sizing:border-box;border:2px solid var(--stroke);border-radius:5px;background:#fff;cursor:pointer;appearance:none;outline:none;transition:background-color .12s,border-color .12s,filter .12s;}
+.rect-71 .r71-courier .courier-toggle[aria-pressed="true"]{border-color:#35C65E!important;background:#35C65E!important;}
+.rect-71 .courier-toggle:focus-visible{outline:2px solid #35C65E;outline-offset:2px;}
+.rect-71 .courier-label{position:absolute;left:35.4px;top:0;width:47.96px;height:24px;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;}
+.rect-71 .courier-price{position:absolute;left:171.69px;top:0;width:66.23px;height:24px;display:flex;align-items:center;font:400 14px/24px 'Ubuntu',sans-serif;color:#828181;}
+
+/* панель 3 */
+.rect-72{box-sizing:border-box;position:absolute;width:976.8px;height:212.27px;left:79.64px;top:690.88px;border:2px solid var(--stroke);background:#fff;border-radius:10px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .18s ease-out,transform .2s ease-out,visibility 0s linear .2s;pointer-events:none;z-index:2;}
+.f313-open .rect-72{opacity:1;visibility:visible;transform:translateY(0);transition:opacity .18s ease-out,transform .2s ease-out,visibility 0s;pointer-events:auto;}
+.f313-input{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;background:#fff;border:2px solid var(--stroke);border-radius:10px;padding:0 14px;font:400 14px/24px 'Ubuntu',sans-serif;color:#363535;outline:none;}
+.f313-input::placeholder{color:#828181;}
+.f313-input:focus{border-color:#35C65E;}
+.rect-72 .r72-g321{position:absolute;width:435.28px;height:55px;left:39.25px;top:61.00px;}
+.rect-72 .r72-g322{position:absolute;width:211.93px;height:55px;left:39.25px;top:126.00px;}
+.rect-72 .r72-g323{position:absolute;width:211.93px;height:55px;left:262.60px;top:126.00px;}
+
+/* заголовок ліворуч */
+.group-154{position:absolute;width:448.79px;height:134.99px;left:90.67px;top:57.2px;}
+.group-154 .group-20{position:absolute;left:0;right:-108.22%;top:26.6%;bottom:0;}
+.group-154 .title-icon{position:absolute;left:0;right:89.97%;top:43%;bottom:20.4%;height:45px;object-fit:contain;transform:rotate(0);pointer-events:none;}
+.group-154 .group-20::before{content:"";position:absolute;height:45px;left:0;right:3.76%;top:calc(50% - 45px/2 + .69px);transform:rotate(90deg);}
+.group-154 .title-h3{position:absolute;left:8.92%;right:-108.22%;top:26.6%;bottom:0;margin:0;display:flex;align-items:center;font:500 37.5px/43px 'Ubuntu',sans-serif;color:#35C65E;white-space:nowrap;}
+
+/* окно прокрутки только для списка товаров */
+.group-491 .cart-scroll{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 64px;          /* было: top: 0;  => опустили список ниже */
+  height: 318px;      /* подкорректовали высоту, чтобы всё влезло */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #ECECEC transparent;
+}
+.group-491 .cart-scroll::-webkit-scrollbar{ width: 8px; }
+.group-491 .cart-scroll::-webkit-scrollbar-thumb{ background:#ECECEC; border-radius:8px; }
+.group-491 .cart-scroll::-webkit-scrollbar-track{ background:transparent; }
+
+/* координаты строк внутри cart-scroll (оставили пиксели — как в макете) */
+.cart-scroll .group-305{
+  position: absolute;
+  left: 7.59%; right: 11.92%;
+  top: 48.74px;
+  height: 90.51px;
+}
+.cart-scroll .group-504{
+  position: absolute;
+  left: 7.59%; right: 11.92%;
+  top: 156.29px;
+  height: 90.51px;
+}
+.cart-scroll .group-505{
+  position: absolute;
+  left: 7.59%; right: 11.92%;
+  top: 263.83px;
+  height: 90.51px;
+}

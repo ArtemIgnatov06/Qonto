@@ -1,0 +1,115 @@
+:root{
+  --stroke:#ECECEC;
+  --accent:#35C65E;
+  --text:#363535;
+  --muted:#828181;
+  --card:#fff;
+}
+
+/* поповер */
+.cw-popover{
+  position: fixed;   /* позиция выставляется скриптом под кнопкой AI */
+  z-index: 1000;
+  width: 420px;
+  max-height: 70vh;
+  min-height: 20vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border: 2px solid var(--stroke);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 14px 36px rgba(0,0,0,.16);
+  overflow: hidden;
+}
+
+/* шапка виджета */
+.cw-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--stroke);
+}
+.cw-title{ font: 700 12px/18px 'Ubuntu', sans-serif; color: var(--text); }
+.cw-close{ all:unset; cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; border-radius:8px; }
+.cw-close:hover{ background:#f2f2f2; }
+
+/* лента */
+.cw-scroll{
+  overflow:auto;
+  padding: 12px;
+  background: #fff;
+}
+.cw-row{ display:flex; margin-bottom:10px; }
+.cw-row.assistant{ justify-content:flex-start; }
+.cw-row.user{ justify-content:flex-end; }
+.cw-bubble{
+  max-width: 85%;
+  border: 2px solid var(--stroke);
+  border-radius: 10px;
+  background:#fff;
+  padding: 10px 12px;
+  color:#000; font:400 14px/1.45 'Ubuntu', sans-serif;
+  white-space:pre-wrap; word-wrap:break-word;
+}
+.cw-row.user .cw-bubble{
+  background: rgba(53,198,94,.08);
+  border-color: rgba(53,198,94,.28);
+}
+
+/* typing */
+.cw-typing{ display:flex; gap:6px; padding: 4px 4px 10px; }
+.cw-typing span{ width:6px; height:6px; border-radius:50%; background:#cfcfcf; animation: cwbl 1.2s infinite ease-in-out; }
+.cw-typing span:nth-child(2){ animation-delay:.15s; }
+.cw-typing span:nth-child(3){ animation-delay:.3s; }
+@keyframes cwbl{ 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+
+/* композер */
+.cw-composer{
+  padding: 10px 10px 12px;
+  border-top: 2px solid var(--stroke);
+  background:#fff;
+}
+.cw-input{
+  width:100%;
+  height:55px;
+  border:2px solid #828181;
+  border-radius:10px;
+  background:#fff; color:#000;
+  font:400 14px/24px 'Ubuntu', sans-serif;
+  padding: 13.5px 86px 13.5px 12px;
+  outline:none; resize:none; overflow:hidden;
+  transition: border-color .15s ease, padding .15s ease;
+}
+.cw-input.multiline{ padding-top:8px; padding-bottom:8px; }
+.cw-input:focus, .cw-input.is-filled{ border-color: var(--accent); }
+
+.cw-actions{
+  position:absolute; right: 18px; bottom: 18px;
+  display:flex; gap:8px;
+}
+.cw-attach{ display:inline-flex; width:28px; height:28px; cursor:pointer; }
+.cw-attach input{ display:none; }
+.cw-attach img{ width:100%; height:100%; object-fit:contain; opacity:.9; }
+.cw-attach:hover img{ opacity:1; }
+
+.cw-send{
+  width:32px; height:32px; border:0; border-radius:8px;
+  background: var(--accent); display:inline-flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.cw-send:disabled{ opacity:.6; cursor:not-allowed; }
+.cw-send img{ width:18px; height:18px; filter: brightness(0) invert(1); }
+
+/* прикрепленные до отправки */
+.cw-pending{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.cw-file{
+  border:1.5px solid var(--stroke); border-radius:8px; padding:4px 6px;
+  display:flex; gap:6px; align-items:center; font-size:12px; color:#333;
+}
+.cw-file .name{ max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cw-file button{ all:unset; cursor:pointer; color:#888; padding:0 4px; font-weight:700; }
+.cw-file button:hover{ color:#000; }
+
+/* узкие экраны */
+@media (max-width: 520px){
+  .cw-popover{ width: calc(100vw - 16px); left:8px !important; }
+}

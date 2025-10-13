@@ -1,0 +1,185 @@
+/* =========================
+   Terms of Use — clean & isolated
+   ========================= */
+
+/* Палитра / контейнер */
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+  --page-max:1120px;
+}
+
+.terms-page{
+  background: transparent; /* фон берём из общей темы */
+}
+
+.terms-container{
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 32px 16px 96px;  /* запас снизу, чтобы футер не наезжал */
+  color: #111;              /* чёрный текст по умолчанию */
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* Если вдруг в контент попали чужие шапка/футер — прячем */
+.terms-page .hdr,
+.terms-page .ftr{
+  display: none !important;
+}
+
+/* ——— Санитайзер старого HTML с абсолютами ———
+   Сбрасываем позиционирование и размеры у «фигмовских» блоков,
+   чтобы они жили в нормальном потоке страницы. */
+.terms-container .group-154,
+.terms-container .group-20,
+.terms-container .frame-139,
+.terms-container .vector,
+.terms-container .about-title,
+.terms-container .lead-text,
+.terms-container .legal-wrap{
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0;
+  margin: 0;
+}
+
+/* ——— Герой-блок (иконка + зелёный заголовок) ——— */
+.terms-hero{
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 4px 0 10px;
+}
+.terms-hero__icon{
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 26px;
+  line-height: 1;
+}
+.terms-hero__title{
+  margin: 0;
+  font-family: 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(32px, 4.2vw, 56px);
+  line-height: 1.1;
+  color: #35C65E; /* как в макете */
+}
+
+/* Лид-абзац под заголовком */
+.terms-lead{
+  margin: 10px 0 16px;
+  font-size: 14px;
+  line-height: 24px;
+  color: #222;
+  opacity: 1;
+}
+
+.terms-content h2{
+  margin: 28px 0 12px;
+  font-weight: 700;
+  font-size: clamp(22px, 2.2vw, 28px);
+  color: #111;
+}
+.terms-content h3{
+  margin: 20px 0 10px;
+  font-weight: 600;
+  font-size: clamp(18px, 1.8vw, 22px);
+  color: #111;
+}
+.terms-content p{
+  margin: 0 0 12px;
+  line-height: 1.65;
+  color: #111;
+}
+.terms-content ul,
+.terms-content ol{
+  margin: 0 0 14px 0;
+  padding-left: 1.25rem;
+  color: #111;
+}
+.terms-content li{ margin: 6px 0; }
+
+.terms-content a{
+  color: #0b0b0b;
+  text-decoration: underline;
+}
+.terms-content a:hover{ color: #000; }
+
+/* ——— Медиа и таблицы ——— */
+.terms-content img,
+.terms-content video,
+.terms-content iframe,
+.terms-content table{
+  max-width: 100%;
+  height: auto;
+}
+.terms-content table{
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 16px;
+}
+.terms-content th,
+.terms-content td{
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  text-align: left;
+  color: #111;
+}
+
+/* ——— Совместимость с разметкой из старого файла ———
+   Если заголовок/лид/контент пришли в .legal-wrap — делаем красиво. */
+.terms-container .legal-wrap{
+  margin-top: 8px;
+}
+.terms-container .legal-wrap h1{
+  margin: 0 0 16px !important;
+  font-weight: 700 !important;
+  font-size: clamp(24px, 3vw, 36px) !important;
+  line-height: 1.25 !important;
+  color: #111 !important;
+}
+.terms-container .legal-wrap h2{
+  margin: 24px 0 8px !important;
+  font-weight: 700 !important;
+  font-size: clamp(20px, 2.2vw, 28px) !important;
+  color: #111 !important;
+}
+.terms-container .legal-wrap p{
+  margin: 0 0 12px !important;
+  font-size: 14px !important;
+  line-height: 24px !important;
+  color: #111 !important;
+}
+.terms-container .legal-wrap ul{
+  margin: 8px 0 16px 18px !important;
+  padding: 0 !important;
+  color: #111 !important;
+}
+.terms-container .legal-wrap li{
+  margin: 0 0 6px !important;
+  font-size: 14px !important;
+  line-height: 24px !important;
+}
+
+/* На всякий случай: убираем прозрачности и фильтры у всех потомков,
+   чтобы текст не выглядел «приглушённым». */
+.terms-container *{
+  opacity: 1 !important;
+  filter: none !important;
+}

@@ -1,0 +1,151 @@
+:root{
+  --stroke:#ECECEC;
+  --text:#363535;
+  --card-w:268px;
+  --card-h:250.44px;
+  --gap:25px;
+
+  /* Фигмовские контейнеры под ноутбуки — без «резины» */
+  --container-1600: 1440px; /* когда окно широкое */
+  --container-1366: 1200px; /* популярный ноут 1366 */
+  --container-1280: 1120px; /* ещё один ноуткейс */
+}
+
+/* сцена */
+.cat-stage{
+  width:100%;
+  background:#fff;
+}
+
+/* «жесткий» контейнер — перебрасываемся ступенями, не растягиваемся плавно */
+.cat-container{
+  width: var(--container-1600);
+  margin: 32px auto 64px;
+  padding: 0 0;             /* по макету без внутренних отступов */
+}
+@media (max-width: 1536px){
+  .cat-container{ width: var(--container-1600); }
+}
+@media (max-width: 1400px){
+  .cat-container{ width: var(--container-1366); }
+}
+@media (max-width: 1300px){
+  .cat-container{ width: var(--container-1280); }
+}
+
+/* Сетка — количество колонок меняем ступенями, карточка всегда фикс ширины/высоты */
+.cat-grid{
+  display:grid;
+  grid-auto-rows: var(--card-h);
+  grid-template-columns: repeat(5, var(--card-w));
+  gap: var(--gap);
+  justify-content: start;            /* как в фигме — от левого края контейнера */
+}
+
+/* ступени по количеству колонок (ноутбуки) */
+@media (max-width: 1400px){
+  .cat-grid{ grid-template-columns: repeat(4, var(--card-w)); }
+}
+@media (max-width: 1300px){
+  .cat-grid{ grid-template-columns: repeat(3, var(--card-w)); }
+}
+
+/* Карточка (пикс-в-пикс из фигмы, но без абсолютов к странице) */
+.cat-card{
+  position:relative;
+  width:var(--card-w);
+  height:var(--card-h);
+  padding:0;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  overflow:hidden;
+  border-radius:6.5px; /* как в макете */
+}
+
+/* фон/рамка */
+.card-bg{
+  position:absolute; inset:0;
+  border:2px solid var(--stroke);
+  border-radius:inherit;
+  background:#fff;
+  transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+/* заголовок + маленькая иконка в ПРАВОМ ВЕРХУ карточки */
+.card-titleWrap{
+  position:absolute;
+  top: calc(0.1187 * var(--card-h));        /* 11.87% по макету */
+  right: calc(0.0846 * var(--card-w));      /* 8.46% по макету */
+
+  display:flex; align-items:center;
+  gap:8px; height:24px;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.card-title{
+  font: 400 14px/24px 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  white-space: nowrap;
+  text-align: right;
+}
+.card-titleIco{ width:26.76px; height:25.26px; display:block; overflow:hidden; }
+.card-titleIco img{ width:100%; height:100%; object-fit:contain; display:block; }
+
+/* большой рисунок занимает нижнюю часть карточки */
+.card-hero{
+  position:absolute;
+  left: 6.4%; right: 6.4%;
+  top: 40%; bottom: 6%;
+  width:auto; height:auto;
+  max-width:100%; max-height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  transform: scale(.965);
+  opacity:.88;
+  transition: transform .22s ease, opacity .22s ease;
+  transform-origin:center bottom;
+}
+
+/* Hover — как в твоём макете */
+.cat-card:hover .card-bg,
+.cat-card:focus-visible .card-bg{
+  background: rgba(236,236,236,.20);
+  border-color: transparent;       /* визуально «пропадает» без скачка размеров */
+  border-radius: 5.5px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  outline: none;
+}
+.cat-card:hover .card-titleWrap,
+.cat-card:focus-visible .card-titleWrap{
+  transform: translateX(8px);
+}
+.cat-card:hover .card-hero,
+.cat-card:focus-visible .card-hero{
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+/* немного приберёмся для доступности */
+.visually-hidden{
+  position:absolute !important;
+  width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+/* подправить некоторые hero как в макете */
+.cat-card:nth-child(2)  .card-hero { left:30.94px; top:82.8px; width:188.16px; height:167.64px; }
+.cat-card:nth-child(3)  .card-hero { left:14.19px; top:73.06px; width:211.72px; height:176.31px; }
+.cat-card:nth-child(4)  .card-hero { left:16.87px; top:74.74px; width:228.69px; height:175.68px; }
+.cat-card:nth-child(5)  .card-hero { left:17.37px; top:80.52px; width:229.22px; height:169.92px; }
+
+/* ряд 2 — примеры */
+.cat-card:nth-child(7)  .card-hero { left:20px; top:77.56px;  width:199px; height:171px; }
+.cat-card:nth-child(8)  .card-hero { left:31px; top:85.56px;   width:190px; height:164px; }
+.cat-card:nth-child(9)  .card-hero { left:7.62px; top:57.33px; width:238px; height:193px; }
+.cat-card:nth-child(10) .card-hero { left:.41px; top:70.56px;  width:251px; height:179px; }
+
+/* ряд 4 — примеры */
+.cat-card:nth-child(16) .card-hero { left:.92px;  top:55.43px; width:232px;   height:195px; }
+.cat-card:nth-child(17) .card-hero { left:12.9px; top:53.97px; width:227px;   height:196px; }
+.cat-card:nth-child(18) .card-hero { left:23.9px; top:75.97px; width:191.96px; height:174.04px; }
+.cat-card:nth-child(19) .card-hero { left:13.9px; top:71.45px; width:218.97px; height:179.02px; }
+
+
