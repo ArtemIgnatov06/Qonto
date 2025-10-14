@@ -1,19 +1,131 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import '../Styles/chat-widget.css';
 
-/* Сообщение */
+/* ---------- Моковые данные продуктов (можно ставить ПРЯМЫЕ HTTPS ссылки) ---------- */
+const FAKE_PRODUCTS = [
+  { id: 1,  title: 'Набір каструль 6 пр.',               brand: 'Tefal',   price: 2399, category: 'kitchen', image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=640' },
+  { id: 2,  title: 'Ножі кухонні 5 пр. з підставкою',    brand: 'BergHOFF',price: 1299, category: 'kitchen', image: 'https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=640' },
+  { id: 3,  title: 'Блендер ручний 800W',                brand: 'Bosch',   price: 1899, category: 'kitchen', image: 'https://images.unsplash.com/photo-1610440042657-612c34a1b3b3?q=80&w=640' },
+  { id: 4,  title: 'Електрочайник 1.7L',                 brand: 'Philips', price: 1499, category: 'kitchen', image: 'https://images.unsplash.com/photo-1606813907291-76a8cbb3a9b0?q=80&w=640' },
+  { id: 5,  title: 'Тостер 2-слотовий',                  brand: 'Bosch',   price: 1699, category: 'kitchen', image: 'https://images.unsplash.com/photo-1617814076367-bd0e1a2a3a9b?q=80&w=640' },
+  { id: 6,  title: 'Сковорода 28 см антипригарна',        brand: 'Tefal',   price: 999,  category: 'kitchen', image: 'https://images.unsplash.com/photo-1514511547117-f9c3d2a4d87d?q=80&w=640' },
+  { id: 7,  title: 'Мультиварка 5L',                     brand: 'Xiaomi',  price: 2599, category: 'kitchen', image: 'https://images.unsplash.com/photo-1622445275938-9d1e3f08cf31?q=80&w=640' },
+  { id: 8,  title: 'Кавомолка 150W',                      brand: 'Bosch',   price: 799,  category: 'kitchen', image: 'https://images.unsplash.com/photo-1504630083234-14187a9df0f5?q=80&w=640' },
+  { id: 9,  title: 'Електрична м’ясорубка',               brand: 'Braun',   price: 2899, category: 'kitchen', image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?q=80&w=640' },
+  { id: 10, title: 'Набір контейнерів 10 пр.',            brand: 'Curver',  price: 549,  category: 'kitchen', image: 'https://images.unsplash.com/photo-1611077543384-5873b31f5b2c?q=80&w=640' },
+];
+
+/* ---------- Утилиты для рендера HTML карточек ---------- */
+function htmlEscape(str = '') {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function currency(n) { return new Intl.NumberFormat('uk-UA', { style: 'currency', currency: 'UAH', maximumFractionDigits: 0 }).format(n); }
+
+function renderProductsHTML(list, title = 'Рекомендації') {
+  const cards = list.map(p => {
+    const img = p.image
+      ? `<img src="${htmlEscape(p.image)}" alt="${htmlEscape(p.title)}" loading="lazy" onerror="this.replaceWith(document.getElementById('cw-img-fallback').content.cloneNode(true))">`
+      : `<span class="noimg"></span>`;
+    return `
+      <div class="cw-card">
+        <div class="cw-thumb">${img}</div>
+        <div class="cw-meta">
+          <div class="cw-title" title="${htmlEscape(p.title)}">${htmlEscape(p.title)}</div>
+          <div class="cw-sub">${htmlEscape(p.brand)}</div>
+          <div class="cw-price">${currency(p.price)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Фолбек-картинка (SVG)
+  const fallbackTemplate = `
+    <template id="cw-img-fallback">
+      <div class="cw-thumb-fallback" aria-label="image placeholder">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <rect x="3" y="8" width="42" height="32" rx="4"></rect>
+          <circle cx="18" cy="22" r="5"></circle>
+          <path d="M8 36 L22 26 L30 31 L40 24 L45 36 Z"></path>
+        </svg>
+      </div>
+    </template>
+  `;
+
+  return `
+    ${fallbackTemplate}
+    <div class="cw-block">
+      <div class="cw-block-title">${htmlEscape(title)}</div>
+      <div class="cw-grid">${cards}</div>
+    </div>
+  `;
+}
+
+/* ---------- Простая логика под 3 команды ---------- */
+function isKitchenStart(text) {
+  const t = text.toLowerCase();
+  return (
+    /(заселивс|переїхав|переїхала|переїзд|новий дім|новому домі|новий будинок)/.test(t) &&
+    /(кухн|посуд|каструл|сковород|чайник|тостер|блендер)/.test(t)
+  );
+}
+function isCheaper(text) {
+  return /дешевш/.test(text.toLowerCase());
+}
+function extractBrand(text) {
+  const m = text.toLowerCase().match(/від\s+([a-zа-яёіїєґ0-9\-\s]+)/i);
+  if (!m) return null;
+  return m[1].trim().replace(/[.!?,;:]+$/, '');
+}
+
+function pickKitchenEssentials() {
+  const list = FAKE_PRODUCTS.filter(p => p.category === 'kitchen');
+  return [...list].sort((a, b) => a.price - b.price);
+}
+function pickCheaper(baseList) {
+  if (!baseList?.length) return [];
+  const avg = baseList.reduce((s, p) => s + p.price, 0) / baseList.length;
+  return baseList.filter(p => p.price <= avg).sort((a, b) => a.price - b.price).slice(0, 8);
+}
+function filterByBrand(baseList, brand) {
+  if (!brand) return [];
+  const b = brand.toLowerCase();
+  return (baseList?.length ? baseList : FAKE_PRODUCTS)
+    .filter(p => p.brand.toLowerCase().includes(b))
+    .slice(0, 12);
+}
+
+/* ---------- Сообщение ---------- */
 function Bubble({ role, children }) {
   return (
     <div className={`cw-row ${role}`}>
-      <div className="cw-bubble">{children}</div>
+      <div
+        className="cw-bubble"
+        {...(role === 'assistant'
+          ? { dangerouslySetInnerHTML: { __html: children } }
+          : { children })}
+      />
     </div>
   );
 }
 
-/* Composer (внизу) */
+/* ---------- Composer (файлы + добавление URL как «псевдо-вложение») ---------- */
+
+// простая проверка, что это ссылка на картинку
+function isImageUrl(u) {
+  try {
+    const url = new URL(u);
+    const okProto = url.protocol === 'https:' || url.protocol === 'http:';
+    const ext = (url.pathname.split('.').pop() || '').toLowerCase();
+    return okProto && /(png|jpg|jpeg|webp|gif|bmp|svg)$/.test(ext);
+  } catch { return false; }
+}
+
 function Composer({ onSend, disabled }) {
   const [value, setValue] = useState('');
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // {type:'file'|'url', file?:File, url?:string, name:string}
   const taRef = useRef(null);
 
   // авто-высота textarea 1–5 строк
@@ -54,8 +166,24 @@ function Composer({ onSend, disabled }) {
     setValue(''); setFiles([]);
     if (taRef.current) { taRef.current.style.height = '55px'; taRef.current.classList.remove('multiline'); }
   }
-  const onAttach  = (e) => { const list = Array.from(e.target.files || []); setFiles((p) => [...p, ...list]); e.target.value = ''; };
+  const onAttach  = (e) => {
+    const list = Array.from(e.target.files || []);
+    const mapped = list.map((f) => ({ type:'file', file:f, name:f.name }));
+    setFiles((p) => [...p, ...mapped]);
+    e.target.value = '';
+  };
   const onKeyDown = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); send(); } };
+
+  // Добавление ссылки на картинку
+  const addUrl = () => {
+    const u = prompt('Вставьте посилання на зображення (https://...)');
+    if (!u) return;
+    if (!isImageUrl(u)) {
+      alert('Це не схоже на посилання на зображення. Потрібно щось на кшталт https://.../image.jpg');
+      return;
+    }
+    setFiles((p) => [...p, { type:'url', url:u, name:u }]);
+  };
 
   return (
     <div className="cw-composer">
@@ -71,7 +199,14 @@ function Composer({ onSend, disabled }) {
       />
 
       <div className="cw-actions">
-        {/* СКРЕПКА (твой SVG) */}
+        {/* Кнопка «добавить URL» */}
+        <button type="button" className="cw-linkbtn" title="Додати URL-зображення" onClick={addUrl} disabled={disabled} aria-label="Додати URL">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M3.9 12a4.1 4.1 0 0 1 4.1-4.1h3v1.8h-3A2.3 2.3 0 1 0 8 12a2.3 2.3 0 0 0 2.3 2.3h3V16h-3A4.1 4.1 0 0 1 3.9 12Zm6-1h4.2v2H9.9v-2Zm6.1-3.1a4.1 4.1 0 0 1 0 8.2h-3V14h3a2.3 2.3 0 1 0 0-4.6h-3V7.9h3Z"/>
+          </svg>
+        </button>
+
+        {/* СКРЕПКА */}
         <label className="cw-attach" title="Прикріпити">
           <input type="file" multiple onChange={onAttach} style={{ display:'none' }} />
           <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -79,7 +214,7 @@ function Composer({ onSend, disabled }) {
           </svg>
         </label>
 
-        {/* ОТПРАВИТЬ (твой SVG) */}
+        {/* ОТПРАВИТЬ */}
         <button className="cw-send" onClick={send} disabled={disabled} aria-label="Надіслати">
           <svg width="21" height="19" viewBox="0 0 21 19" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M19.3076 9.09766C19.541 9.21518 19.5703 9.49666 19.3955 9.65527L19.3086 9.71484C15.5317 11.6252 7.19015 15.8736 3.90332 17.7773C3.8374 16.2366 4.12863 14.3345 5.11914 13.0869L5.61328 12.4639L4.96289 12.0068L1.29883 9.43164L4.96289 6.85644L5.61328 6.39941L5.11914 5.77637C4.12824 4.52872 3.83686 2.625 3.90332 1.08398C7.18364 2.97872 15.5286 7.19982 19.3076 9.09766Z" fill="#35C65E" stroke="#35C65E" strokeWidth="1.5"/>
@@ -91,7 +226,13 @@ function Composer({ onSend, disabled }) {
         <div className="cw-pending">
           {files.map((f, i) => (
             <div className="cw-file" key={i}>
-              <span className="name">{f.name}</span>
+              {/* превью для URL-картинок */}
+              {f.type === 'url' ? (
+                <span className="cw-file-thumb">
+                  <img src={f.url} alt="preview" onError={(e)=>{e.currentTarget.replaceWith(document.createElement('div'))}} />
+                </span>
+              ) : null}
+              <span className="name" title={f.name}>{f.name}</span>
               <button onClick={() => setFiles(files.filter((_, k) => k !== i))} aria-label="Убрати">×</button>
             </div>
           ))}
@@ -101,7 +242,7 @@ function Composer({ onSend, disabled }) {
   );
 }
 
-/* Виджет */
+/* ---------- Виджет ---------- */
 export default function ChatWidget({
   autoOpenOnError = false,
   anchorRef = null,
@@ -110,7 +251,7 @@ export default function ChatWidget({
   onClose,
 }) {
   const popRef  = useRef(null);
-  const launcherRef = useRef(null); // для автономного режима
+  const launcherRef = useRef(null);
   const scrollRef = useRef(null);
 
   const controlled = !!anchorRef;
@@ -123,6 +264,9 @@ export default function ChatWidget({
     try { return JSON.parse(localStorage.getItem('qonto.ai.chat') || '[]'); }
     catch { return []; }
   });
+
+  // Контекст «последней выдачи»
+  const [lastList, setLastList] = useState([]);
 
   useEffect(() => {
     if (msgs.length === 0) {
@@ -163,7 +307,7 @@ export default function ChatWidget({
   // автоскролл
   useEffect(() => { const c = scrollRef.current; if (c) c.scrollTop = c.scrollHeight; }, [msgs, loading, open]);
 
-  // авто-показ ошибок (только автономный режим)
+  // авто-показ ошибок
   useEffect(() => {
     if (!autoOpenOnError || controlled) return;
     const onRejection = (ev) => { setErrText(ev?.reason?.message || 'Виникла помилка на сервері.'); setUncontrolledOpen(true); };
@@ -171,35 +315,61 @@ export default function ChatWidget({
     return () => window.removeEventListener('unhandledrejection', onRejection);
   }, [autoOpenOnError, controlled]);
 
-  async function send({ text, files }) {
+  /* --------- «Фейковый AI» --------- */
+  async function send({ text/*, files*/ }) {
     setLoading(true); setErrText('');
     const user = { role: 'user', content: text };
     setMsgs((m) => [...m, user]);
+
     try {
-      const fd = new FormData();
-      fd.append('messages', JSON.stringify([...msgs, user].map(({ role, content }) => ({ role, content }))));
-      (files || []).forEach((f) => fd.append('files', f, f.name));
-      const res = await fetch('/api/ai/chat', { method: 'POST', body: fd });
-      const data = res.ok ? await res.json() : { reply: 'Виникла помилка на сервері.' };
-      setMsgs((m) => [...m, { role: 'assistant', content: data.reply || 'Ок.' }]);
-      if (!res.ok && !autoOpenOnError) setErrText('Виникла помилка на сервері.');
+      let replyHTML = '';
+      let nextList = [];
+
+      if (isKitchenStart(text)) {
+        nextList = pickKitchenEssentials().slice(0, 12);
+        replyHTML = renderProductsHTML(nextList, 'Початковий набір для кухні');
+      } else if (isCheaper(text)) {
+        const base = lastList.length ? lastList : pickKitchenEssentials();
+        nextList = pickCheaper(base);
+        replyHTML = renderProductsHTML(nextList, 'Ще вигідніше ⬇️');
+      } else {
+        const brand = extractBrand(text);
+        if (brand) {
+          nextList = filterByBrand(lastList.length ? lastList : FAKE_PRODUCTS, brand);
+          const title = `Тільки товари від ${brand.charAt(0).toUpperCase() + brand.slice(1)}`;
+          replyHTML = nextList.length ? renderProductsHTML(nextList, title) :
+            `<div class="cw-block"><div class="cw-block-title">${title}</div><div class="cw-note">Нічого не знайшов. Спробуйте інший бренд.</div></div>`;
+        } else {
+          replyHTML = `
+            <div class="cw-block">
+              <div class="cw-block-title">Я можу:</div>
+              <ul class="cw-list">
+                <li>«Я заселився в новий дім і мені треба товари на кухню» — підберу стартовий набір</li>
+                <li>«Можна будь ласка щось подешевше» — покажу бюджетніші позиції</li>
+                <li>«Покажи мені тільки товари від Bosch» — відфільтрую по бренду</li>
+              </ul>
+            </div>`;
+          nextList = lastList;
+        }
+      }
+
+      setLastList(nextList);
+      setMsgs((m) => [...m, { role: 'assistant', content: replyHTML }]);
     } catch {
       setMsgs((m) => [...m, { role: 'assistant', content: 'Проблема з мережею, спробуй ще раз.' }]);
     } finally { setLoading(false); }
   }
 
   const suggestions = [
-    'Що подарувати на день народження дитині?',
-    'Як обрати велосипед?',
-    'Які товари для спорту зараз найпопулярніші?',
-    'Допоможи обрати подарунок',
-    'Що мені знадобиться у поході?',
+    'Я заселився в новий дім і мені треба товари на кухню',
+    'Можна будь ласка щось подешевше',
+    'Покажи мені тільки товари від Bosch',
   ];
 
   const Welcome = () => (
     <div className="cw-welcome">
       <div className="cw-hello">
-        {/* Аватар — твой SVG */}
+        {/* Аватар */}
         <svg className="cw-ava" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <mask id="mava" maskUnits="userSpaceOnUse" x="0" y="0" width="26" height="26" style={{maskType:'alpha'}}>
             <circle cx="13.0078" cy="12.9258" r="12.5" fill="#D9D9D9"/>
@@ -213,7 +383,6 @@ export default function ChatWidget({
           </g>
           <circle cx="13.0078" cy="12.9258" r="12" stroke="#35C65E"/>
         </svg>
-
         <div className="cw-hello-bubble">Чим я можу допомогти?</div>
       </div>
 
@@ -225,7 +394,6 @@ export default function ChatWidget({
         ))}
       </div>
 
-      {/* Центральный зелёный шар с ромбом */}
       <div className="cw-logo-dot" aria-hidden="true">
         <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
           <circle cx="28" cy="28" r="28" fill="#7AD293" opacity="0.7"/>
@@ -242,22 +410,8 @@ export default function ChatWidget({
     return (
       <div ref={popRef} id={id} className="cw-popover" role="dialog" aria-label="AI чат">
         <div className="cw-toolbar">
-          {/* Історія запитів — контурная */}
-          <div className="cw-tab outline">
-
-            Історія запитів
-          </div>
-
-          {/* Новий чат — зелёная кнопка с плюсом */}
-          <button className="cw-tab solid" type="button" onClick={() => setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }])} title="Новий чат">
-            {/* <span className="ico" aria-hidden="true">
-              <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.5505 14.5374L14.5505 21.7857C14.5505 22.0569 14.4457 22.2972 14.2361 22.5068C14.0266 22.7163 13.7862 22.8211 13.515 22.8211C13.2438 22.8211 13.0035 22.7163 12.7939 22.5068C12.5843 22.2972 12.4796 22.0569 12.4796 21.7857L12.4796 14.5374L5.23131 14.5374C4.96012 14.5374 4.71975 14.4326 4.51019 14.2231C4.30063 14.0135 4.19585 13.7731 4.19585 13.502C4.19585 13.2308 4.30063 12.9904 4.51019 12.7808C4.71975 12.5713 4.96012 12.4665 5.23131 12.4665L12.4796 12.4665L12.4796 5.21825C12.4796 4.94705 12.5843 4.70668 12.7939 4.49712C13.0035 4.28756 13.2438 4.18278 13.515 4.18278C13.7862 4.18278 14.0266 4.28756 14.2361 4.49712C14.4457 4.70668 14.5505 4.94706 14.5505 5.21825L14.5505 12.4665H21.7987C22.0699 12.4665 22.3103 12.5713 22.5199 12.7808C22.7294 12.9904 22.8342 13.2308 22.8342 13.502C22.8342 13.7731 22.7294 14.0135 22.5199 14.2231C22.3103 14.4326 22.0699 14.5374 21.7987 14.5374H14.5505Z" fill="white"/>
-              </svg>
-            </span> */}
-            Новий чат
-          </button>
-
+          <div className="cw-tab outline">Історія запитів</div>
+          <button className="cw-tab solid" type="button" onClick={() => { setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }]); setLastList([]); }} title="Новий чат">Новий чат</button>
           <button className="cw-x" onClick={() => onClose?.()} aria-label="Закрити">×</button>
         </div>
 
@@ -273,7 +427,7 @@ export default function ChatWidget({
     );
   }
 
-  /* автономный режим (на будущее) */
+  /* автономный режим */
   return (
     <div style={{ position: 'fixed', inset: 'auto 16px 16px auto', zIndex: 9999, pointerEvents: 'none' }}>
       <button
@@ -288,25 +442,8 @@ export default function ChatWidget({
       {open && (
         <div ref={popRef} className="cw-popover" role="dialog" aria-label="AI чат" style={{ pointerEvents: 'auto' }}>
           <div className="cw-toolbar">
-            <div className="cw-tab outline">
-              {/*<span className="ico" aria-hidden="true">
-                <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3.95313 12.0005C3.95313 13.1814 4.18573 14.3508 4.63765 15.4418C5.08958 16.5329 5.75197 17.5242 6.58702 18.3593C7.42207 19.1943 8.41342 19.8567 9.50446 20.3087C10.5955 20.7606 11.7649 20.9932 12.9458 20.9932C14.1267 20.9932 15.2961 20.7606 16.3872 20.3087C17.4782 19.8567 18.4695 19.1943 19.3046 18.3593C20.1396 17.5242 20.802 16.5329 21.254 15.4418C21.7059 14.3508 21.9385 13.1814 21.9385 12.0005C21.9385 9.61549 20.9911 7.32816 19.3046 5.64171C17.6181 3.95525 15.3308 3.00781 12.9458 3.00781C10.5608 3.00781 8.27348 3.95525 6.58702 5.64171C4.90057 7.32816 3.95313 9.61549 3.95313 12.0005Z" stroke="#35C65E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12.9453 7.00391L12.9453 11.9998L15.9429 14.9974" stroke="#35C65E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>*/}
-              Історія запитів
-            </div>
-
-            <button className="cw-tab solid" onClick={() => setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }])}>
-              {/*<span className="ico" aria-hidden="true">
-                <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14.5505 14.5374L14.5505 21.7857C14.5505 22.0569 14.4457 22.2972 14.2361 22.5068C14.0266 22.7163 13.7862 22.8211 13.515 22.8211C13.2438 22.8211 13.0035 22.7163 12.7939 22.5068C12.5843 22.2972 12.4796 22.0569 12.4796 21.7857L12.4796 14.5374L5.23131 14.5374C4.96012 14.5374 4.71975 14.4326 4.51019 14.2231C4.30063 14.0135 4.19585 13.7731 4.19585 13.502C4.19585 13.2308 4.30063 12.9904 4.51019 12.7808C4.71975 12.5713 4.96012 12.4665 5.23131 12.4665L12.4796 12.4665L12.4796 5.21825C12.4796 4.94705 12.5843 4.70668 12.7939 4.49712C13.0035 4.28756 13.2438 4.18278 13.515 4.18278C13.7862 4.18278 14.0266 4.28756 14.2361 4.49712C14.4457 4.70668 14.5505 4.94706 14.5505 5.21825L14.5505 12.4665H21.7987C22.0699 12.4665 22.3103 12.5713 22.5199 12.7808C22.7294 12.9904 22.8342 13.2308 22.8342 13.502C22.8342 13.7731 22.7294 14.0135 22.5199 14.2231C22.3103 14.4326 22.0699 14.5374 21.7987 14.5374H14.5505Z" fill="white"/>
-                </svg>
-              </span> */}
-              Новий чат
-            </button>
-
+            <div className="cw-tab outline">Історія запитів</div>
+            <button className="cw-tab solid" onClick={() => { setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }]); setLastList([]); }}>Новий чат</button>
             <button className="cw-x" onClick={() => setUncontrolledOpen(false)} aria-label="Закрити">×</button>
           </div>
 
