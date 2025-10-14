@@ -7,6 +7,8 @@ import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import '../App.css';
 import '../Styles/Home.css';
 import { catalogItems } from '../data/catalogItems'; // путь подправь под свой
+import BannerCarousel from '../Components/BannerCarousel';
+
 const API = process.env.REACT_APP_API || '';
 
 function pickMessage(r, data, fallback) {
@@ -283,11 +285,16 @@ export default function Home() {
     }
   };
 
+
+  
 return (
   <div className="page page-home" style={{ paddingRight: 0 }}>
     {loading && <p className="text-muted">{t('common.loading')}</p>}
     {error && <p className="text-danger">{t('home.errors.loadFailed')}: {error}</p>}
-
+    
+    <div className="hero-wrap">
+      <BannerCarousel />
+    </div>
     {/* макет: контент + правая панель */}
     <div
       className="catalog-layout"
@@ -299,17 +306,19 @@ return (
       }}
     >
       {/* ЛЕВАЯ КОЛОНКА — грид товаров */}
-      <div>
-        {!loading && !error && (
-          viewItems.length ? (
-            <div
-              className="products-grid products-grid-4"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-                gap: 16
-              }}
-            >
+<div className="products-col">
+  {!loading && !error && (
+    viewItems.length ? (
+      <div
+        className="products-grid products-grid-4"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 268px)', // 4 фикс-колонки как в макете
+          columnGap: 16,                           // маленький горизонтальный отступ
+          rowGap: 16,
+          justifyContent: 'center',                // на всякий случай
+        }}
+      >
               {viewItems.map(p => {
                 const priceText = money(p.price);
                 const oldPriceText = Number(p?.old_price) > Number(p?.price) ? money(p.old_price) : null;
@@ -550,7 +559,7 @@ return (
       </aside>
     </div>
 
-    <ChatWidget autoOpenOnError={false} />
+    {/*<ChatWidget autoOpenOnError={false} /> */}
   </div>
 );
 

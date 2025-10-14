@@ -101,11 +101,11 @@ const Profile = () => {
           <div className="card mb-16">
             <div className="grid-2 gap-16">
               <div>
-                <label className="label">{t('profile.firstName', { defaultValue: 'Имя' })}</label>
+                <label className="label">{t('profile.firstName', { defaultValue: 'Імя' })}</label>
                 <input className="input" value={form.first_name} onChange={e=>setForm({ ...form, first_name: e.target.value })} />
               </div>
               <div>
-                <label className="label">{t('profile.lastName', { defaultValue: 'Фамилия' })}</label>
+                <label className="label">{t('profile.lastName', { defaultValue: 'Прізвище' })}</label>
                 <input className="input" value={form.last_name} onChange={e=>setForm({ ...form, last_name: e.target.value })} />
               </div>
               <div>
@@ -113,7 +113,7 @@ const Profile = () => {
                 <input className="input" type="email" value={form.email} onChange={e=>setForm({ ...form, email: e.target.value })} />
               </div>
               <div>
-                <label className="label">{t('profile.contactEmail', { defaultValue: 'Почта для связи' })}</label>
+                <label className="label">{t('profile.contactEmail', { defaultValue: 'Пошта для звязку' })}</label>
                 <input className="input" type="email" value={form.contact_email} onChange={e=>setForm({ ...form, contact_email: e.target.value })} />
               </div>
             </div>
@@ -125,10 +125,10 @@ const Profile = () => {
 
             <div className="row gap-12 mt-16">
               <button className="btn btn-primary" onClick={saveProfile} disabled={saving}>
-                {saving ? t('common.saving', { defaultValue: 'Сохранение…' }) : t('common.save', { defaultValue: 'Сохранить' })}
+                {saving ? t('common.saving', { defaultValue: 'Збереження…' }) : t('common.save', { defaultValue: 'Зберегти' })}
               </button>
               <button className="btn btn-ghost" onClick={() => setShowEdit(false)}>
-                {t('common.cancel', { defaultValue: 'Отмена' })}
+                {t('common.cancel', { defaultValue: 'Відмінити' })}
               </button>
             </div>
             {msg && <div className="msg-ok mt-8" role="status">{msg}</div>}

@@ -53,7 +53,7 @@
 
 .form-row { /* оболочка для формовых строк, если нужно что-то добавить позже */ }
 
-.products-grid { display: grid; gap: 16px; }
+.products-grid { display: grid; gap: 10px; }
 .products-grid-3 { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
 .product-card { border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: #fff; }
@@ -84,7 +84,7 @@
   background: #fff;
   border-radius: 15px;
   overflow: hidden;
-  margin: 0 auto; /* чтобы в сетке центрировалась */
+  margin: 0 ; /* чтобы в сетке центрировалась */
 }
 .pcard-link{ position:absolute; inset:0; z-index:1; }
 
@@ -152,7 +152,7 @@
 }
 
 /* Кнопка удаления админа — чтобы не прыгала на карточке */
-.pcard-admin-del{ position:absolute; right:10px; bottom:10px; z-index:4; }
+/*.pcard-admin-del{ position:absolute; right:10px; bottom:10px; z-index:4; }*/
 
 /* совместимость со старым стилем каталога (оставляем, вдруг что-то ещё использует) */
 .product-card, .product-thumb, .product-body, .product-title, .product-desc,
@@ -226,3 +226,57 @@
 .star-btn.on svg path{ fill: var(--accent); }
 .star-btn:focus-visible{ outline: none; box-shadow: 0 0 0 2px rgba(53,198,94,.4); border-radius:6px; }
 .star-btn:hover svg path{ fill: var(--accent); }
+
+
+
+/* Адаптив: на узких экранах один столбец — баннер на всю ширину, фильтры вниз */
+@media (max-width: 1024px){
+  .hero-wrap{ max-width: 100%; margin: 12px 0 12px; }
+  .catalog-layout{ grid-template-columns: 1fr !important; }
+  .filters-sidebar{
+    position: static;   /* чтобы не прилипали, когда под баннером */
+    width: auto;
+    min-height: unset;
+    margin-top: 0;
+  }
+}
+/* Ширина баннера ровно как у левой колонки (в Фигме) —
+   центрируем его в общей ширине страницы */
+/* Баннер: меньше сверху, больше снизу */
+.hero-wrap{
+  max-width: calc(100% - 320px - 24px);
+  margin: 0px auto 32px;     /* было 18px auto 16px */
+}
+
+@media (max-width: 1100px){
+  .hero-wrap{ max-width: 100%; }
+}
+
+
+/* центрируем блок "товары + фильтры" */
+.catalog-layout{
+  display: grid;
+  grid-template-columns: max-content 320px; /* левая колонка по фактической ширине сетки */
+  gap: 24px;
+  width: max-content;        /* ширина по содержимому */
+  margin: 0 auto;            /* центр по странице */
+  align-items: start;
+}
+
+/* левая колонка (обёртка над сеткой товаров) тоже по содержимому */
+.products-col{
+  width: max-content;
+}
+
+/* баннер той же ширины, что и левая колонка (4 карточки по 268 + 3 промежутка по 16) */
+.hero-wrap{
+  width: calc(268px * 4 + 16px * 3);
+  margin: 0 auto 32px;       /* без верхнего отступа, снизу больше */
+}
+
+/* на узком экране всё в столбик */
+@media (max-width: 1024px){
+  .catalog-layout{ grid-template-columns: 1fr; width: 100%; }
+  .products-col{ width: 100%; }
+  .hero-wrap{ width: 100%; }
+}

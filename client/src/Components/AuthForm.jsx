@@ -264,7 +264,8 @@ export default function AuthForm() {
           <span className={`dot ${regStep === 3 ? 'is-active' : ''}`} />
         </div>
 
-        {regStep === 1 && (
+      {regStep === 1 && (
+        <>
           <form onSubmit={startRegister}>
             <label className="r-auth-input-wrap">
               <input
@@ -309,13 +310,15 @@ export default function AuthForm() {
             >
               {t('common.continue', 'Продовжити')}
             </button>
-
-            <div className="r-auth-divider">
-              <span className="r-auth-divider__text">{t('common.or')}</span>
-              <GoogleSignIn onSuccess={() => (window.location.href = '/')} />
-            </div>
           </form>
-        )}
+
+          {/* ВАЖНО: Google-кнопка вне формы, чтобы не было submit */}
+          <div className="r-auth-divider">
+            <span className="r-auth-divider__text">{t('common.or')}</span>
+            <GoogleSignIn onSuccess={() => (window.location.href = '/')} />
+          </div>
+        </>
+      )}
 
         {regStep === 2 && (
           <form onSubmit={verifyOtp}>

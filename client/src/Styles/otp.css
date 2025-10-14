@@ -45,7 +45,7 @@
   padding: 10px 14px;
   border-radius: 10px;
   border: none;
-  background: #1a73e8;
+  background: #35C65E;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -56,4 +56,4 @@
 .otp-close{position:absolute;top:8px;right:10px;border:none;background:transparent;font-size:22px;cursor:pointer}
 .otp-input{width:100%;font-size:24px;letter-spacing:4px;text-align:center;padding:10px 12px;border:1px solid #ccc;border-radius:10px;outline:none}
 .otp-error{color:#b00020;margin-top:8px;margin-bottom:8px}
-.otp-submit{margin-top:10px;width:100%;padding:10px 14px;border-radius:10px;border:none;background:#1a73e8;color:#fff;font-size:16px;cursor:pointer}
+.otp-submit{margin-top:10px;width:100%;padding:10px 14px;border-radius:10px;border:none;background:#35C65E;color:#fff;font-size:16px;cursor:pointer}
