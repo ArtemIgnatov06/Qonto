@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="creating-product.css" />
+  <!-- ШРИФТЫ -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+  <title>Creating Product</title>
+</head>
+<body>
+    <header class="hdr">
+  <!-- фоновый прямоугольник -->
+  <div class="hdr-bg"></div>
+
+  <!-- LOGO -->
+  <a class="logo" href="#">
+    <span class="logo-text">Qonte</span>
+    <span class="logo-dot" aria-hidden="true"></span>
+  </a>
+
+  <!-- SEARCH GROUP -->
+  <form class="search-wrap" action="#" role="search">
+  <input class="search-input" type="text" placeholder="Пошук..." aria-label="Пошук">
+  <button class="search-btn" type="submit" aria-label="Найти">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" fill="none" stroke="#7AD293" stroke-width="1.5"/>
+      <rect x="16" y="16" width="6" height="6" rx="1.2" fill="#7AD293"/>
+    </svg>
+  </button>
+</form>
+
+  <!-- КНОПКА AI -->
+<button class="btn-ai" type="button">
+  <span class="ai-ico" aria-hidden="true">
+    <!-- иконка «робот/ИИ» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <circle cx="9" cy="10" r="1"/>
+      <circle cx="15" cy="10" r="1"/>
+      <path d="M8 15c1.5 1 3.5 1 5 0"/>
+    </svg>
+  </span>
+  <span class="ai-label">AI-Консультант</span>
+</button>
+
+<!-- КНОПКА КАТАЛОГ -->
+<button class="btn-cat" type="button">
+  <span class="cat-ico" aria-hidden="true">
+    <!-- иконка «меню/каталог» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <rect x="3" y="4" width="7" height="7"/>
+      <rect x="14" y="4" width="7" height="7"/>
+      <rect x="3" y="13" width="7" height="7"/>
+      <rect x="14" y="13" width="7" height="7"/>
+    </svg>
+  </span>
+  <span class="cat-label">Каталог</span>
+</button>
+
+  <!-- ИКОНКИ 3–6 -->
+  <button class="ico ico-lang" type="button" aria-label="Выбор языка">
+    <!-- Иконка "язык" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-heart" type="button" aria-label="Избранное">
+    <!-- Иконка "сердце" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 21s-6-4.3-9-8.6C1 9.3 3.5 5 7.5 5c2.1 0 3.5 1.1 4.5 2.5C13 6.1 14.4 5 16.5 5 20.5 5 23 9.3 21 12.4c-3 4.3-9 8.6-9 8.6z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-cart" type="button" aria-label="Корзина">
+    <!-- Иконка "корзина" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-user" type="button" aria-label="Аккаунт">
+    <!-- Иконка "пользователь" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#7AD293" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+    </svg>
+  </button>
+</header>
+
+
+
+<!-- Group 1125 -->
+<div class="group-1125">
+  <button type="button" class="rectangle-107" id="add-photo-btn" aria-label="Додайте фото товару (до 6 фото)">
+    <span class="icon-plus">+</span>
+    <span class="hint">Додайте фото товару (до 6 фото)</span>
+    <img class="preview" alt="Зображення товару" />
+  </button>
+
+  <!-- скрытый инпут для выбора файла -->
+  <input id="product-photo" type="file" accept="image/*" hidden>
+</div>
+
+
+<!-- Group 1038 — панель миниатюр слева -->
+<div class="group-1038" aria-label="Додаткові фото товару">
+  <!-- Рамка -->
+  <div class="rectangle-108"></div>
+
+  <!-- Разделительные линии (строго по координатам макета) -->
+  <div class="line-37"></div>
+  <div class="line-36"></div>
+  <div class="line-35"></div>
+  <div class="line-34"></div>
+
+  <!-- 5 ячеек-слотов -->
+  <button class="thumb-slot" data-slot="0" aria-label="Мініатюра 1" disabled>
+    <span class="icon-plus">+</span>
+    <img class="thumb-preview" alt="Мініатюра 1">
+  </button>
+  <button class="thumb-slot" data-slot="1" aria-label="Мініатюра 2" disabled>
+    <span class="icon-plus">+</span>
+    <img class="thumb-preview" alt="Мініатюра 2">
+  </button>
+  <button class="thumb-slot" data-slot="2" aria-label="Мініатюра 3" disabled>
+    <span class="icon-plus">+</span>
+    <img class="thumb-preview" alt="Мініатюра 3">
+  </button>
+  <button class="thumb-slot" data-slot="3" aria-label="Мініатюра 4" disabled>
+    <span class="icon-plus">+</span>
+    <img class="thumb-preview" alt="Мініатюра 4">
+  </button>
+  <button class="thumb-slot" data-slot="4" aria-label="Мініатюра 5" disabled>
+    <span class="icon-plus">+</span>
+    <img class="thumb-preview" alt="Мініатюра 5">
+  </button>
+
+  <!-- скрытые инпуты под каждый слот -->
+  <input type="file" accept="image/*" class="thumb-input" data-slot="0" hidden>
+  <input type="file" accept="image/*" class="thumb-input" data-slot="1" hidden>
+  <input type="file" accept="image/*" class="thumb-input" data-slot="2" hidden>
+  <input type="file" accept="image/*" class="thumb-input" data-slot="3" hidden>
+  <input type="file" accept="image/*" class="thumb-input" data-slot="4" hidden>
+</div>
+
+
+
+
+<!-- Rectangle 201 — поле описания товара -->
+<div class="rectangle-201">
+  <textarea class="desc-input" aria-label="Опис товару" placeholder="*Про товар"></textarea>
+</div>
+
+
+<!-- Group 1045 -->
+<div class="group-1045">
+  <div class="rectangle-199">
+    <input
+      type="text"
+      class="title-input"
+      maxlength="40"
+      aria-label="Назва товару"
+      placeholder="*Назва товару"
+    />
+  </div>
+</div>
+
+
+<div class="group-1047">
+  <div class="rectangle-200">
+    <input
+      type="text"
+      class="price-input"
+      aria-label="Ціна"
+      placeholder="*Ціна"
+      maxlength="10"
+      inputmode="decimal"
+      autocomplete="off"
+      pattern="^\d{1,10}(,\d{0,2})?$"
+    />
+    <span class="suffix-uah">грн</span>
+  </div>
+</div>
+
+<!-- Group 683 — блок продавця (всё img) -->
+<div class="group-683">
+  <!-- Баннер как IMG (под рамкой) -->
+  <img
+    class="seller-cover-img"
+    src="shop-brand.png"
+    alt="Обкладинка магазину"
+  />
+
+  <!-- Рамка блока (над картинкой) -->
+  <div class="seller-frame"></div>
+
+  <!-- Название магазина -->
+  <div class="seller-title">Super Noname Store</div>
+
+  <!-- Ссылка “Перейти до магазину” + иконка -->
+  <div class="seller-link">
+    <a class="seller-link-text" href="#" aria-label="Перейти до магазину">Перейти до магазину</a>
+    <img class="seller-link-icon" src="arrow-green.png" alt="" />
+  </div>
+</div>
+
+
+<!-- Frame 736 (кликабельный) -->
+<div class="frame-736">
+  <button type="button" class="frame-736__btn" aria-label="Бренд (за бажанням)">
+    <span class="frame-736__plus">+</span>
+    <span class="frame-736__label">Бренд (за бажанням)</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+<!-- ===== МОДАЛКА: меню загрузки бренда ===== -->
+<div class="brand-modal" id="brand-modal" aria-hidden="true">
+  <div class="brand-modal__overlay"></div>
+
+  <!-- Rectangle 192 -->
+  <div class="brand-modal__card">
+    <!-- Group 1128 — зона добавления фото, Rectangle 212 -->
+    <button type="button" class="brand-modal__photo" id="brand-photo-btn" aria-label="Додати фото">
+      <span class="brand-modal__plus">+</span>
+      <span class="brand-modal__photo-label">Додати фото</span>
+      <!-- превью вставишь потом, место предусмотрено -->
+      <img class="brand-modal__photo-preview" alt="" />
+      <input id="brand-photo-input" type="file" accept="image/*" hidden>
+    </button>
+
+    <!-- Group 1129 — Назва бренду, Rectangle 213 -->
+    <div class="brand-modal__row">
+      <input type="text" class="brand-modal__input" placeholder="Назва бренду" aria-label="Назва бренду">
+    </div>
+
+    <!-- Group 1130 — URL-посилання, Rectangle 214 -->
+    <div class="brand-modal__row" style="top: 285px;">
+      <input type="text" class="brand-modal__input" placeholder="URL-посилання" aria-label="URL-посилання">
+    </div>
+
+    <!-- Group 1131 — кнопка Додати, Rectangle 215 -->
+    <button type="button" class="brand-modal__submit" style="top: 360px;">
+      Додати
+    </button>
+
+    <!-- (опционально) крестик закрытия -->
+    <button type="button" class="brand-modal__close" aria-label="Закрити">&times;</button>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="group-1132 features-box" id="features-box" role="button" aria-label="Додати характеристики товару" tabindex="0">
+  <div class="rectangle-203"></div>
+
+  <!-- Центрированный контент -->
+  <div class="features-center">
+    <div class="features-plus" aria-hidden="true">+</div>
+    <div class="features-label">Додати характеристики товару</div>
+  </div>
+</div>
+
+
+
+
+
+<!-- Group 1132 -->
+<div class="group-1132 features-box" id="features-box" role="button" aria-label="Додати характеристики товару" tabindex="0">
+  <!-- Rectangle 203 -->
+  <div class="rectangle-203"></div>
+
+  <!-- Group 1042 -->
+  <div class="group-1042">
+    <!-- + -->
+    <div class="features-plus" aria-hidden="true">+</div>
+  </div>
+
+  <!-- Додати характеристики товару -->
+  <div class="features-label">Додати характеристики товару</div>
+</div>
+
+
+
+
+
+<button id="publish-btn" class="publish-btn" type="button">
+  Опублікувати товар
+</button>
+
+<div class="shop-label">Магазин</div>
+
+<!-- Товари + иконка (img) -->
+<div class="goods-wrap">
+  <button class="goods-icon" type="button" aria-label="Назад до списку">
+    <img class="goods-icon__img" src="planex.png" alt="">
+  </button>
+  <h3 class="goods-title">Товари</h3>
+</div>
+
+
+
+
+
+
+<div id="attrs-anchor" class="attrs-anchor"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<footer class="ftr" role="contentinfo">
+  <div class="ftr-bg"></div>
+
+  <!-- Колонки -->
+  <h4 class="ftr-h4 ftr-h4--info">Інформація о компанії</h4>
+  <ul class="ftr-list ftr-list--info">
+    <li><a href="#">Про нас</a></li>
+    <li><a href="#">Умови використання сайту</a></li>
+    <li><a href="#">Вакансії</a></li>
+    <li><a href="#">Контакти</a></li>
+    <li><a href="#">Зворотній зв’язок</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--help">Допомога</h4>
+  <ul class="ftr-list ftr-list--help">
+    <li><a href="#">Часті питання</a></li>
+    <li><a href="#">Доставка та оплата</a></li>
+    <li><a href="#">Гарантія</a></li>
+    <li><a href="#">Повернення</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--sellers">Продавцям</h4>
+  <ul class="ftr-list ftr-list--sellers">
+    <li><a href="#">Продавати товари</a></li>
+    <li><a href="#">Правила торгівлі</a></li>
+  </ul>
+
+  <!-- Соцсети -->
+  <h4 class="ftr-h4 ftr-h4--social">Ми в соціальних мережах</h4>
+  <a class="ftr-soc ftr-soc--ig" href="#" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1" fill="#ECECEC"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--fb" href="#" aria-label="Facebook">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M13.5 21v-7h2.3l.4-3H13.5V9.1c0-.9.3-1.5 1.7-1.5H16V5.1c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 3.9V11H7v3h2.6v7h3.9z"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--tt" href="#" aria-label="TikTok">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M15 3c.6 1.8 2 3.2 3.8 3.7v3.1c-1.5-.1-2.9-.6-4-1.5v5.9a5.6 5.6 0 1 1-5.6-5.6c.5 0 1 .1 1.4.2v3a2.5 2.5 0 1 0 2.2 2.5V3h2.2z"/>
+    </svg>
+  </a>
+
+  <!-- Декоративная фигура справа -->
+  <img class="ftr-mascot" src="maskotfooter.png" alt="Маскот Qonto">
+
+  <!-- Копирайт -->
+  <p class="ftr-copy">©2025 Платформа онлайн-торгівлі «Qonto» — використовується на підставі ліцензії правовласника</p>
+</footer>
+
+
+
+<script>
+(() => {
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  // ===== страховка от перекрытий
+  function pokePointerIssues() {
+    const TOP_Z = '300';
+    const clickable = [
+      '#add-photo-btn',
+      '.group-1038 .thumb-slot',
+      '.frame-736__btn',
+      '.brand-modal__card',
+      '.brand-modal__overlay',
+      '.frame-736',
+      '#attrs-bar .attr-add-btn',
+      '#attrs-bar .attr-chip',
+      '#attrs-bar .attr-input-wrap'
+    ];
+    clickable.forEach(sel =>
+      $$(sel).forEach(n => {
+        n.style.pointerEvents = 'auto';
+        n.style.zIndex = TOP_Z;
+        // у родителя тоже поднимем слой, если он статичен
+        if (n.parentElement && getComputedStyle(n.parentElement).zIndex === 'auto') {
+          n.parentElement.style.zIndex = TOP_Z;
+          if (getComputedStyle(n.parentElement).position === 'static') {
+            n.parentElement.style.position = 'relative';
+          }
+        }
+      })
+    );
+    $$('.rectangle-108, .line-37, .line-36, .line-35, .line-34, .seller-frame')
+      .forEach(n => n.style.pointerEvents = 'none');
+  }
+
+  // ===== 1) главное фото
+  function ensureMainInput() {
+    const btn = $('#add-photo-btn'); if (!btn) return null;
+    let input = $('#product-photo');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*'; input.hidden = true; input.id = 'product-photo';
+      btn.parentElement?.appendChild(input);
+    }
+    return input;
+  }
+  function handleMainChange(input) {
+    const btn = $('#add-photo-btn'); const imgEl = btn?.querySelector('.preview');
+    if (!btn || !imgEl) return;
+    const f = input.files?.[0]; if (!f) return;
+    if (!f.type?.startsWith('image/')) { alert('Будь ласка, виберіть зображення.'); input.value=''; return; }
+    const url = URL.createObjectURL(f);
+    imgEl.src = url; imgEl.onload = () => URL.revokeObjectURL(url);
+    btn.classList.add('has-image'); btn.setAttribute('aria-label','Зображення товару додано'); input.disabled = true;
+    btn.dispatchEvent(new CustomEvent('product-image-added', { detail:{ file:f }}));
+  }
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#add-photo-btn'); if (!btn) return;
+    if (btn.classList.contains('has-image')) return;
+    e.preventDefault(); const input = ensureMainInput(); input?.click();
+  });
+  document.addEventListener('change', (e) => {
+    const input = e.target.matches('#product-photo') ? e.target : null; if (!input) return;
+    handleMainChange(input);
+  });
+
+  // ===== 2) миниатюры слева
+  function enableSlot(i) {
+    const panel = $('.group-1038'); const slot = panel?.querySelector(`.thumb-slot[data-slot="${i}"]`);
+    if (!slot || slot.classList.contains('has-image')) return;
+    slot.disabled = false; slot.classList.add('is-enabled');
+  }
+  document.addEventListener('product-image-added', () => enableSlot(0), true);
+  const _btn = () => $('#add-photo-btn');
+  const mo = new MutationObserver(() => { if (_btn()?.classList.contains('has-image')) { enableSlot(0); mo.disconnect(); }});
+  if (_btn()) mo.observe(_btn(), { attributes:true, attributeFilter:['class'] });
+  document.addEventListener('click', (e) => {
+    const slot = e.target.closest('.group-1038 .thumb-slot.is-enabled:not(.has-image)'); if (!slot) return;
+    e.preventDefault(); const idx = slot.dataset.slot;
+    const input = slot.parentElement?.querySelector(`.thumb-input[data-slot="${idx}"]`); input?.click();
+  });
+  document.addEventListener('change', (e) => {
+    const input = e.target.matches('.group-1038 .thumb-input') ? e.target : null; if (!input) return;
+    const idx = input.dataset.slot; const panel = input.closest('.group-1038');
+    const slot = panel?.querySelector(`.thumb-slot[data-slot="${idx}"]`); const img = slot?.querySelector('.thumb-preview');
+    const f = input.files?.[0]; if (!slot || !img || !f) return;
+    if (!f.type?.startsWith('image/')) { alert('Будь ласка, виберіть зображення.'); input.value=''; return; }
+    const url = URL.createObjectURL(f); img.src = url; img.onload = () => URL.revokeObjectURL(url);
+    slot.classList.add('has-image'); slot.classList.remove('is-enabled'); slot.disabled = true; input.disabled = true;
+    enableSlot(Number(idx)+1);
+  });
+
+  // ===== 3) цена
+  function sanitizePrice(v) {
+    v = v.replace(/[^\d,]/g,'');
+    const [int='', decRaw=''] = v.split(',');
+    const dec = decRaw.replace(/,/g,'').slice(0,2);
+    let out = int; if (v.includes(',')) out += ',' + dec;
+    return out.slice(0,10);
+  }
+  document.addEventListener('input', (e) => {
+    const input = e.target.closest('.group-1047 .price-input'); if (!input) return;
+    const clean = sanitizePrice(input.value);
+    if (clean !== input.value) { input.value = clean; input.setSelectionRange(clean.length, clean.length); }
+  });
+  document.addEventListener('blur', (e) => {
+    const input = e.target.closest?.('.group-1047 .price-input'); if (input) input.value = input.value.replace(/,$/, '');
+  }, true);
+
+  // ===== 4) Модалка бренда — загрузка фото через dataURL, хранится в dataset
+  let brandModalEscHandler = null;
+
+  function buildBrandModal() {
+    const prev = document.getElementById('brand-modal');
+    if (prev) prev.remove();
+
+    const wrap = document.createElement('div');
+    wrap.className = 'brand-modal';
+    wrap.id = 'brand-modal';
+    wrap.setAttribute('aria-hidden','true');
+    Object.assign(wrap.style, { position:'fixed', inset:'0', zIndex:'100000' });
+
+    wrap.innerHTML = `
+      <div class="brand-modal__overlay" style="position:absolute;inset:0;background:rgba(0,0,0,.35);"></div>
+      <div class="brand-modal__card" role="dialog" aria-modal="true"
+           style="position:absolute;width:412px;height:438px;left:calc(50% - 206px + 3px);top:285px;background:#ECECEC;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden;z-index:100001;">
+        <button type="button" class="brand-modal__close" aria-label="Закрити"
+          style="position:absolute;right:10px;top:6px;width:28px;height:28px;border:0;border-radius:6px;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:#555">&times;</button>
+
+        <div class="brand-photo-btn" role="button" tabindex="0" aria-label="Додати фото"
+          style="position:absolute;width:340px;height:173px;left:36px;top:37px;border:2px solid #828181;border-radius:14px;background:#FFF;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:pointer;overflow:hidden">
+          <span class="brand-modal__plus" style="font-family:Ubuntu;font-weight:500;font-size:37.5px;line-height:43px;color:#35C65E">+</span>
+          <span class="brand-modal__photo-label" style="font-family:Ubuntu;font-size:14px;line-height:24px;color:#363535">Додати фото</span>
+          <img class="brand-photo-preview" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
+        </div>
+
+        <div style="position:absolute;left:36px;top:224px;width:340px;height:49px;border:2px solid #828181;border-radius:10px;background:#FFF">
+          <input id="brand-name-input" type="text" placeholder="Назва бренду" aria-label="Назва бренду"
+                 style="position:absolute;inset:0;border:0;outline:none;background:transparent;padding:12px 14px;font-family:Ubuntu;font-size:14px;line-height:24px;color:#2A2A2A">
+        </div>
+
+        <div style="position:absolute;left:36px;top:285px;width:340px;height:49px;border:2px solid #828181;border-radius:10px;background:#FFF">
+          <input id="brand-url-input" type="text" placeholder="URL-посилання" aria-label="URL-посилання"
+                 style="position:absolute;inset:0;border:0;outline:none;background:transparent;padding:12px 14px;font-family:Ubuntu;font-size:14px;line-height:24px;color:#2A2A2A">
+        </div>
+
+        <button id="brand-submit" type="button"
+          style="position:absolute;left:36px;top:360px;width:340px;height:49px;border:2px solid #35C65E;border-radius:10px;background:#35C65E;font-family:Ubuntu;font-size:14px;line-height:24px;color:#FFFFFF;cursor:pointer;">
+          Додати
+        </button>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    const overlay = $('.brand-modal__overlay', wrap);
+    const card    = $('.brand-modal__card', wrap);
+    const closeX  = $('.brand-modal__close', wrap);
+    const photoBtn= $('.brand-photo-btn', wrap);
+    const preview = $('.brand-photo-preview', wrap);
+    const plus    = $('.brand-modal__plus', wrap);
+    const label   = $('.brand-modal__photo-label', wrap);
+    const nameInp = $('#brand-name-input', wrap);
+    const submit  = $('#brand-submit', wrap);
+
+    const closeModal = () => {
+      window.removeEventListener('keydown', brandModalEscHandler, true);
+      wrap.remove();
+    };
+    overlay.addEventListener('click', (e) => { e.stopPropagation(); closeModal(); });
+    closeX.addEventListener('click',    (e) => { e.stopPropagation(); closeModal(); });
+    card.addEventListener('click', (e) => e.stopPropagation());
+    brandModalEscHandler = (e) => { if (e.key === 'Escape') { e.preventDefault(); closeModal(); } };
+    window.addEventListener('keydown', brandModalEscHandler, true);
+
+    function spawnFilePicker(accept = 'image/*', cb) {
+      const inp = document.createElement('input');
+      inp.type = 'file';
+      inp.accept = accept;
+      Object.assign(inp.style, { position:'fixed', left:'-9999px', top:'-9999px', opacity:'0' });
+      document.body.appendChild(inp);
+      inp.addEventListener('change', () => {
+        const file = inp.files && inp.files[0];
+        try { cb && cb(file || null); } finally { inp.remove(); }
+      }, { once:true });
+      inp.click();
+    }
+
+    const openPicker = () => spawnFilePicker('image/*', (file) => {
+      if (!file) return;
+      if (!file.type || !file.type.startsWith('image/')) { alert('Будь ласка, виберіть зображення.'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        if (plus)  plus.style.display = 'none';
+        if (label) label.style.display = 'none';
+        card.dataset.brandImage = String(dataUrl || '');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    photoBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openPicker(); });
+    photoBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }});
+
+    submit.addEventListener('click', () => {
+      const brandName   = (nameInp?.value || '').trim();
+      const imageSrc    = card.dataset.brandImage || '';
+      const targetFrame = window.__brandFrameRef || document.querySelector('.frame-736');
+      closeModal();
+      replaceBrandFrameWithBanner(imageSrc, brandName, targetFrame);
+      window.__brandFrameRef = null;
+    });
+
+    wrap.classList.add('is-open');
+    wrap.setAttribute('aria-hidden','false');
+  }
+
+  function openBrandModal() { buildBrandModal(); }
+
+  document.addEventListener('click', (e) => {
+    const opened = document.getElementById('brand-modal');
+    if (opened && opened.classList.contains('is-open')) return;
+
+    const trigger = e.target.closest('.frame-736__btn, .frame-736');
+    if (!trigger) return;
+
+    const frame = trigger.closest?.('.frame-736') || document.querySelector('.frame-736');
+    if (!frame) return;
+    if (frame.querySelector('.frame736-banner')) return;
+
+    window.__brandFrameRef = frame;
+    e.preventDefault();
+    openBrandModal();
+  });
+
+  // ===== 5) замена блока бренда на баннер
+  function replaceBrandFrameWithBanner(imageSrc, brandName, containerEl) {
+    const frame = containerEl || document.querySelector('.frame-736');
+    if (!frame) return;
+
+    if (!frame.style.position) frame.style.position = 'absolute';
+    frame.style.zIndex = '301';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'frame736-banner';
+    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:341px;height:155px;z-index:302;';
+
+    const topBlock = document.createElement('div');
+    topBlock.style.cssText = 'position:absolute;left:0px;top:0.27px;width:341px;height:90px;overflow:hidden;border-radius:10px 10px 0 0;';
+    if (imageSrc) {
+      const img = document.createElement('img');
+      img.src = imageSrc;
+      img.alt = '';
+      img.style.cssText = 'position:absolute;inset:0;width:341px;height:90px;object-fit:cover;';
+      topBlock.appendChild(img);
+    } else {
+      const ph = document.createElement('div');
+      ph.style.cssText = 'position:absolute;inset:0;width:341px;height:90px;background:#CCCCCC;';
+      topBlock.appendChild(ph);
+    }
+
+    const border = document.createElement('div');
+    border.style.cssText = 'box-sizing:border-box;position:absolute;left:0;top:0;width:341px;height:155px;border:2px solid #ECECEC;border-radius:10px;pointer-events:none;';
+
+    const title = document.createElement('div');
+    title.style.cssText = "position:absolute;left:20px;top:100px;width:301px;height:24px;font-family:'Ubuntu',sans-serif;font-weight:400;font-size:14px;line-height:24px;color:#363535;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+    title.textContent = brandName || '';
+
+    wrapper.appendChild(topBlock);
+    wrapper.appendChild(border);
+    wrapper.appendChild(title);
+
+    frame.replaceChildren(wrapper);
+    hideBrandOptionalLabel(frame);
+    frame.classList.remove('frame-736__btn');
+  }
+
+  function hideBrandOptionalLabel(scopeEl) {
+    const TEXTS = ['Бренд (за бажанням)','Бренд (за бажаням)'];
+    const CANDIDATE_SELECTORS = ['.brand-optional', '.brand-optional-label','label','div','span','p'];
+
+    for (const sel of CANDIDATE_SELECTORS) {
+      const nodes = scopeEl.querySelectorAll(sel);
+      for (const el of nodes) {
+        const txt = (el.textContent || '').trim();
+        if (TEXTS.includes(txt)) {
+          el.style.display = 'none';
+          el.setAttribute('aria-hidden', 'true');
+          return;
+        }
+      }
+    }
+    const r1 = scopeEl.getBoundingClientRect?.(); if (!r1) return;
+    const candidates = Array.from(document.querySelectorAll(CANDIDATE_SELECTORS.join(',')));
+    for (const el of candidates) {
+      const txt = (el.textContent || '').trim();
+      if (!TEXTS.includes(txt)) continue;
+      const r2 = el.getBoundingClientRect?.(); if (!r2) continue;
+      const overlap = !(r2.right < r1.left || r2.left > r1.right || r2.bottom < r1.top || r2.top > r1.bottom);
+      if (overlap) { el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); return; }
+    }
+  }
+
+  // ===== 6) Атрибуты: кнопка → инпут → чипы (max 5), стабильный полный ререндер
+(() => {
+/* ===== Атрибуты: кнопка → инпут → чипы (max 5). Монтируемся в #attrs-anchor ===== */
+const ROOT_ID = 'attrs-root';
+const ANCHOR_ID = 'attrs-anchor';
+
+const W_CHIP = 82, W_BTN = 209, W_INP = 166, H = 55, GAP = 18, MAX = 5;
+
+let anchor = document.getElementById(ANCHOR_ID);
+if (!anchor) {
+  // если якорь забыли поставить, создадим в body (но лучше добавь его в нужный блок)
+  anchor = document.createElement('div');
+  anchor.id = ANCHOR_ID;
+  anchor.style.position = 'relative';
+  anchor.style.left = '813px';
+  anchor.style.top  = '416px';
+  anchor.style.width = '1400px';
+  anchor.style.height = H + 'px';
+  anchor.style.zIndex = '600';
+  document.body.appendChild(anchor);
+}
+
+let root = document.getElementById(ROOT_ID);
+if (!root) {
+  root = document.createElement('div');
+  root.id = ROOT_ID;
+  anchor.appendChild(root);
+}
+// подчинимся CSS: никаких инлайнов left/top/zIndex у root
+root.style.position = 'absolute';
+root.style.left = '0';
+root.style.top  = '0';
+root.style.height = H + 'px';
+root.style.width  = '100%';
+root.style.zIndex = '601';
+if (!getComputedStyle(root).getPropertyValue('--attrs-inner-top')) {
+  root.style.setProperty('--attrs-inner-top', '6px');
+}
+
+const state = { items: [] };
+const xFor = (i) => i * (W_CHIP + GAP);
+
+function chip(text, i){
+  const wrap = document.createElement('div');
+  wrap.className = 'attr-chip';
+  wrap.style.cssText = `position:absolute;left:${xFor(i)}px;top:var(--attrs-inner-top);width:${W_CHIP}px;height:${H}px;`;
+
+  const rect = document.createElement('div');
+  rect.style.cssText = 'position:absolute;inset:0;box-sizing:border-box;border:2px solid #ECECEC;border-radius:12px;background:#FFF;';
+  const label = document.createElement('div');
+  label.className = 'attr-label';
+  label.textContent = text;
+  label.style.cssText = "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Ubuntu';font-weight:400;font-size:18px;line-height:24px;color:#363535;";
+
+  wrap.appendChild(rect);
+  wrap.appendChild(label);
+  return wrap;
+}
+
+function addBtn(x){
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'attr-add-btn';
+  btn.style.cssText = `
+    position:absolute;left:${x}px;top:var(--attrs-inner-top);width:${W_BTN}px;height:${H}px;
+    border:2px solid #ECECEC;border-radius:12px;background:#FFF;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-family:'Ubuntu';font-weight:400;font-size:18px;line-height:24px;color:#828181;
+  `;
+  btn.innerHTML = `<span style="font-size:37.5px;line-height:43px;color:#35C65E">+</span><span>Добавити атрибут</span>`;
+  btn.addEventListener('click', () => render('input'));
+  return btn;
+}
+
+function inputWrap(x){
+  const w = document.createElement('div');
+  w.className = 'attr-input-wrap';
+  w.style.cssText = `
+    position:absolute;left:${x}px;top:var(--attrs-inner-top);width:${W_INP}px;height:${H}px;
+    box-sizing:border-box;background:#FFF;border:2px solid #ECECEC;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+  `;
+  w.innerHTML = `<input class="attr-input" type="text" placeholder="Введіть текст" maxlength="30"
+    style="width:90%;border:0;outline:none;background:transparent;text-align:center;
+           font-family:'Ubuntu';font-weight:400;font-size:18px;line-height:24px;color:#2A2A2A;">`;
+  return w;
+}
+
+function render(mode='button'){ // 'button' | 'input'
+  const nodes = [];
+  state.items.forEach((t,i) => nodes.push(chip(t,i)));
+  const nextX = xFor(state.items.length);
+  if (state.items.length < MAX) nodes.push(mode === 'input' ? inputWrap(nextX) : addBtn(nextX));
+  root.replaceChildren(...nodes);
+
+  if (mode === 'input') {
+    const input = root.querySelector('.attr-input');
+    if (input) {
+      let done = false;
+      const commit = () => {
+        if (done) return; done = true;
+        const v = input.value.trim();
+        if (v && state.items.length < MAX) state.items.push(v);
+        render('button');
+      };
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'NumpadEnter') { e.preventDefault(); commit(); }
+        else if (e.key === 'Escape') { e.preventDefault(); render('button'); }
+      });
+      input.addEventListener('blur', commit);
+      input.focus();
+    }
+  }
+}
+
+render('button');
+})();
+
+  // ===== запуск
+  function init() {
+    pokePointerIssues();
+    ensureMainInput();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+
+
+
+</body>
+</html>

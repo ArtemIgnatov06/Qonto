@@ -1,0 +1,1610 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 1700px; /* временно, чтобы видеть футер при разработке */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+/* Group 1125 — как раньше */
+.group-1125 {
+  position: absolute;
+  width: 586px;
+  height: 489px;
+  left: 202px;
+  top: 292px;
+}
+
+/* Rectangle 107 — как раньше, с дополнениями */
+.rectangle-107 {
+  box-sizing: border-box;
+  position: absolute;
+  left: 12.62%;
+  right: 50.75%;
+  top: 17.63%;
+  bottom: 52.84%;
+    width: 586px;
+  height: 489px;
+
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFF;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  cursor: pointer;
+  overflow: hidden; /* чтобы изображение не вылезало за скругления */
+}
+
+/* + */
+.icon-plus {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 64px;
+  display: block;
+  color: #35C65E;
+}
+
+/* подпись */
+.hint {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: center;
+  color: #828181;
+  max-width: 80%;
+}
+
+/* картинка-превью заполняет весь бокс */
+.preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* на весь бокс, без искажений */
+  display: none;       /* скрыта до выбора */
+}
+
+/* когда изображение добавлено */
+.rectangle-107.has-image .icon-plus,
+.rectangle-107.has-image .hint {
+  display: none;
+}
+.rectangle-107.has-image .preview {
+  display: block;
+}
+
+/* === Контейнер панели миниатюр (строго по макету) === */
+.group-1038 {
+  position: absolute;
+  width: 97px;
+  height: 489px;
+  left: 80.05px;
+  top: 292px;
+}
+
+/* Внешняя рамка (Rectangle 108) */
+.rectangle-108 {
+  box-sizing: border-box;
+  position: absolute;
+  width: 97px;
+  height: 489px;
+  left: 0;   /* внутри контейнера */
+  top: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFF;
+  pointer-events: none;
+}
+
+/* Разделительные линии — в абсолютных координатах макета, пересчитаны относительно контейнера */
+.line-37, .line-36, .line-35, .line-34 {
+  position: absolute;
+  width: 96px;
+  height: 0px;
+  left: 0.95px;              /* 81 - 80.05 */
+  border: 2px solid #ECECEC; /* как в макете */
+}
+
+/* Точки Y: 390, 489, 586, 684 относительно страницы → минус top контейнера (292) */
+.line-37 { top: 98px;  }  /* 390 - 292 */
+.line-36 { top: 197px; }  /* 489 - 292 */
+.line-35 { top: 294px; }  /* 586 - 292 */
+.line-34 { top: 392px; }  /* 684 - 292 */
+
+/* Пять слотов одинаковой высоты (по сегментам 0–98–197–294–392–489) */
+.thumb-slot {
+  position: absolute;
+  left: 0;
+  width: 97px;
+  height: 97px;       /* сегментная высота */
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;    /* станет pointer, когда активен */
+  overflow: hidden;
+  border-radius: 13px; /* чуть меньше рамки, чтобы не вылезало */
+  padding: 0;
+}
+
+/* Раскладка по вертикали (точно к сегментам) */
+.thumb-slot[data-slot="0"] { top: 0px;   }
+.thumb-slot[data-slot="1"] { top: 98px;  }
+.thumb-slot[data-slot="2"] { top: 197px; }
+.thumb-slot[data-slot="3"] { top: 294px; }
+.thumb-slot[data-slot="4"] { top: 392px; }
+
+/* Плюсик по центру, как в основном боксе */
+.thumb-slot .icon-plus {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1;
+  color: #35C65E;
+  display: none; /* показываем только когда слот активен и пуст */
+}
+
+/* Превью внутри ячейки */
+.thumb-slot .thumb-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+/* Состояния: активный пустой, активный с изображением */
+.thumb-slot.is-enabled:not(.has-image) {
+  cursor: pointer;
+}
+.thumb-slot.is-enabled:not(.has-image) .icon-plus {
+  display: block;
+}
+.thumb-slot.has-image .thumb-preview {
+  display: block;
+}
+
+/* Неактивные (до загрузки главного) — не кликаются и визуально «пустые» */
+.thumb-slot:disabled {
+  pointer-events: none;
+  opacity: 1; /* без затемнения по ТЗ; можно поставить 0.6, если нужно */
+}
+
+/* рамка и линии под слоями ячеек */
+.rectangle-108 { z-index: 0; pointer-events: none; }
+
+.line-37, .line-36, .line-35, .line-34 {
+  z-index: 0;
+  pointer-events: none; /* чтобы не перехватывали клики */
+}
+
+/* сами слоты поверх */
+.thumb-slot { z-index: 2; }
+
+/* 1) Контейнер колонки — режем содержимое по внешнему радиусу */
+.group-1038 {
+  position: absolute;
+  width: 97px;
+  height: 489px;
+  left: 80.05px;
+  top: 375px;
+
+  border-radius: 15px;   /* внешние скругления */
+  overflow: hidden;      /* чтобы миниатюры и плюс не выходили за радиус */
+}
+
+/* 2) Рамка остаётся как есть, но клики не ловит и под содержимым */
+.rectangle-108 {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFF;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 3) Перегородки строго внутри рамки и не выпирают */
+.line-37, .line-36, .line-35, .line-34 {
+  position: absolute;
+  left: 2px;            /* отступ от левой стенки рамки (толщина бордера) */
+  right: 2px;           /* отступ от правой стенки рамки */
+  height: 0;
+  border-top: 2px solid #ECECEC;  /* рисуем только верхнюю грань */
+  z-index: 0;
+  pointer-events: none;
+}
+/* координаты по макету минус top контейнера (292) */
+.line-37 { top: 98px;  }
+.line-36 { top: 197px; }
+.line-35 { top: 294px; }
+.line-34 { top: 392px; }
+
+/* 4) Слоты: базово без скруглений, поверх линий */
+.thumb-slot {
+  position: absolute;
+  left: 0;
+  width: 97px;
+  height: 97px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  overflow: hidden;
+  /* Важно: убираем внутренние скругления */
+  border-radius: 0;
+  z-index: 2;
+  padding: 0;
+}
+/* расположение слотов по сегментам */
+.thumb-slot[data-slot="0"] { top: 0px;   }
+.thumb-slot[data-slot="1"] { top: 98px;  }
+.thumb-slot[data-slot="2"] { top: 197px; }
+.thumb-slot[data-slot="3"] { top: 294px; }
+.thumb-slot[data-slot="4"] { top: 392px; }
+
+/* 5) Только внешние углы у верхнего и нижнего слота */
+.thumb-slot[data-slot="0"] {
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
+}
+.thumb-slot[data-slot="4"] {
+  border-bottom-left-radius: 13px;
+  border-bottom-right-radius: 13px;
+}
+
+/* 6) Плюс/превью — как было */
+.thumb-slot .icon-plus {
+  font-family: 'Ubuntu';
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1;
+  color: #35C65E;
+  display: none;
+}
+.thumb-slot .thumb-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+.thumb-slot.is-enabled:not(.has-image) { cursor: pointer; }
+.thumb-slot.is-enabled:not(.has-image) .icon-plus { display: block; }
+.thumb-slot.has-image .thumb-preview { display: block; }
+.thumb-slot:disabled { pointer-events: none; }
+
+/* Rectangle 201 — рамка по макету */
+.rectangle-201 {
+  box-sizing: border-box;
+
+  position: absolute;
+  width: 783px;
+  height: 218px;
+  left: 81px;
+  top: 900px;
+
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFF;
+  overflow: hidden; /* чтобы контент не выходил за скругления */
+}
+
+/* поле как раньше — меняем только внутренние отступы */
+.rectangle-201 .desc-input {
+  position: absolute;
+  inset: 0;
+  width: 90%;
+  height: 80%;
+  /* 115 - 81 = 34px слева, 860 - 830 = 30px сверху */
+  padding: 30px 20px 16px 34px;
+
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  color: #2A2A2A;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* плейсхолдер «Опишите товар» по заданным стилям */
+.rectangle-201 .desc-input::placeholder {
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: justify;
+  color: #828181;
+}
+
+/* тонкая настройка скролла — по желанию */
+.rectangle-201 .desc-input::-webkit-scrollbar { width: 8px; }
+.rectangle-201 .desc-input::-webkit-scrollbar-thumb { background: #E5E5E5; border-radius: 8px; }
+.rectangle-201 .desc-input { scrollbar-width: thin; scrollbar-color: #E5E5E5 transparent; }
+
+/* Group 1045 (контейнер группы) */
+.group-1045 {
+  position: absolute;
+  width: 550px;
+  height: 66px;
+  left: 813px;
+  top: 292px;
+}
+
+/* Rectangle 199 — рамка */
+.rectangle-199 {
+  box-sizing: border-box;
+  position: absolute;
+  width: 550px;
+  height: 66px;
+  left: 70px;   /* внутри группы */
+  top: 85px;
+  border: 2px solid #ECECEC;
+  border-radius: 14px;
+  background: #FFF;
+  overflow: hidden; /* чтобы контент не выходил за скругления */
+}
+
+/* Поле ввода */
+.title-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 15px 20px 15px 27px; /* 15px сверху, 27px слева по макету */
+  border: 0;
+  outline: none;
+  background: transparent;
+
+  /* h4 как в макете */
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-size: 25px;
+  line-height: 36px;
+  color: #2A2A2A;
+
+  white-space: nowrap;     /* без многострочности */
+  text-overflow: ellipsis; /* визуальная обрезка при переполнении */
+  overflow: hidden;        /* без полос прокрутки */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 99;
+}
+
+/* Плейсхолдер по стилю h4 */
+.title-input::placeholder {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 25px;
+  line-height: 36px;
+  color: #828181;
+}
+
+/* (опционально) фокусное состояние рамки */
+.rectangle-199:has(.title-input:focus) {
+  border-color: #DCDCDC;
+}
+
+/* Группа по макету */
+.group-1047 {
+  position: absolute;
+  width: 151px;
+  height: 55px;
+  left: 813px;
+  top: 449px;
+}
+
+/* Рамка (Rectangle 200) */
+.rectangle-200 {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  overflow: hidden;
+  width: 180px;
+  height: 55px;
+  left: 70px;
+  top: 85px;
+}
+
+/* (опционально) подсветка рамки при фокусе */
+.rectangle-200:has(.price-input:focus) { border-color: #DCDCDC; }
+
+/* подпись справа */
+.suffix-uah {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  color: #828181;
+  pointer-events: none;
+}
+
+/* ввод по центру по вертикали + отступ справа под 'грн' */
+.price-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+
+  /* вертикальный центр: высота строки = высоте поля, без верх/низ паддингов */
+  line-height: 55px;         /* = высоте Rectangle 200 */
+  padding: 0 56px 0 14px;    /* справа запас под 'грн' (≈ 44px) + зазор */
+
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  color: #2A2A2A;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* плейсхолдер */
+.price-input::placeholder {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  left: 50%;
+  color: #828181;
+}
+
+/* Контейнер по макету */
+.group-683 {
+  position: absolute;
+  width: 341px;
+  height: 155px;
+  left: 813px;
+  top: 626px;
+}
+
+/* Баннер как <img>, 341×90, скругления */
+.seller-cover-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 341px;
+  height: 90px;
+  border-radius: 10px;
+  object-fit: cover;       /* как cover у background */
+  object-position: center;
+  z-index: 1;
+}
+
+/* Рамка всего блока */
+.seller-frame {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  z-index: 0;
+}
+
+/* Текст: (833,726) => внутри: left:20px; top:100px */
+.seller-title {
+  position: absolute;
+  left: 20px;
+  top: 100px;
+  width: 132px;
+  height: 24px;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  z-index: 2;
+    white-space: nowrap;
+}
+
+/* Ссылка и иконка: (833,750) => left:20px; top:124px */
+.seller-link {
+  position: absolute;
+  left: 20px;
+  top: 124px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.seller-link-text {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 18px;
+  color: #35C65E;
+  white-space: nowrap;
+}
+
+/* Иконка-стрелка как <img>, 17×17, позиция по макету */
+.seller-link-icon {
+  width: 17px;
+  height: 17px;
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* Контейнер по макету + обрезаем содержимое по радиусу */
+.group-683 {
+  position: absolute;
+  width: 330px;
+  height: 155px;
+  left: 882px;
+  top: 710px;
+  border-radius: 10px;
+  overflow: hidden;  /* чтобы баннер не вылезал за скругления */
+}
+
+/* Баннер ПОД рамкой */
+.seller-cover-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 341px;
+  height: 90px;
+  border-radius: 10px;   /* совпадает с контейнером */
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;            /* ниже рамки */
+}
+
+/* Рамка СВЕРХУ */
+.seller-frame {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  z-index: 2;            /* выше баннера */
+  pointer-events: none;  /* не мешает кликам по ссылке */
+}
+
+/* Текст: (833,726) => внутри: 20/100 */
+.seller-title {
+  position: absolute;
+  left: 20px;
+  top: 100px;
+  width: 132px;
+  height: 24px;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  z-index: 3;
+}
+
+/* Ссылка и иконка: (833,750) => 20/124 */
+.seller-link {
+  position: absolute;
+  left: 20px;
+  top: 124px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 3;
+}
+
+/* Кликабельный текст-ссылка */
+.seller-link-text {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 18px;
+  color: #35C65E;
+  text-decoration: none;
+}
+.seller-link-text:hover,
+.seller-link-text:focus {
+  text-decoration: underline;
+  outline: none;
+}
+
+/* Иконка-стрелка как IMG */
+.seller-link-icon {
+  width: 17px;
+  height: 17px;
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* Контейнер по макету */
+.frame-736 {
+  position: absolute;
+  width: 341px;
+  height: 155px;
+  left: 1225px;
+  top: 710px;
+  z-index: 99;
+}
+
+/* Кнопка = рамка (Rectangle 145) + фон */
+.frame-736__btn {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 341px;
+  height: 155px;
+
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+  background: #FFF;
+
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+
+  /* чтобы позиции детей считались от кнопки */
+  position: relative;
+}
+
+/* “+” — пикс-в-пикс */
+.frame-736__plus {
+  position: absolute;
+  left: 46.92%;
+  right: 46.63%;
+  top: 22.58%;
+  bottom: 49.68%;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 37.5px;
+  line-height: 43px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+}
+
+/* Подпись — пикс-в-пикс */
+.frame-736__label {
+  position: absolute;
+  width: 179px;
+  height: 24px;
+  left: 81px;
+  top: 78px;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px; /* 133% */
+  text-align: justify;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* (необязательно) состояние фокуса/hover для доступности */
+.frame-736__btn:hover,
+.frame-736__btn:focus-visible {
+  border-color: #DCDCDC;
+}
+
+/* ====== базовая модалка ====== */
+.brand-modal {
+  position: fixed;
+  inset: 0;
+  display: none;               /* скрыта по умолчанию */
+  z-index: 1000;
+}
+.brand-modal.is-open { display: block; }
+
+.brand-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+}
+
+/* Rectangle 192 — карточка в центре, 412×438, top: 285px */
+.brand-modal__card {
+  position: fixed;
+  width: 412px;
+  height: 438px;
+  left: calc(50% - 412px/2 + 3px);
+  top: 285px;
+
+  background: #ECECEC;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+/* === ЗОНА ФОТО 340×173 @ top: 37px (322−285), центр по горизонтали === */
+/* Rectangle 212 */
+.brand-modal__photo {
+  position: absolute;
+  width: 340px;
+  height: 173px;
+  left: calc((412px - 340px)/2); /* 36px */
+  top: 37px; /* 322 − 285 */
+
+  border: 2px solid #828181;
+  border-radius: 14px;
+  background: #FFF;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* + */
+.brand-modal__plus {
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 37.5px;
+  line-height: 43px;
+  color: #35C65E;
+}
+
+/* “Додати фото” */
+.brand-modal__photo-label {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px; /* 171% */
+  color: #363535;
+}
+
+/* превью (на будущее) */
+.brand-modal__photo-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;  /* скроем пока */
+}
+
+/* === Ряды инпутов 340×49 === */
+/* Group 1129 — top: 224px (509−285) */
+/* Rectangle 213 / 214 — одинаковые */
+.brand-modal__row {
+  position: absolute;
+  width: 340px;
+  height: 49px;
+  left: calc((412px - 340px)/2); /* 36px */
+  top: 224px;
+
+  border: 2px solid #828181;
+  border-radius: 10px;
+  background: #FFF;
+}
+
+/* input внутри ряда */
+.brand-modal__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+
+  padding: 12px 14px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  color: #2A2A2A;
+}
+.brand-modal__input::placeholder {
+  color: #828181;
+}
+
+/* === кнопка Додати 340×49 @ top: 360px (645−285) === */
+.brand-modal__submit {
+  position: absolute;
+  left: calc((412px - 340px)/2);
+  width: 340px;
+  height: 49px;
+  top: 360px;
+
+  border: 2px solid #828181;
+  border-radius: 10px;
+  background: #FFF;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  color: #828181;
+
+  cursor: pointer;
+}
+
+/* Крестик закрытия (не из макета; удобно для теста) */
+.brand-modal__close {
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+}
+.brand-modal__close:hover { background: rgba(0,0,0,0.05); }
+
+/* Контейнер */
+.group-1132 {
+  position: absolute;
+  width: 707px;
+  height: 218px;
+  left: 884px;
+  top: 900px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Рамка */
+.group-1132 .rectangle-203 {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFFFFF;
+}
+
+/* Центровка контента */
+.group-1132 .features-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 265px;                /* как в макете для группы текста */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;                   /* небольшой отступ между + и текстом */
+  pointer-events: none;        /* кликается весь бокс */
+  z-index: 10;
+}
+
+/* Плюс */
+.group-1132 .features-plus {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 37.5px;
+  line-height: 43px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+}
+
+/* Подпись */
+.group-1132 .features-label {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;   /* h5 */
+  line-height: 24px; /* 133% */
+  text-align: center;
+  color: #828181;
+}
+
+/* Контейнер всей полосы атрибутов */
+.attrs-bar{
+  position:absolute;
+  left:813px;
+  top:376px;
+  height:55px;
+  width:1200px; /* запас по ширине, можно подправить */
+  z-index: -99;
+}
+
+/* === Кнопка: "+ Добавити атрибут" (209×55) === */
+.attr-add-btn{
+  position:absolute;
+  width:209px; height:55px;
+  border:2px solid #ECECEC;
+  border-radius:12px;
+  background:#FFF;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  gap:10px;
+  font-family:'Ubuntu'; font-style:normal; font-weight:400; font-size:18px; line-height:24px;
+  color:#828181;
+}
+.attr-add-btn .plus{
+  font-size:37.5px; line-height:43px; color:#35C65E;
+}
+
+/* === Поле ввода (166×55) === */
+.attr-input-wrap{
+  position:absolute;
+  width:166px; height:55px;
+  box-sizing:border-box;
+  background:#FFFFFF;
+  border:2px solid #ECECEC;
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+}
+.attr-input{
+  width:90%;
+  border:0; outline:none; background:transparent;
+  text-align:center;
+  font-family:'Ubuntu'; font-style:normal; font-weight:400; font-size:18px; line-height:24px;
+  color:#2A2A2A;
+}
+.attr-input::placeholder{
+  color:#828181;
+}
+
+/* === Чип атрибута (82×55) === */
+.attr-chip{
+  position:absolute;
+  width:82px; height:55px;
+  box-sizing:border-box;
+  border:2px solid #ECECEC;
+  border-radius:12px;
+  background:#FFF;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Ubuntu'; font-style:normal; font-weight:400; font-size:18px; line-height:24px;
+  color:#363535;
+  user-select:none;
+}
+
+/* Контейнер для атрибутов (ставим на макетные координаты тут) */
+#attrs-bar {
+  position: absolute;
+  left: 883px;
+  top: 376px;
+  height: 55px;
+  width: 1200px;         /* запас ширины */
+  z-index: 30;           /* выше фоновых блоков */
+  pointer-events: auto;
+}
+
+/* Общий слой элементов в баре */
+#attrs-bar .attr-layer {
+  position: absolute;
+  top: 0;
+  height: 55px;
+  z-index: 31;           /* сами элементы ещё выше */
+}
+
+/* Кнопка: + Добавити атрибут (209×55) */
+#attrs-bar .attr-add-btn {
+  left: 0;               /* JS будет сдвигать по left */
+  width: 209px; height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  font-family: 'Ubuntu';
+  font-weight: 400; font-size: 18px; line-height: 24px;
+  color: #828181;
+}
+#attrs-bar .attr-add-btn .plus {
+  font-size: 37.5px; line-height: 43px; color: #35C65E;
+}
+
+/* Поле ввода (166×55) */
+#attrs-bar .attr-input-wrap {
+  left: 0;               /* JS будет сдвигать по left */
+  width: 166px; height: 55px;
+  box-sizing: border-box;
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+#attrs-bar .attr-input {
+  width: 90%;
+  border: 0; outline: none; background: transparent;
+  text-align: center;
+  font-family: 'Ubuntu';
+  font-weight: 400; font-size: 18px; line-height: 24px;
+  color: #2A2A2A;
+}
+#attrs-bar .attr-input::placeholder { color: #828181; }
+
+/* Чип атрибута (82×55) */
+#attrs-bar .attr-chip {
+  left: 0;               /* JS будет сдвигать по left */
+  width: 82px; height: 55px;
+  box-sizing: border-box;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Ubuntu';
+  font-weight: 400; font-size: 18px; line-height: 24px;
+  color: #363535;
+  user-select: none;
+}
+
+#attrs-bar .attr-add-btn,
+#attrs-bar .attr-input-wrap,
+#attrs-bar .attr-chip { position:absolute; top:0; height:55px; z-index:31; }
+
+/* сместить только кнопку и поле ввода на 6px вниз */
+#attrs-bar .attr-add-btn,
+#attrs-bar .attr-input-wrap{
+  top: 85px !important;
+}
+
+/* полоса атрибутов по макету + всегда сверху */
+#attrs-bar.attrs-bar{
+  position:absolute; left:813px; top:376px;
+  height:55px; width:1400px; z-index:200; pointer-events:auto;
+}
+
+/* демо-чип (как в макете) */
+#attrs-bar .attr-chip{
+  position:absolute; left:0; top:6px;   /* опустил на 6px как просил */
+  width:82px; height:55px; z-index:201;
+}
+#attrs-bar .attr-chip .attr-rect{
+  position:absolute; inset:0;
+  box-sizing:border-box; border:2px solid #ECECEC; border-radius:12px; background:#FFF;
+}
+#attrs-bar .attr-chip .attr-label{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Ubuntu'; font-weight:400; font-size:18px; line-height:24px; color:#363535;
+}
+
+/* кнопка и поле ввода — тоже чуть ниже и поверх всего */
+#attrs-bar .attr-add-btn,
+#attrs-bar .attr-input-wrap{ top:85px !important; z-index:201;}
+
+/* сам якорь позиционируй как удобно */
+#attrs-anchor{
+  position: relative;        /* важно! чтобы внутрь него можно было абсолютно спозиционировать полосу */
+  width: 1400px;             /* дорожка с запасом */
+  height: 55px;
+  /* поставь где нужно: */
+  left: 883px;               /* ← меняй горизонталь тут */ 
+  top:  455px;               /* ← и вертикаль тут */
+  z-index: 600;              /* если перекрывается — подними */
+}
+
+/* сама полоса атрибутов внутри якоря */
+#attrs-root{
+  position: absolute;        /* теперь относительно #attrs-anchor */
+  left: 0;
+  top:  0;
+  height: 55px;
+  width: 100%;
+  z-index: 601;
+  --attrs-inner-top: 6px;    /* микро-сдвиг чипов/кнопки внутри */
+}
+
+#attrs-root .attr-add-btn,
+#attrs-root .attr-chip,
+#attrs-root .attr-input-wrap{
+  z-index: 602;
+}
+
+/* Сброс браузерных стилей для кнопки */
+.publish-btn{
+  all: unset;                 /* убираем дефолтные стили button */
+  box-sizing: border-box;
+  position: absolute;
+  left: 635px;
+  top: 1200px;
+  width: 417px;
+  height: 82px;
+
+  background: #35C65E;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 36px;
+  color: #FFFFFF;
+  text-align: center;
+
+  cursor: pointer;
+  user-select: none;
+  z-index: 700;
+}
+
+/* ховер/актив/фокус */
+.publish-btn:hover   { filter: brightness(0.95); }
+.publish-btn:active  { transform: translateY(1px); }
+.publish-btn:focus-visible { outline: 2px solid #2cab53; outline-offset: 3px; }
+
+/* необязательный вид для отключенной кнопки */
+.publish-btn:disabled{
+  background: #A7E1BB;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+.shop-label{
+  position: absolute;
+  left: 883px;
+  top: 670px;
+  width: 73px;
+  height: 24px;
+
+  /* h5 */
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: justify;
+
+  color: #35C65E;
+
+  z-index: 700; /* чтобы было поверх */
+}
+
+/* Контейнер группы */
+.goods-wrap{
+  position: absolute;
+  left: 79.64px;
+  top: 185px;
+  width: 207px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  z-index: 720;
+}
+
+/* Текст "Товари" */
+.goods-title{
+  margin: 0;
+  width: 129px;
+  height: 43px;
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 500;
+  font-size: 37.5px;
+  line-height: 43px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+}
+
+/* Кнопка-иконка слева — без контура */
+.goods-icon{
+  position: relative;
+  width: 42px;
+  height: 41px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #35C65E;        /* используется для фона при ховере, если нужно */
+  background: transparent;
+  border: none;          /* <— убрали контур */
+  border-radius: 8px;
+  cursor: pointer;
+
+  transform: scaleX(-1);
+  transition: color .15s ease, background-color .15s ease, box-shadow .15s ease;
+  outline: none;
+}
+
+/* Иконка-картинка */
+.goods-icon__img{
+  width: 42px;
+  height: 41px;
+  object-fit: contain;
+  transition: filter .15s ease;
+}
