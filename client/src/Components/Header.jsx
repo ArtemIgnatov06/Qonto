@@ -57,7 +57,7 @@ export default function Header() {
   const langs = useMemo(
     () => [
       { code: 'uk', label: tt('lang.uk', 'Українська') },
-      { code: 'ru', label: tt('lang.ru', 'Русский') },
+
       { code: 'en', label: tt('lang.en', 'English') },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps

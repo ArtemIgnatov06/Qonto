@@ -45,12 +45,13 @@
 }
 
 /* Карточка */
-.card {
+/* было .card { ... } */
+.app-card {
   position: relative;
   background-color: var(--card-bg);
   border: var(--border);
   border-radius: var(--radius);
-  padding: 20rem;
+  padding: 1.25rem;
   box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
 }

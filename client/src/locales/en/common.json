@@ -1,5 +1,5 @@
 {
-  "lang": { "ru": "Russian", "uk": "Ukrainian", "en": "English" },
+  "lang": {  "uk": "Ukrainian", "en": "English" },
   "nav": { "home": "Home", "about": "About", "contacts": "Contacts", "profile": "Profile", "adminApplications": "Applications", "adminDeletions": "Deleted products" },
   "currency": { "label": "Currency", "change": "Change currency" },
   "auth": { "loginTab": "Sign in", "registerTab": "Sign up", "byEmail": "Sign in with e-mail", "byPhonePass": "Sign in with phone & password", "byPhoneOtp": "Sign in with SMS code", "login": "Sign in", "logout": "Sign out", "register": "Register", "required": "You must be signed in.", "invalidCreds": "Incorrect email or password." },

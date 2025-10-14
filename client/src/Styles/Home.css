@@ -69,3 +69,160 @@
 .msg.error { color: #b00020; }
 .text-muted { color: #6b7280; }
 .text-danger { color: #b00020; }
+
+/* === СЕТКА как была === */
+.products-grid { display: grid; gap: 16px; }
+.products-grid-3 { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
+
+/* ===== FIGMA-карточка (268×356) ===== */
+.pcard{
+  position: relative;
+  width: 268px;
+  height: 356px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  margin: 0 auto; /* чтобы в сетке центрировалась */
+}
+.pcard-link{ position:absolute; inset:0; z-index:1; }
+
+/* Фото-маска 268×270 */
+.pcard-photo{ position:absolute; left:0; top:0; width:268px; height:270px; overflow:hidden; }
+.pcard-photo-bg{ position:absolute; inset:0; /* если нужен фон, можно добавить */ }
+.pcard-img{
+  position:absolute; left:0; top:0; width:100%; height:100%;
+  object-fit: cover; object-position: center; display:block; background:#f8fafc;
+}
+
+/* Внешняя рамка карточки */
+.pcard-frame{
+  position:absolute; left:0; top:0; width:268px; height:356px;
+  border:2px solid #ECECEC; border-radius:15px; box-sizing:border-box;
+}
+
+/* Заголовок (228×24 @ 20,283) */
+.pcard-title{
+  position:absolute; left:20px; top:283px; width:228px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px; color:#363535;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  z-index:2;
+}
+
+/* Рейтинг справа: звезда 17×17 @ (208,287.5), значение 20×24 @ (228,283) */
+.pcard-star{
+  position:absolute; left:208px; top:287.5px; width:17px; height:17px; display:block; z-index:2;
+}
+.pcard-rating{
+  position:absolute; left:228px; top:283px; width:20px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px; color:#828181; z-index:2;
+}
+
+/* Цены + действия (228×24 @ 20,315) */
+.pcard-price{ position:absolute; left:20px; top:315px; width:228px; height:24px; z-index:2; }
+.pcard-price-now{
+  position:absolute; left:0; top:0; width:auto; height:24px;
+  font-weight:500; font-size:12px; line-height:24px; color:#35C65E;
+}
+.pcard-price-old{
+  position:absolute; left:66px; top:7px; /* как в макете */
+  font-weight:400; font-size:10px; line-height:11px; color:#828181;
+  text-decoration: line-through; opacity:.5;
+}
+
+/* Кнопки справа */
+.pcard-btn{
+  position:absolute; top:2.5px; width:21px; height:20px; padding:0; box-sizing:border-box;
+  background:#fff; border-radius:2px; cursor:pointer; z-index:3;
+}
+.pcard-btn--ghost{ left:175px; border:0px solid #fff; }
+.pcard-btn--green{ left:208px; border:0px solid #fff; width:20px; }
+.pcard-btn:focus-visible{ outline:none; box-shadow: inset 0 0 0 2px #35C65E; }
+
+/* Бейдж скидки (57.99×24 @ 13.81,235.08) */
+.pcard-badge{ position:absolute; left:13.81px; top:235.08px; width:57.99px; height:24px; z-index:2; }
+.pcard-badge-bg{
+  position:absolute; left:1.44px; top:1.87px; width:56.55px; height:20.24px;
+  background:#FF6B5B; border:2px solid #FFFFFF; border-radius:40px; box-sizing:border-box;
+}
+.pcard-badge-txt{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:12px; color:#fff;
+}
+
+/* Кнопка удаления админа — чтобы не прыгала на карточке */
+.pcard-admin-del{ position:absolute; right:10px; bottom:10px; z-index:4; }
+
+/* совместимость со старым стилем каталога (оставляем, вдруг что-то ещё использует) */
+.product-card, .product-thumb, .product-body, .product-title, .product-desc,
+.product-price, .product-seller { /* пусто */ }
+
+
+/* ==== Sidebar wrapper (как в фрейме 313.83×847.75) ==== */
+.filters-sidebar{
+  position: sticky; top: 0; align-self: start;
+  margin-top:11px;
+  width: 314px; min-height: 848px;
+  background: #fff; border: 2px solid #ECECEC; border-radius: 10px; padding: 14px;
+  font-family: 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* ==== Группа фильтра ==== */
+.fg{ margin-bottom: 18px; }
+.fg-title{ color:#828181; font-size:14px; line-height:24px; margin-bottom: 6px; }
+.fg-row{ display:flex; align-items:center; gap:12px; margin-top: 8px; }
+.fg-input-underline{
+  border:none; outline:none; background:transparent;
+  border-bottom:2px solid #ECECEC; height:28px; font-size:14px; color:#363535;
+}
+.w-80{ width:80px; } .w-100{ width:100px; }
+
+/* ==== Кастомные чекбоксы/радио (квадрат 15×15, r=5, #ECECEC) ==== */
+.chk{ display:flex; gap:8px; align-items:center; margin-top:6px; color:#363535; font-size:14px; }
+.chk > input{
+  appearance:none; -webkit-appearance:none; width:15px; height:15px; border-radius:5px;
+  border:2px solid #ECECEC; display:inline-block; position:relative; cursor:pointer; background:#fff;
+}
+.chk > input[type="checkbox"]:checked::after,
+.chk > input[type="radio"]:checked::after{
+  content:""; position:absolute; inset:2px; border-radius:3px; background:#35C65E;
+}
+.chk > input[type="radio"]{ border-radius:5px; } /* как на макете — тоже квадратные */
+
+/* ==== Список категорий (высота 216 как в Figma) ==== */
+.cat-scroll{ max-height:216px; overflow:auto; padding-right:6px; }
+
+/* ==== Рейтинг (5 прямоугольников 25×23.75 в контейнере 30×30) ==== */
+.rate-row{ display:flex; gap:11px; margin-top: 6px; }
+.rate-box{
+  width:30px; height:30px; padding:0; background:transparent; border:none; cursor:pointer; position:relative;
+}
+.rate-box::before{
+  content:""; position:absolute; left:2.5px; top:2.5px; width:25px; height:23.75px;
+  background:#ECECEC; border-radius:1px;
+}
+.rate-box.is-on::before{ background:#35C65E; }
+
+/* ==== Dual range slider (зелёная линия 2px + круглые ручки 10px) ==== */
+.dr-wrap{ position:relative; height:16px; margin: 6px 0 8px; }
+.dr-track{ position:absolute; left:0; right:0; top:7px; height:0; border-top:2px solid #ECECEC; }
+.dr-progress{ position:absolute; top:7px; height:0; border-top:2px solid #35C65E; }
+.dr-range{ position:absolute; left:0; right:0; width:100%; height:16px; margin:0; opacity:0; pointer-events:auto; }
+.dr-thumb{
+  position:absolute; top:1px; width:10px; height:10px; background:#35C65E; border-radius:9999px;
+}
+
+
+:root{ --accent:#7AD293; }
+
+.star-row{ display:flex; gap:11px; margin-top:6px; }
+.star-btn{
+  width:30px; height:30px; padding:0; border:0; background:transparent;
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+}
+.star-btn svg{ width:31px; height:31px; display:block; }
+.star-btn svg path{ fill:#ECECEC; transition: fill .15s ease; }
+.star-btn.on svg path{ fill: var(--accent); }
+.star-btn:focus-visible{ outline: none; box-shadow: 0 0 0 2px rgba(53,198,94,.4); border-radius:6px; }
+.star-btn:hover svg path{ fill: var(--accent); }
