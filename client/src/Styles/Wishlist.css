@@ -42,12 +42,21 @@
 .wishlist-page .wl-row{
   display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);
 }
-.wishlist-page .wl-row__img{ width:72px; height:72px; object-fit:cover; border-radius:10px; background:#f6f6f6; }
+.wishlist-page .wl-row__img{
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  display: block;
+  background: #f7f7f7;
+  border-radius: 12px;
+}
 .wishlist-page .wl-row__info{ flex:1; }
+.wishlist-page .wl-row__name{ font-weight:600; color:#111827; text-decoration:none; }
+.wishlist-page .wl-row__name:hover{ text-decoration:underline; }
 .wishlist-page .wl-row__price{ color:var(--green); font-weight:700; }
 .wishlist-page .wl-row__actions{ display:flex; gap:8px; }
 .wishlist-page .wl-ghost, .wishlist-page .wl-green{
-  width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:#fff;
+  width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer;
 }
 
 /* Sections */
@@ -90,10 +99,17 @@
 .wishlist-page .wl-card .price-old{ color:#b6b6b6; text-decoration: line-through; font-size:12px; }
 .wishlist-page .wl-card .btn-ghost, .wishlist-page .wl-card .btn-green{
   width:36px; height:36px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
-  border:1px solid var(--line); background:#fff;
+  border:1px solid var(--line); background:#fff; cursor:pointer;
 }
 .wishlist-page .wl-card .btn-green{ border-color: var(--green); }
 .wishlist-page .wl-card .btn-ghost img, .wishlist-page .wl-card .btn-green img{ width:18px; height:18px; }
+
+/* make empty-state illustration bigger on Wishlist */
+.wishlist-page .wl-empty__img{
+  width: 420px;
+  max-width: 90vw;
+  height: auto;
+}
 
 /* Responsive */
 @media (max-width: 1279px){
@@ -108,3 +124,23 @@
   .wishlist-page{ --container: min(560px, 100% - 24px); }
   .wishlist-page .cards-grid{ grid-template-columns: 1fr 1fr; gap:16px; }
 }
+
+/* === Qonto patch: center & enlarge empty-state === */
+.wishlist-page .wl-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.wishlist-page .wl-empty__img{
+  width:520px;
+  max-width:min(520px,90vw);
+  height:auto;
+}
+.wishlist-page .wl-empty__title{ font-size:32px; font-weight:700; }
+
+/* heart buttons (если используешь их на карточках/странице товара) */
+.btn-wishlist{margin-left:8px;border:1px solid #e5e7eb;background:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn-wishlist.is-fav{color:#ef4444;border-color:#ef4444}
+.btn.btn-heart{margin-left:8px}
+.btn.btn-heart.is-fav{color:#ef4444;border-color:#ef4444}

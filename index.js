@@ -1,43 +1,58 @@
-// server/index.js
-const path = require('path');
-const fs = require('fs');
-const multer = require('multer');
-// Читаем .env именно из папки server
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
+import express from 'express';
+import cors from 'cors';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import mysql from 'mysql2/promise';
+import axios from 'axios';
+import nodemailer from 'nodemailer';
+import { OAuth2Client } from 'google-auth-library';
+import multer from 'multer';
+import http from 'http';
+import { Server } from 'socket.io';
+import crypto from 'crypto';
 
-// +++ SOCKET.IO + HTTP
-const http = require('http');
-const { Server } = require('socket.io');
+/* Optional SMS via Twilio (only if configured) */
+let twilioClient = null;
+const SMS_PROVIDER = process.env?.SMS_PROVIDER || '';
+try {
+  if (SMS_PROVIDER === 'twilio') {
+    const { default: twilio } = await import('twilio');
+    if (process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN) {
+      twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+    }
+  }
+} catch (_) { /* optional dependency */ }
 
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
-const mysql = require('mysql2/promise');
-const axios = require('axios');
-
-const nodemailer = require('nodemailer');
-const { OAuth2Client } = require('google-auth-library');
-const crypto = require('crypto');
+// === .env from server/.env
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 // === CORS
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',');
 
-// === Express app (создаём ДО любых app.use)
+// === Express app
 const app = express();
 
-// === Базовые middlewares
+// Static uploads
+const uploadsRoot = path.resolve(__dirname, 'uploads');
+fs.mkdirSync(uploadsRoot, { recursive: true });
+app.use('/uploads', express.static(uploadsRoot));
+
+// Base middlewares
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// === Static uploads & multer storage for avatars ===
-const uploadsRoot = path.resolve(__dirname, 'uploads');
+/* ===== Avatars upload ===== */
 const avatarDir = path.join(uploadsRoot, 'avatars');
 try { fs.mkdirSync(avatarDir, { recursive: true }); } catch {}
-app.use('/uploads', express.static(uploadsRoot));
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, avatarDir),
   filename: (req, file, cb) => {
@@ -47,12 +62,10 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage });
-// === End uploads ===
 
-// ==== Chat attachments upload (ниже ваших require и до роутов) ====
-const chatUploadsDir = path.join(__dirname, 'uploads', 'chat');
+/* ===== Chat attachments upload ===== */
+const chatUploadsDir = path.join(uploadsRoot, 'chat');
 fs.mkdirSync(chatUploadsDir, { recursive: true });
-
 const chatStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, chatUploadsDir),
   filename: (req, file, cb) => {
@@ -61,35 +74,25 @@ const chatStorage = multer.diskStorage({
     cb(null, safeName);
   }
 });
-
 function isAllowedAttachment(file) {
-  // разрешим картинки и общие вложения; при желании сузьте
   const ok = [
     'image/png','image/jpeg','image/webp','image/gif',
     'application/pdf','image/heic','image/heif'
   ];
   return ok.includes(file.mimetype);
 }
-
 const uploadChat = multer({
   storage: chatStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => cb(null, isAllowedAttachment(file))
 });
 
-// отдать статику
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// --- SOCKET.IO init (после CORS/парсеров, до маршрутов)
+/* ===== HTTP + Socket.IO ===== */
 const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: allowedOrigins, credentials: true } });
 
-const io = new Server(server, {
-  cors: { origin: allowedOrigins, credentials: true }
-});
-
-// presence: карта кто онлайн
+// Presence map
 const onlineUsers = new Map(); // userId -> Set<socketId>
-
 function _attach(userId, socketId) {
   if (!userId) return;
   if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
@@ -101,22 +104,15 @@ function _detach(userId, socketId) {
   set.delete(socketId);
   if (set.size === 0) onlineUsers.delete(userId);
 }
+function isOnline(userId) { return onlineUsers.has(Number(userId)); }
+function emitToUser(userId, event, payload) { io.to(`user:${userId}`).emit(event, payload); }
 
-function isOnline(userId) {
-  return onlineUsers.has(Number(userId));
-}
-function emitToUser(userId, event, payload) {
-  io.to(`user:${userId}`).emit(event, payload);
-}
-
-// делаем хелперы доступными в роутерах/обработчиках дальше по файлу
 app.locals.isOnline = isOnline;
 app.locals.emitToUser = emitToUser;
 
 io.on('connection', (socket) => {
   let userId = null;
 
-  // клиент сразу после connect вызывает socket.emit('auth', <user.id>)
   socket.on('auth', (uid) => {
     userId = Number(uid);
     if (!userId) return;
@@ -125,13 +121,11 @@ io.on('connection', (socket) => {
     io.emit('presence:update', { userId, online: true });
   });
 
-  // клиент присоединяется к комнате треда (для typing/моментальных сообщений)
   socket.on('thread:join', (threadId) => {
     if (!threadId) return;
     socket.join(`thread:${Number(threadId)}`);
   });
 
-  // “печатает…”
   socket.on('thread:typing', ({ threadId, from }) => {
     socket.to(`thread:${Number(threadId)}`).emit('thread:typing', { threadId: Number(threadId), from });
   });
@@ -146,7 +140,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// === MySQL
+/* ===== MySQL ===== */
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -195,19 +189,17 @@ async function ensureUsersExtraSchema() {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
 
-// ---------- OpenRouter (ИИ) ----------
+/* ====== OpenRouter (AI) ====== */
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_MODEL =
-  process.env.OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free';
 const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
 const OPENROUTER_SITE_URL = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',')[0];
 const OPENROUTER_TITLE = process.env.OPENROUTER_APP_TITLE || 'MyShop Assistant';
-
 if (!OPENROUTER_API_KEY) {
-  console.warn('⚠️  OPENROUTER_API_KEY не найден. /api/chat будет возвращать 503, пока не настроите ключ в server/.env');
+  console.warn('⚠️ OPENROUTER_API_KEY не найден. /api/chat вернёт 503, пока не настроите ключ.');
 }
 
-/* ===================== helpers ===================== */
+/* ===== Helpers ===== */
 const random6 = () => Math.floor(100000 + Math.random() * 900000).toString();
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const normalizePhone = (raw) => {
@@ -224,7 +216,6 @@ async function getUserById(id) {
   );
   return rows[0] || null;
 }
-
 async function findUserByEmail(email) {
   const [rows] = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
   return rows[0] || null;
@@ -233,12 +224,10 @@ async function findUserByPhone(phone) {
   const [rows] = await db.query('SELECT * FROM users WHERE phone = ? LIMIT 1', [phone]);
   return rows[0] || null;
 }
-
 async function ensureUniqueUsername(base) {
   let u = (base || 'user').toString().replace(/[^a-z0-9._-]/gi, '').toLowerCase();
   if (!u) u = 'user';
   let candidate = u, i = 0;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const [r] = await db.query('SELECT id FROM users WHERE username = ? LIMIT 1', [candidate]);
     if (!r.length) return candidate;
@@ -247,7 +236,6 @@ async function ensureUniqueUsername(base) {
     if (i > 50) candidate = `${u}-${Date.now().toString().slice(-6)}`;
   }
 }
-
 async function createUserByEmail({ email, first_name, last_name }) {
   const base = (email || '').split('@')[0] || 'user';
   const username = await ensureUniqueUsername(base);
@@ -277,7 +265,6 @@ async function sendOtpEmail(to, code) {
   });
   console.log('✉️ Отправлено письмо:', info.messageId);
 }
-
 async function sendOtpSms(to, code) {
   if (SMS_PROVIDER !== 'twilio') throw new Error('SMS_PROVIDER не настроен (twilio)');
   if (!twilioClient) throw new Error('Twilio клиент не инициализирован');
@@ -286,7 +273,6 @@ async function sendOtpSms(to, code) {
   const resp = await twilioClient.messages.create({ from, to, body: `Ваш код: ${code} (действителен 10 минут)` });
   console.log('📲 SMS отправлено:', resp.sid);
 }
-
 async function verifyGoogleIdToken(idToken) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) throw new Error('GOOGLE_CLIENT_ID не задан в .env');
@@ -295,13 +281,12 @@ async function verifyGoogleIdToken(idToken) {
   return ticket.getPayload();
 }
 
-/* ===================== авторизация ===================== */
+/* ===== Auth middlewares ===== */
 function extractToken(req) {
   const auth = req.headers.authorization || '';
   const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   return bearer || req.cookies.token || null;
 }
-
 app.use(async (req, res, next) => {
   const token = extractToken(req);
   if (!token) { req.user = null; return next(); }
@@ -313,7 +298,6 @@ app.use(async (req, res, next) => {
   }
   next();
 });
-
 function requireAuth(req, res, next) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
   next();
@@ -329,7 +313,7 @@ function requireApprovedSeller(req, res, next) {
   next();
 }
 
-/* ===================== ensure schema: categories ===================== */
+/* ===== Ensure schemas ===== */
 async function ensureCategoriesSchema() {
   try {
     await db.query(
@@ -343,12 +327,8 @@ async function ensureCategoriesSchema() {
     console.error('ensureCategoriesSchema error:', err);
   }
 }
-
-/* ===================== ensure schema: products ===================== */
-/** Автодобавляем недостающие поля/индексы для products (MySQL) */
 async function ensureProductsSchema() {
   try {
-    // category
     const [c1] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'category'`,
@@ -358,8 +338,6 @@ async function ensureProductsSchema() {
       await db.query(`ALTER TABLE products ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT '' AFTER description`);
       console.log('✅ products.category добавлен');
     }
-
-    // status
     const [cStat] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'status'`,
@@ -369,8 +347,6 @@ async function ensureProductsSchema() {
       await db.query(`ALTER TABLE products ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active' AFTER qty`);
       console.log('✅ products.status добавлен');
     }
-
-    // created_at
     const [c2] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'created_at'`,
@@ -380,8 +356,6 @@ async function ensureProductsSchema() {
       await db.query(`ALTER TABLE products ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
       console.log('✅ products.created_at добавлен');
     }
-
-    // preview_image_url
     const [cPrev] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'preview_image_url'`,
@@ -391,8 +365,6 @@ async function ensureProductsSchema() {
       await db.query(`ALTER TABLE products ADD COLUMN preview_image_url VARCHAR(500) NULL DEFAULT NULL AFTER status`);
       console.log('✅ products.preview_image_url добавлен');
     }
-
-    // индексы
     const [i1] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_category'`,
@@ -402,7 +374,6 @@ async function ensureProductsSchema() {
       await db.query(`CREATE INDEX idx_products_category ON products(category)`);
       console.log('✅ индекс idx_products_category создан');
     }
-
     const [i2] = await db.query(
       `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_created_at'`,
@@ -417,7 +388,6 @@ async function ensureProductsSchema() {
   }
 }
 
-/* ===================== init OTP tables ===================== */
 (async () => {
   try {
     await db.query(`
@@ -441,18 +411,15 @@ async function ensureProductsSchema() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
     console.log('✅ email_otps / phone_otps tables ensured');
-
-    // гарантируем схему categories и products
     await ensureUsersExtraSchema();
-await ensureCategoriesSchema();
+    await ensureCategoriesSchema();
     await ensureProductsSchema();
-
   } catch (e) {
     console.error('Не удалось инициализировать таблицы:', e?.message || e);
   }
 })();
 
-/* ===================== AUTH: username/password ===================== */
+/* ===== Username/password auth (basic) ===== */
 app.post('/api/register', async (req, res) => {
   try {
     const { firstName, lastName, username, password, phone, email } = req.body;
@@ -478,7 +445,6 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ error: 'Внутренняя ошибка сервера.', detail: err.message });
   }
 });
-
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'Логин и пароль обязательны.' });
@@ -501,20 +467,20 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-/* ===================== AUTH: email/password ===================== */
+/* ===== Auth: email/password simple ===== */
 app.post('/api/register-email', async (req, res) => {
   try {
     let { firstName, lastName, password, phone, email } = req.body;
     if (!firstName || !lastName || !password || !phone || !email) {
-      return res.status(400).json({ error: 'Заповніть всі поля!!!' });
+      return res.status(400).json({ error: 'Заполните все обязательные поля.' });
     }
     phone = normalizePhone(phone);
 
     const [emailExists] = await db.query('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
-    if (emailExists.length) return res.status(400).json({ error: 'Користувач з таким email вже існує.' });
+    if (emailExists.length) return res.status(400).json({ error: 'Пользователь с таким email уже существует.' });
 
     const [phoneExists] = await db.query('SELECT id FROM users WHERE phone = ? LIMIT 1', [phone]);
-    if (phoneExists.length) return res.status(400).json({ error: 'Цей номер теелфону вже використовується' });
+    if (phoneExists.length) return res.status(400).json({ error: 'Этот номер телефона уже используется.' });
 
     const base = (email || '').split('@')[0] || 'user';
     const username = await ensureUniqueUsername(base);
@@ -533,18 +499,17 @@ app.post('/api/register-email', async (req, res) => {
     res.status(500).json({ error: e?.message || 'Ошибка регистрации.' });
   }
 });
-
 app.post('/api/login-email', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Укажіть email і пароль.' });
+    if (!email || !password) return res.status(400).json({ error: 'Укажите email и пароль.' });
 
     const [rows] = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
     const userRow = rows?.[0];
-    if (!userRow) return res.status(400).json({ error: 'Неправильний email і пароль.' });
+    if (!userRow) return res.status(400).json({ error: 'Неверный email или пароль.' });
 
     const match = await bcrypt.compare(password, userRow.password_hash || '');
-    if (!match) return res.status(400).json({ error: 'Неправильний email і пароль.' });
+    if (!match) return res.status(400).json({ error: 'Неверный email или пароль.' });
 
     const token = jwt.sign({ id: userRow.id }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
@@ -553,13 +518,12 @@ app.post('/api/login-email', async (req, res) => {
     res.json({ ok: true, user });
   } catch (e) {
     console.error('login-email error:', e);
-    res.status(500).json({ error: 'Помилка логіну.' });
+    res.status(500).json({ error: 'Ошибка входа.' });
   }
 });
-// ====== EMAIL REGISTRATION WITH OTP (3-step) ======
-const jwtRegSecret = process.env.JWT_REG_SECRET || (JWT_SECRET + '_reg');
 
-// старт: валидируем поля, проверяем уникальность, шлём код на email, возвращаем reg_token (jwt)
+/* ===== Email registration with OTP (3 steps) ===== */
+const jwtRegSecret = process.env.JWT_REG_SECRET || (JWT_SECRET + '_reg');
 app.post('/api/register-email/start', async (req, res) => {
   try {
     let { firstName, lastName, email, phone } = req.body || {};
@@ -577,12 +541,10 @@ app.post('/api/register-email/start', async (req, res) => {
       if (p1) return res.status(400).json({ error: 'Цей номер теелфону вже використовується' });
     }
 
-    // генерим/сохраняем код
-// генерим/сохраняем код
-const code = random6();
-const hash = sha256(code);
-const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-console.log('[OTP start]', email, code, sha256(code));
+    const code = random6();
+    const hash = sha256(code);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    console.log('[OTP start]', email, code, sha256(code));
 
     await db.query(
       `INSERT INTO email_otps (email, code_hash, expires_at)
@@ -593,7 +555,6 @@ console.log('[OTP start]', email, code, sha256(code));
 
     await sendOtpEmail(email, code);
 
-    // reg_token хранит только безопасные поля шага 1
     const reg_token = jwt.sign(
       { email, firstName, lastName, phone, stage: 'otp' },
       jwtRegSecret,
@@ -606,28 +567,24 @@ console.log('[OTP start]', email, code, sha256(code));
     res.status(500).json({ error: 'Помилка старту реєстрації' });
   }
 });
-
-// проверка кода; на выходе новый reg_token (разрешает finish)
 app.post('/api/register-email/verify', async (req, res) => {
   try {
     let { email, code } = req.body || {};
     email = (email||'').trim();
     code = (code||'').trim();
 
-    console.log('[OTP verify] incoming', email, code, 'calc=', sha256(code)); // <-- ЛОГ 1
-    
+    console.log('[OTP verify] incoming', email, code, 'calc=', sha256(code));
 
     if (!email || !/^\d{6}$/.test(code)) return res.status(400).json({ error: 'Некоректний код' });
 
     const [[row]] = await db.query('SELECT * FROM email_otps WHERE email=? LIMIT 1', [email]);
-    console.log('[OTP verify] row', row?.email, row?.code_hash); // <-- ЛОГ 2
+    console.log('[OTP verify] row', row?.email, row?.code_hash);
     if (!row) return res.status(400).json({ error: 'Код не запрошений або прострочений' });
     if (new Date(row.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Код прострочений' });
     if (sha256(code) !== row.code_hash) return res.status(400).json({ error: 'Невірний код' });
 
     await db.query('DELETE FROM email_otps WHERE email=?', [email]);
 
-    // выписываем токен для finish (без пароля)
     const reg_token = jwt.sign({ email, stage: 'finish-allowed' }, jwtRegSecret, { expiresIn: '15m' });
     res.json({ ok: true, reg_token });
   } catch (e) {
@@ -635,8 +592,6 @@ app.post('/api/register-email/verify', async (req, res) => {
     res.status(500).json({ error: 'Помилка підтвердження коду' });
   }
 });
-
-// завершение: принимает пароль + reg_token, создаёт пользователя и логинит
 app.post('/api/register-email/finish', async (req, res) => {
   try {
     const { reg_token, password } = req.body || {};
@@ -668,7 +623,6 @@ app.post('/api/register-email/finish', async (req, res) => {
       [first_name, last_name, username, password_hash, phone, email]
     );
 
-    // логиним
     const token = jwt.sign({ id: ins.insertId }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.json({ ok: true, user: await getUserById(ins.insertId) });
@@ -678,8 +632,7 @@ app.post('/api/register-email/finish', async (req, res) => {
   }
 });
 
-
-/* ===================== Google OAuth + email OTP ===================== */
+/* ===== Google OAuth + Email OTP ===== */
 app.post('/api/auth/google/start', async (req, res) => {
   try {
     const { id_token } = req.body;
@@ -706,7 +659,6 @@ app.post('/api/auth/google/start', async (req, res) => {
     res.status(500).json({ error: 'Ошибка при старте Google входа' });
   }
 });
-
 app.post('/api/auth/google/verify', async (req, res) => {
   try {
     const { id_token, code } = req.body;
@@ -744,19 +696,19 @@ app.post('/api/auth/google/verify', async (req, res) => {
   }
 });
 
-/* ===================== Привязка телефона + вход по телефону ===================== */
+/* ===== Phone linking + Phone OTP login ===== */
 app.post('/api/me/update-phone', requireAuth, async (req, res) => {
   try {
     let { phone, password } = req.body || {};
-    if (!phone) return res.status(400).json({ error: 'Укажіть номер телефону' });
+    if (!phone) return res.status(400).json({ error: 'Укажите номер телефона' });
 
     phone = normalizePhone(phone);
 
     const [exists] = await db.query('SELECT id FROM users WHERE phone = ? AND id <> ? LIMIT 1', [phone, req.user.id]);
-    if (exists.length) return res.status(400).json({ error: 'Цей номер телефону уже прив язаний до іншого аккауну' });
+    if (exists.length) return res.status(400).json({ error: 'Этот номер уже привязан к другому аккаунту' });
 
     if (password && password.length < 6) {
-      return res.status(400).json({ error: 'Пароль не має бути коротше 6 символів' });
+      return res.status(400).json({ error: 'Пароль должен быть не короче 6 символов' });
     }
 
     if (password) {
@@ -769,25 +721,23 @@ app.post('/api/me/update-phone', requireAuth, async (req, res) => {
     res.json({ ok: true, phone });
   } catch (e) {
     console.error('update-phone error:', e);
-    res.status(500).json({ error: 'Не вдалося зберегти номер' });
+    res.status(500).json({ error: 'Не удалось сохранить номер' });
   }
 });
-
-/* ===================== Вход по телефону через SMS-код ===================== */
 app.post('/api/auth/phone/start', async (req, res) => {
   try {
     let { phone } = req.body || {};
     phone = normalizePhone(phone);
-    if (!phone) return res.status(400).json({ error: 'Укажіть номер телефону' });
+    if (!phone) return res.status(400).json({ error: 'Укажите номер телефона' });
 
     const user = await findUserByPhone(phone);
-    if (!user) return res.status(404).json({ error: 'Цей номер телефона не прив язаний до жодного акаунту' });
+    if (!user) return res.status(404).json({ error: 'Этот номер не привязан ни к одному аккаунту' });
 
     const [last] = await db.query('SELECT created_at FROM phone_otps WHERE phone=?', [phone]);
     if (last.length) {
       const lastTs = new Date(last[0].created_at).getTime();
       if (Date.now() - lastTs < 30 * 1000) {
-        return res.status(429).json({ error: 'Занадто часто, спробуйте через 30 секунд' });
+        return res.status(429).json({ error: 'Слишком часто. Попробуйте через 30 секунд' });
       }
     }
 
@@ -806,15 +756,14 @@ app.post('/api/auth/phone/start', async (req, res) => {
     res.json({ ok: true, phone });
   } catch (e) {
     console.error('phone/start error:', e);
-    res.status(500).json({ error: e?.message || 'Не вдалося відправити SMS' });
+    res.status(500).json({ error: e?.message || 'Не удалось отправить SMS' });
   }
 });
-
 app.post('/api/auth/phone/verify', async (req, res) => {
   try {
     let { phone, code } = req.body || {};
     phone = normalizePhone(phone);
-    if (!phone || !code) return res.status(400).json({ error: 'Укажіть телефон і код' });
+    if (!phone || !code) return res.status(400).json({ error: 'Укажите телефон и код' });
 
     const [rows] = await db.query('SELECT * FROM phone_otps WHERE phone = ? LIMIT 1', [phone]);
     const row = rows?.[0];
@@ -838,7 +787,7 @@ app.post('/api/auth/phone/verify', async (req, res) => {
   }
 });
 
-/* ===================== Профиль ===================== */
+/* ===== Profile & session ===== */
 app.post('/api/me/update-profile', requireAuth, async (req, res) => {
   try {
     let { first_name, last_name, email, contact_email } = req.body || {};
@@ -847,7 +796,7 @@ app.post('/api/me/update-profile', requireAuth, async (req, res) => {
     email = (email || '').trim();
 
     contact_email = (contact_email || '').trim();
-if (!first_name || !last_name || !email) {
+    if (!first_name || !last_name || !email) {
       return res.status(400).json({ error: 'Имя, фамилия и email обязательны' });
     }
     const [exists] = await db.query('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1', [email, req.user.id]);
@@ -862,140 +811,64 @@ if (!first_name || !last_name || !email) {
     res.status(500).json({ error: 'Не удалось сохранить профиль' });
   }
 });
-
-app.get('/api/me', (req, res) => {
-  res.json({ user: req.user || null });
-});
-
-app.post('/api/logout', (req, res) => {
-  res.clearCookie('token');
-  res.json({ success: true });
-});
-
+app.get('/api/me', (req, res) => { res.json({ user: req.user || null }); });
+app.post('/api/logout', (req, res) => { res.clearCookie('token'); res.json({ success: true }); });
 app.post('/api/heartbeat', requireAuth, async (req, res) => {
-  try {
-    await db.query('UPDATE users SET last_seen_at = NOW() WHERE id = ?', [req.user.id]);
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ ok: false });
-  }
+  try { await db.query('UPDATE users SET last_seen_at = NOW() WHERE id = ?', [req.user.id]); res.json({ ok: true }); }
+  catch { res.status(500).json({ ok: false }); }
 });
 
-/* ===================== Chats ===================== */
-
-// безопасный emit (если socket.io не инициализирован – просто молча пропускаем)
+/* ===== Chats ===== */
 function _emitTo(req, userId, event, payload) {
-  try {
-    const fn = req.app?.locals?.emitToUser;
-    if (typeof fn === 'function') fn(userId, event, payload);
-  } catch (_) {}
+  try { const fn = req.app?.locals?.emitToUser; if (typeof fn === 'function') fn(userId, event, payload); } catch (_) {}
 }
-
-// создать/получить существующий диалог покупатель->продавец
 app.post('/api/chats/start', requireAuth, async (req, res) => {
   try {
     const seller_id = Number(req.body?.seller_id);
     const buyer_id  = Number(req.user.id);
-
     if (!seller_id || seller_id === buyer_id) {
       return res.status(400).json({ error: 'Некорректный продавец' });
     }
-
-    // проверим, что продавец существует
     const [se] = await db.query('SELECT id FROM users WHERE id=? LIMIT 1', [seller_id]);
     if (!se.length) return res.status(404).json({ error: 'Продавец не найден' });
 
-    // если тред уже есть — отдадим его id
     const [ex] = await db.query(
       'SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',
       [seller_id, buyer_id]
     );
     if (ex.length) return res.json({ id: ex[0].id });
 
-    // создаём, избегая гонок
-    await db.query(
-      'INSERT IGNORE INTO chat_threads (seller_id, buyer_id) VALUES (?, ?)',
-      [seller_id, buyer_id]
-    );
-
-    // гарантированно читаем id созданного/существующего треда
-    const [rows] = await db.query(
-      'SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',
-      [seller_id, buyer_id]
-    );
+    await db.query('INSERT IGNORE INTO chat_threads (seller_id, buyer_id) VALUES (?, ?)', [seller_id, buyer_id]);
+    const [rows] = await db.query('SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',[seller_id, buyer_id]);
     if (!rows.length) return res.status(500).json({ error: 'Не удалось создать чат' });
-
     return res.json({ id: rows[0].id });
   } catch (e) {
     console.error('POST /api/chats/start', e);
     return res.status(500).json({ error: 'Server error' });
   }
 });
-
-// список моих диалогов (role=seller|buyer|all)
-app.get('/api/chats/my', requireAuth, async (req, res) => {
-  try {
-    const role = String(req.query.role || 'all');
-    const me = req.user.id;
-
-    let where = 't.seller_id=? OR t.buyer_id=?';
-    let params = [me, me];
-    if (role === 'seller') { where = 't.seller_id=?'; params = [me]; }
-    if (role === 'buyer')  { where = 't.buyer_id=?';  params = [me]; }
-
-    const [rows] = await db.query(
-      `
-      SELECT
-        t.id, t.seller_id, t.buyer_id, t.updated_at,
-        s.first_name AS seller_first_name, s.last_name AS seller_last_name, s.avatar_url AS seller_avatar,
-        b.first_name AS buyer_first_name,  b.last_name AS buyer_last_name,  b.avatar_url AS buyer_avatar,
-        (SELECT body       FROM chat_messages m WHERE m.thread_id=t.id ORDER BY m.id DESC LIMIT 1) AS last_text,
-        (SELECT created_at FROM chat_messages m WHERE m.thread_id=t.id ORDER BY m.id DESC LIMIT 1) AS last_at,
-        (SELECT COUNT(*)   FROM chat_messages m WHERE m.thread_id=t.id AND m.sender_id<>? AND m.read_at IS NULL) AS unread
-      FROM chat_threads t
-      JOIN users s ON s.id=t.seller_id
-      JOIN users b ON b.id=t.buyer_id
-      WHERE ${where}
-      ORDER BY COALESCE(last_at, t.updated_at) DESC
-      `,
-      [me, ...params]
-    );
-
-    res.json({ items: rows });
-  } catch (e) {
-    console.error('GET /api/chats/my', e);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// сообщения в диалоге
-// до хэндлера: заверните middleware uploadChat.array(...)
+// single handler that supports text + file attachments
 app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), async (req, res) => {
   try {
     const threadId = Number(req.params.id);
     const me = req.user.id;
     const body = String(req.body?.body || '').trim();
 
-    // получим тред
     const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [threadId]);
     if (!t) return res.status(404).json({ error: 'Диалог не найден' });
     if (t.seller_id !== me && t.buyer_id !== me) {
       return res.status(403).json({ error: 'Нет доступа к диалогу' });
     }
 
-    // Проверка блокировки со стороны получателя
     const receiver = me === t.seller_id ? t.buyer_id : t.seller_id;
     const blockedForMe =
       (receiver === t.seller_id && t.blocked_by_seller) ||
       (receiver === t.buyer_id  && t.blocked_by_buyer);
-    if (blockedForMe) {
-      return res.status(403).json({ error: 'Пользователь заблокировал вас' });
-    }
+    if (blockedForMe) return res.status(403).json({ error: 'Пользователь заблокировал вас' });
 
     const files = Array.isArray(req.files) ? req.files : [];
-
-    // 1) Если есть текст без файлов — отдельная запись
     const created = [];
+
     if (body && !files.length) {
       const [r] = await db.query(
         `INSERT INTO chat_messages (thread_id, sender_id, body)
@@ -1005,62 +878,39 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
       created.push({ id: r.insertId, body });
     }
 
-    // 2) Файлы — каждая запись отдельно (body можно прикрепить к первой, если нужно)
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       const attachUrl = `/uploads/chat/${f.filename}`;
       const attachType = f.mimetype;
       const attachName = f.originalname || f.filename;
       const attachSize = f.size || null;
-
-      const thisBody = (i === 0 ? body : ''); // текст пойдёт в первую запись
-
+      const thisBody = (i === 0 ? body : '');
       const [r2] = await db.query(
         `INSERT INTO chat_messages
            (thread_id, sender_id, body, attachment_url, attachment_type, attachment_name, attachment_size)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [threadId, me, thisBody, attachUrl, attachType, attachName, attachSize]
       );
-      created.push({
-        id: r2.insertId,
-        body: thisBody,
-        attachment_url: attachUrl,
-        attachment_type: attachType,
-        attachment_name: attachName,
-        attachment_size: attachSize
-      });
+      created.push({ id: r2.insertId, body: thisBody, attachment_url: attachUrl, attachment_type: attachType, attachment_name: attachName, attachment_size: attachSize });
     }
 
-    // если вообще ничего не пришло
-    if (!created.length) {
-      return res.status(400).json({ error: 'Пустое сообщение' });
-    }
+    if (!created.length) return res.status(400).json({ error: 'Пустое сообщение' });
 
-    // MUTE-логика: если получатель замутил — копим серый счётчик и НЕ триггерим всплытие
     const receiverMuted =
       (receiver === t.seller_id && t.muted_by_seller) ||
       (receiver === t.buyer_id  && t.muted_by_buyer);
 
     if (receiverMuted) {
       if (receiver === t.seller_id) {
-        await db.query(`UPDATE chat_threads SET muted_unread_seller = muted_unread_seller + ? WHERE id=?`,
-                       [created.length, threadId]);
+        await db.query(`UPDATE chat_threads SET muted_unread_seller = muted_unread_seller + ? WHERE id=?`, [created.length, threadId]);
       } else {
-        await db.query(`UPDATE chat_threads SET muted_unread_buyer = muted_unread_buyer + ? WHERE id=?`,
-                       [created.length, threadId]);
+        await db.query(`UPDATE chat_threads SET muted_unread_buyer = muted_unread_buyer + ? WHERE id=?`, [created.length, threadId]);
       }
     } else {
-      // обычный «всплывающий» сценарий
-      _emitTo(req, receiver, 'chat:message', {
-        thread_id: threadId,
-        items: created
-      });
+      _emitTo(req, receiver, 'chat:message', { thread_id: threadId, items: created });
       _emitTo(req, receiver, 'chat:unread', { delta: created.length });
     }
-
-    // Отправителю — мгновенная доставка
     _emitTo(req, me, 'chat:message:ack', { thread_id: threadId, items: created });
-
     res.json({ ok: true, items: created });
   } catch (e) {
     console.error('POST /api/chats/:id/messages', e);
@@ -1068,183 +918,55 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
   }
 });
 
-// отправка сообщения (с сокет-пушами)
-app.post('/api/chats/:id/messages', requireAuth, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    const me = req.user.id;
-    const text = String(req.body?.body || '').trim();
-    if (!text) return res.status(400).json({ error: 'Пустое сообщение' });
-
-    const [tt] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [id]);
-    const t = tt[0];
-    if (!t || (t.seller_id !== me && t.buyer_id !== me)) {
-      return res.status(404).json({ message: 'Chat not found' });
-    }
-
-    const [r] = await db.query(
-      'INSERT INTO chat_messages (thread_id, sender_id, body) VALUES (?, ?, ?)',
-      [id, me, text]
-    );
-    await db.query('UPDATE chat_threads SET updated_at=NOW() WHERE id=?', [id]);
-
-    const payload = {
-      id: r.insertId,
-      thread_id: id,
-      sender_id: me,
-      body: text,
-      created_at: new Date()
-    };
-
-    // пушим новое сообщение обоим участникам (если socket.io включён)
-    _emitTo(req, t.seller_id, 'chat:message', payload);
-    _emitTo(req, t.buyer_id,  'chat:message', payload);
-
-    // инкремент непрочитанного собеседнику
-    const receiver = me === t.seller_id ? t.buyer_id : t.seller_id;
-    _emitTo(req, receiver, 'chat:unread', { delta: +1 });
-
-    res.json({ ok: true, ...payload });
-  } catch (e) {
-    console.error('POST /api/chats/:id/messages', e);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// пометить входящие как прочитанные, обнулить «серый» счётчик и вернуть новое значение
-app.post('/api/chats/:id/read', requireAuth, async (req, res) => {
-  try {
-    const threadId = Number(req.params.id);
-    const me = req.user.id;
-
-    // 1) Прочитать входящие
-    await db.query(
-      `UPDATE chat_messages m
-       JOIN chat_threads t ON t.id = m.thread_id
-       SET m.read_at = NOW()
-       WHERE m.thread_id = ?
-         AND m.sender_id <> ?
-         AND m.read_at IS NULL`,
-      [threadId, me]
-    );
-
-    // 2) Сброс «серого» счётчика для моей стороны
-    await db.query(
-      `UPDATE chat_threads
-       SET muted_unread_seller = IF(seller_id = ?, 0, muted_unread_seller),
-           muted_unread_buyer  = IF(buyer_id  = ?, 0, muted_unread_buyer)
-       WHERE id = ?`,
-      [me, me, threadId]
-    );
-
-    // 3) Посчитать актуальный непрочитанный (если у тебя это нужно для бейджа)
-    const [[{ c }]] = await db.query(
-      `SELECT COUNT(*) AS c
-       FROM chat_messages m
-       JOIN chat_threads t ON t.id = m.thread_id
-       WHERE m.thread_id = ?
-         AND (t.seller_id = ? OR t.buyer_id = ?)
-         AND m.sender_id <> ?
-         AND m.read_at IS NULL`,
-      [threadId, me, me, me]
-    );
-
-    // 4) Обновить бейдж клиенту этой же стороне
-    _emitTo(req, me, 'chat:unread:replace', { total: c });
-
-    res.json({ ok: true, unread: c });
-  } catch (e) {
-    console.error('POST /api/chats/:id/read', e);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// helper: роль стороны
 function sideColumns(me, t) {
   if (me === t.seller_id) {
-    return {
-      archived: 'archived_by_seller',
-      muted:    'muted_by_seller',
-      blocked:  'blocked_by_seller',
-      muted_unread: 'muted_unread_seller'
-    };
+    return { archived: 'archived_by_seller', muted: 'muted_by_seller', blocked: 'blocked_by_seller', muted_unread: 'muted_unread_seller' };
   }
   if (me === t.buyer_id) {
-    return {
-      archived: 'archived_by_buyer',
-      muted:    'muted_by_buyer',
-      blocked:  'blocked_by_buyer',
-      muted_unread: 'muted_unread_buyer'
-    };
+    return { archived: 'archived_by_buyer', muted: 'muted_by_buyer', blocked: 'blocked_by_buyer', muted_unread: 'muted_unread_buyer' };
   }
   return null;
 }
-
-// Архив / разархивировать
 app.post('/api/chats/:id/archive', requireAuth, async (req,res)=>{
   try {
     const threadId = Number(req.params.id);
     const me = req.user.id;
-    const { archive } = req.body; // true/false
-
+    const { archive } = req.body;
     const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
     if (!t) return res.status(404).json({error:'Диалог не найден'});
-
     const cols = sideColumns(me, t);
     if (!cols) return res.status(403).json({error:'Нет доступа'});
-
     await db.query(`UPDATE chat_threads SET ${cols.archived}=? WHERE id=?`, [archive?1:0, threadId]);
     res.json({ ok:true, archived: !!archive });
-  } catch(e){
-    console.error('archive', e); res.status(500).json({error:'Server error'});
-  }
+  } catch(e){ console.error('archive', e); res.status(500).json({error:'Server error'}); }
 });
-
-// Мут / размутить
 app.post('/api/chats/:id/mute', requireAuth, async (req,res)=>{
   try {
     const threadId = Number(req.params.id);
     const me = req.user.id;
-    const { mute } = req.body; // true/false
-
+    const { mute } = req.body;
     const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
     if (!t) return res.status(404).json({error:'Диалог не найден'});
-
     const cols = sideColumns(me, t);
     if (!cols) return res.status(403).json({error:'Нет доступа'});
-
     await db.query(`UPDATE chat_threads SET ${cols.muted}=? WHERE id=?`, [mute?1:0, threadId]);
-    if (!mute) {
-      // при размуте можно "посеревшие" обнулить (опционально)
-      await db.query(`UPDATE chat_threads SET ${cols.muted_unread}=0 WHERE id=?`, [threadId]);
-    }
+    if (!mute) { await db.query(`UPDATE chat_threads SET ${cols.muted_unread}=0 WHERE id=?`, [threadId]); }
     res.json({ ok:true, muted: !!mute });
-  } catch(e){
-    console.error('mute', e); res.status(500).json({error:'Server error'});
-  }
+  } catch(e){ console.error('mute', e); res.status(500).json({error:'Server error'}); }
 });
-
-// Блок / разблок
 app.post('/api/chats/:id/block', requireAuth, async (req,res)=>{
   try{
     const threadId = Number(req.params.id);
     const me = req.user.id;
-    const { block } = req.body; // true/false
-
+    const { block } = req.body;
     const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
     if (!t) return res.status(404).json({error:'Диалог не найден'});
-
     const cols = sideColumns(me, t);
     if (!cols) return res.status(403).json({error:'Нет доступа'});
-
     await db.query(`UPDATE chat_threads SET ${cols.blocked}=? WHERE id=?`, [block?1:0, threadId]);
     res.json({ ok:true, blocked: !!block });
-  } catch(e){
-    console.error('block', e); res.status(500).json({error:'Server error'});
-  }
+  } catch(e){ console.error('block', e); res.status(500).json({error:'Server error'}); }
 });
-
-// сколько непрочитанных у меня (для хедера при загрузке)
 app.get('/api/chats/unread-count', requireAuth, async (req, res) => {
   try {
     const me = req.user.id;
@@ -1263,19 +985,15 @@ app.get('/api/chats/unread-count', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-// получить список сообщений в треде
 app.get('/api/chats/:id/messages', requireAuth, async (req, res) => {
   try {
     const threadId = Number(req.params.id);
     const me = req.user.id;
-
     const [[thread]] = await db.query(
       'SELECT * FROM chat_threads WHERE id=? AND (seller_id=? OR buyer_id=?)',
       [threadId, me, me]
     );
     if (!thread) return res.status(404).json({ error: 'Диалог не найден' });
-
     const [items] = await db.query(
       `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
               attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
@@ -1284,21 +1002,17 @@ app.get('/api/chats/:id/messages', requireAuth, async (req, res) => {
        ORDER BY created_at ASC`,
       [threadId]
     );
-
     res.json({ thread, items });
   } catch (e) {
     console.error('GET /api/chats/:id/messages', e);
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-// PATCH /api/messages/:id — редактировать (только автор, если не удалено)
 app.patch('/api/messages/:id', requireAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const me = req.user.id;
     const body = String(req.body?.body || '').trim();
-
     const [[m]] = await db.query(
       `SELECT m.*, t.seller_id, t.buyer_id
        FROM chat_messages m
@@ -1308,31 +1022,24 @@ app.patch('/api/messages/:id', requireAuth, async (req, res) => {
     if (!m) return res.status(404).json({ error: 'Сообщение не найдено' });
     if (m.sender_id !== me) return res.status(403).json({ error: 'Можно редактировать только свои сообщения' });
     if (m.deleted_at) return res.status(400).json({ error: 'Сообщение удалено' });
-
     await db.query(`UPDATE chat_messages SET body=?, edited_at=NOW() WHERE id=?`, [body, id]);
     const [[updated]] = await db.query(
       `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
               attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
        FROM chat_messages WHERE id=?`, [id]
     );
-
-    // уведомим обе стороны
     _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
     _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
-
     res.json({ ok: true, item: updated });
   } catch (e) {
     console.error('PATCH /api/messages/:id', e);
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-// DELETE /api/messages/:id — мягкое удаление (только автор)
 app.delete('/api/messages/:id', requireAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const me = req.user.id;
-
     const [[m]] = await db.query(
       `SELECT m.*, t.seller_id, t.buyer_id
        FROM chat_messages m
@@ -1342,27 +1049,15 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
     if (!m) return res.status(404).json({ error: 'Сообщение не найдено' });
     if (m.sender_id !== me) return res.status(403).json({ error: 'Можно удалять только свои сообщения' });
     if (m.deleted_at) {
-      // уже удалено — просто отдать как есть
       return res.json({
         ok: true,
         item: {
-          id: m.id,
-          thread_id: m.thread_id,
-          sender_id: m.sender_id,
-          body: m.body, // оставляем как есть
-          attachment_url: null,
-          attachment_type: null,
-          attachment_name: null,
-          attachment_size: null,
-          created_at: m.created_at,
-          read_at: m.read_at,
-          edited_at: m.edited_at,
-          deleted_at: m.deleted_at
+          id: m.id, thread_id: m.thread_id, sender_id: m.sender_id, body: m.body,
+          attachment_url: null, attachment_type: null, attachment_name: null, attachment_size: null,
+          created_at: m.created_at, read_at: m.read_at, edited_at: m.edited_at, deleted_at: m.deleted_at
         }
       });
     }
-
-    // Мягко: вложения чистим, ставим deleted_at, body оставляем (или делаем пустым)
     await db.query(
       `UPDATE chat_messages
          SET attachment_url=NULL,
@@ -1371,20 +1066,17 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
              attachment_size=NULL,
              edited_at=NULL,
              deleted_at=NOW(),
-             body=''  -- безопасно для NOT NULL
+             body=''
        WHERE id=?`,
       [id]
     );
-
     const [[updated]] = await db.query(
       `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
               attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
        FROM chat_messages WHERE id=?`, [id]
     );
-
     _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
     _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
-
     res.json({ ok: true, item: updated });
   } catch (e) {
     console.error('DELETE /api/messages/:id', e);
@@ -1392,12 +1084,7 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
   }
 });
 
-/* ===================== Categories ===================== */
-async function isCategoryExists(name) {
-  const [rows] = await db.query('SELECT id FROM categories WHERE name = ? LIMIT 1', [String(name || '').trim()]);
-  return rows.length > 0;
-}
-
+/* ===== Categories & Products ===== */
 app.get('/api/categories', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT id, name FROM categories ORDER BY name ASC');
@@ -1407,14 +1094,12 @@ app.get('/api/categories', async (req, res) => {
     res.status(500).json({ message: 'Не удалось загрузить категории' });
   }
 });
-
 app.post('/admin/categories', requireAuth, requireAdmin, async (req, res) => {
   try {
     let { name } = req.body || {};
     name = (name || '').toString().trim();
     if (!name) return res.status(400).json({ message: 'Название категории обязательно' });
     if (name.length > 100) return res.status(400).json({ message: 'Слишком длинное название' });
-
     await db.query('INSERT INTO categories (name) VALUES (?)', [name]);
     const [rows] = await db.query('SELECT id, name FROM categories WHERE name = ? LIMIT 1', [name]);
     res.status(201).json({ item: rows[0] });
@@ -1427,20 +1112,12 @@ app.post('/admin/categories', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
-/* ===================== Products (public) ===================== */
-/** общий обработчик листинга с ?category=... */
-// server/index.js
 async function listProducts(req, res) {
   try {
     const { category } = req.query;
     const params = [];
     let where = "p.status = 'active'";
-
-    if (category) {
-      where += " AND p.category = ?";
-      params.push(category);
-    }
-
+    if (category) { where += " AND p.category = ?"; params.push(category); }
     const [rows] = await db.query(
       `
       SELECT
@@ -1452,7 +1129,8 @@ async function listProducts(req, res) {
         p.status,
         p.category,
         p.created_at,
-        p.preview_image_url, -- <— ВАЖНО!
+        COALESCE(NULLIF(TRIM(p.preview_image_url), ''), NULLIF(TRIM(p.image_url), '')) AS preview_image_url,
+        p.image_url,
         TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
       FROM products p
       JOIN users u ON u.id = p.seller_id
@@ -1461,75 +1139,52 @@ async function listProducts(req, res) {
       `,
       params
     );
-
     res.json({ items: rows });
   } catch (e) {
     console.error('GET /products error', e);
     res.status(500).json({ message: 'Server error' });
   }
 }
-
-// и маршруты
 app.get('/products', listProducts);
 app.get('/api/products', listProducts);
 
-// ── NEW: проверяем, что категория существует в таблице categories
 async function isCategoryExists(name) {
   const cat = String(name || '').trim();
   if (!cat) return false;
   const [rows] = await db.query('SELECT id FROM categories WHERE name = ? LIMIT 1', [cat]);
   return rows.length > 0;
 }
-
-/** общий обработчик создания товара */
 const createProduct = async (req, res) => {
   try {
     const { title, description, price, qty, category, preview_image_url } = req.body || {};
     if (!title || price == null || !category || String(category).trim() === '') {
       return res.status(400).json({ message: 'title, price и category обязательны' });
     }
-
     const p = Number(price);
     if (!Number.isFinite(p) || p < 0) {
       return res.status(400).json({ message: 'price должен быть неотрицательным числом' });
     }
     const q = Number.isFinite(Number(qty)) ? Math.max(0, parseInt(qty, 10)) : 1;
-
     const preview = (preview_image_url && String(preview_image_url).trim()) || null;
     if (preview && !/^https?:\/\//i.test(preview)) {
       return res.status(400).json({ message: 'preview_image_url должен быть абсолютным URL' });
     }
-
     const cat = String(category).trim();
-
-    // ── NEW: НЕ-админ не может создавать новую категорию — только выбирать существующую
     if (req.user?.role !== 'admin') {
       const exists = await isCategoryExists(cat);
       if (!exists) {
         return res.status(400).json({ message: 'Категория должна существовать. Обратитесь к администратору.' });
       }
     }
-
-    // создаём товар сразу активным
     const [result] = await db.query(
       `INSERT INTO products (seller_id, title, description, price, qty, category, status, preview_image_url, created_at)
        VALUES (?, ?, ?, ?, ?, ?, 'active', ?, NOW())`,
       [req.user.id, title, description || null, p, q, cat, preview]
     );
-
     const newId = result.insertId;
-
-    // отдаём созданный товар
     const [rows] = await db.query(
       `SELECT
-         p.id,
-         p.title,
-         p.description,
-         p.price,
-         p.qty,
-         p.status,
-         p.category,
-         p.created_at,
+         p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
          p.preview_image_url,
          TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS seller_name
        FROM products p
@@ -1538,39 +1193,19 @@ const createProduct = async (req, res) => {
        LIMIT 1`,
       [newId]
     );
-
     res.status(201).json({ ok: true, item: rows[0] });
   } catch (e) {
     console.error('POST /products error', e);
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-// Листинг
-app.get('/products', listProducts);
-app.get('/api/products', listProducts);
-
-// Создание (оба пути) — только для одобренных продавцов
 app.post('/products', requireAuth, requireApprovedSeller, createProduct);
 app.post('/api/products', requireAuth, requireApprovedSeller, createProduct);
 
-/* ===================== Products: управление продавца ===================== */
-
-// список товаров конкретного продавца
-// список товаров текущего пользователя (для страницы "Мои товары")
 app.get('/api/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT
-         p.id,
-         p.title,
-         p.description,
-         p.price,
-         p.qty,
-         p.category,
-         p.status,
-         p.created_at,
-         p.preview_image_url
+      `SELECT p.id, p.title, p.description, p.price, p.qty, p.category, p.status, p.created_at, p.preview_image_url
        FROM products p
        WHERE p.seller_id = ?
        ORDER BY p.created_at DESC`,
@@ -1582,21 +1217,10 @@ app.get('/api/my/products', requireAuth, requireApprovedSeller, async (req, res)
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-// fallback без /api (если фронт вдруг обратится на /my/products)
 app.get('/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT
-         p.id,
-         p.title,
-         p.description,
-         p.price,
-         p.qty,
-         p.category,
-         p.status,
-         p.created_at,
-         p.preview_image_url
+      `SELECT p.id, p.title, p.description, p.price, p.qty, p.category, p.status, p.created_at, p.preview_image_url
        FROM products p
        WHERE p.seller_id = ?
        ORDER BY p.created_at DESC`,
@@ -1608,14 +1232,10 @@ app.get('/my/products', requireAuth, requireApprovedSeller, async (req, res) => 
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-// редактирование товара
 app.put('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res) => {
   const { id } = req.params;
   const { title, description, price, qty, category } = req.body || {};
-
   try {
-    // ── NEW: нормализуем категорию и проверяем её существование для НЕ-админа
     const cat = category != null ? String(category).trim() : category;
     if (cat && req.user?.role !== 'admin') {
       const exists = await isCategoryExists(cat);
@@ -1623,33 +1243,24 @@ app.put('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res
         return res.status(400).json({ message: 'Категория должна существовать. Обратитесь к администратору.' });
       }
     }
-
     const [result] = await db.query(
-      `UPDATE products
-         SET title = ?, description = ?, price = ?, qty = ?, category = ?
+      `UPDATE products SET title = ?, description = ?, price = ?, qty = ?, category = ?
        WHERE id = ? AND seller_id = ?`,
-      [title, description, price, qty, cat, id, req.user.id] // <- используем cat
+      [title, description, price, qty, cat, id, req.user.id]
     );
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Товар не найден' });
     }
-
     res.json({ ok: true });
   } catch (e) {
     console.error('PUT /api/products/:id error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-// удаление товара
 app.delete('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res) => {
   const { id } = req.params;
   try {
-    const [result] = await db.query(
-      `DELETE FROM products WHERE id = ? AND seller_id = ?`,
-      [id, req.user.id]
-    );
+    const [result] = await db.query(`DELETE FROM products WHERE id = ? AND seller_id = ?`, [id, req.user.id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Товар не найден' });
     }
@@ -1659,46 +1270,28 @@ app.delete('/api/products/:id', requireAuth, requireApprovedSeller, async (req, 
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* ===================== Admin: удаление чужих товаров с причиной ===================== */
 app.delete('/admin/products/:id', requireAuth, requireAdmin, async (req, res) => {
   const productId = Number(req.params.id);
   const { reason } = req.body || {};
   if (!reason || !String(reason).trim()) {
     return res.status(400).json({ message: 'Укажите причину удаления' });
   }
-
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
-
-    // 1) читаем товар
     const [rows] = await conn.query(
-      `SELECT id, seller_id, title, price, category
-         FROM products
-        WHERE id = ?`,
+      `SELECT id, seller_id, title, price, category FROM products WHERE id = ?`,
       [productId]
     );
     const prod = rows[0];
-    if (!prod) {
-      await conn.rollback();
-      return res.status(404).json({ message: 'Товар не найден' });
-    }
-
-    // 2) логируем удаление
+    if (!prod) { await conn.rollback(); return res.status(404).json({ message: 'Товар не найден' }); }
     await conn.query(
       `INSERT INTO product_deletions (product_id, seller_id, title, price, category, admin_id, reason)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [prod.id, prod.seller_id, prod.title, prod.price, prod.category, req.user.id, String(reason).trim()]
     );
-
-    // 3) физически удаляем товар
     const [delRes] = await conn.query(`DELETE FROM products WHERE id = ?`, [productId]);
-    if (delRes.affectedRows === 0) {
-      await conn.rollback();
-      return res.status(409).json({ message: 'Не удалось удалить (возможно, уже удалён)' });
-    }
-
+    if (delRes.affectedRows === 0) { await conn.rollback(); return res.status(409).json({ message: 'Не удалось удалить (возможно, уже удалён)' }); }
     await conn.commit();
     res.json({ ok: true });
   } catch (e) {
@@ -1709,27 +1302,15 @@ app.delete('/admin/products/:id', requireAuth, requireAdmin, async (req, res) =>
     conn.release();
   }
 });
-
-/* ===================== Admin: история удалений товаров ===================== */
 app.get('/admin/product-deletions', requireAuth, requireAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT
-          pd.id,
-          pd.product_id,
-          pd.seller_id,
-          u.username        AS seller_username,
-          u.first_name      AS seller_first_name,
-          u.last_name       AS seller_last_name,
-          pd.title,
-          pd.price,
-          pd.category,
-          pd.admin_id,
-          a.username        AS admin_username,
-          a.first_name      AS admin_first_name,
-          a.last_name       AS admin_last_name,
-          pd.reason,
-          pd.created_at
+          pd.id, pd.product_id, pd.seller_id,
+          u.username AS seller_username, u.first_name AS seller_first_name, u.last_name AS seller_last_name,
+          pd.title, pd.price, pd.category, pd.admin_id,
+          a.username AS admin_username, a.first_name AS admin_first_name, a.last_name AS admin_last_name,
+          pd.reason, pd.created_at
        FROM product_deletions pd
        JOIN users a ON a.id = pd.admin_id
        JOIN users u ON u.id = pd.seller_id
@@ -1743,217 +1324,49 @@ app.get('/admin/product-deletions', requireAuth, requireAdmin, async (req, res) 
   }
 });
 
-
-/* ===================== Chat (Mistral FREE с фолбэком) ===================== */
-app.post('/api/chat', async (req, res) => {
-  const userMessage = req.body.message;
-  const PRIMARY_MODEL = 'mistralai/mistral-7b-instruct:free';
-  const FALLBACK_MODELS = [
-    'meta-llama/llama-3.1-8b-instruct:free',
-    'openrouter/auto'
-  ];
-
-  if (!OPENROUTER_API_KEY) {
-    return res.status(503).json({ error: 'AI недоступен: отсутствует OPENROUTER_API_KEY на сервере.' });
-  }
-
-  let systemContext = 'Ты вежливый ИИ-помощник, консультирующий по интернет-магазину.';
-  if (req.user) systemContext += ` Пользователь: ${req.user.username}, email: ${req.user.email}.`;
-
-  async function callModel(model) {
-    const { data } = await axios.post(
-      `${OPENROUTER_BASE_URL}/chat/completions`,
-      {
-        model,
-        messages: [
-          { role: 'system', content: systemContext },
-          { role: 'user', content: userMessage }
-        ],
-        temperature: 0.7
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': OPENROUTER_SITE_URL,
-          'X-Title': OPENROUTER_TITLE
-        }
-      }
-    );
-    const aiReply = data?.choices?.[0]?.message?.content || 'Пустой ответ от модели';
-    return { aiReply, usedModel: model };
-  }
-
+/* ===== Recommendations (personalized placeholder) ===== */
+app.get('/api/reco/personal', async (req, res) => {
   try {
-    try {
-      const r = await callModel(PRIMARY_MODEL);
-      return res.json({ reply: r.aiReply, model: r.usedModel });
-    } catch (e) {
-      const s = e.response?.status;
-      if (![401, 402, 403].includes(s)) throw e;
-    }
-    for (const m of FALLBACK_MODELS) {
-      try {
-        const r = await callModel(m);
-        return res.json({ reply: r.aiReply, model: r.usedModel });
-      } catch (e) { }
-    }
-    return res.status(503).json({ error: 'AI недоступен для текущего ключа/модели. Проверьте ключ и Allowed Sites.' });
-  } catch (error) {
-    const status = error.response?.status || 500;
-    const detail = error.response?.data || error.message;
-    console.error('Ошибка обращения к OpenRouter:', detail);
-    res.status(status).json({
-      error:
-        status === 401
-          ? 'Неверный/отключённый OPENROUTER_API_KEY.'
-          : status === 402
-            ? 'Недостаточно кредитов/лимит.'
-            : status === 403
-              ? 'Доступ к выбранной модели ограничен (проверьте Allowed Sites/регион/политику).'
-              : 'Не удалось связаться с AI.'
-    });
-  }
-});
-
-/* ===================== Заявки продавцов ===================== */
-app.get('/admin/applications', requireAuth, requireAdmin, async (req, res) => {
-  const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
-  const [rows] = await db.query(`
-    SELECT a.*, u.first_name, u.last_name, u.email, u.phone
-    FROM seller_applications a
-    JOIN users u ON u.id = a.user_id
-    WHERE a.status = ?
-    ORDER BY a.created_at DESC
-  `, [status]);
-  res.json(rows);
-});
-
-app.post('/seller/apply', requireAuth, async (req, res) => {
-  const { company_name, tax_id, price_list_url, comment } = req.body || {};
-  if (!company_name || !tax_id) return res.status(400).json({ message: 'company_name and tax_id are required' });
-
-  const [u] = await db.query('SELECT seller_status FROM users WHERE id=?', [req.user.id]);
-  if (!u.length) return res.status(404).json({ message: 'User not found' });
-  if (u[0].seller_status === 'approved') return res.status(400).json({ message: 'Already seller' });
-  if (u[0].seller_status === 'pending') return res.status(400).json({ message: 'Application already pending' });
-
-  await db.query(`
-    INSERT INTO seller_applications (user_id, company_name, tax_id, price_list_url, comment)
-    VALUES (?, ?, ?, ?, ?)
-  `, [req.user.id, company_name, tax_id, price_list_url || null, comment || null]);
-
-  await db.query(`UPDATE users SET seller_status='pending', seller_rejection_reason=NULL WHERE id=?`, [req.user.id]);
-
-  res.json({ ok: true });
-});
-
-app.patch('/admin/applications/:id', requireAuth, requireAdmin, async (req, res) => {
-  const id = Number(req.params.id);
-  const { action, reason } = req.body || {};
-  if (!['approve', 'reject'].includes(action)) return res.status(400).json({ message: 'Invalid action' });
-
-  const conn = await db.getConnection();
-  try {
-    await conn.beginTransaction();
-
-    const [apps] = await conn.query('SELECT * FROM seller_applications WHERE id=? FOR UPDATE', [id]);
-    if (!apps.length) { await conn.rollback(); return res.status(404).json({ message: 'Not found' }); }
-    const appRow = apps[0];
-    if (appRow.status !== 'pending') { await conn.rollback(); return res.status(400).json({ message: 'Already decided' }); }
-
-    if (action === 'approve') {
-      await conn.query(
-        `UPDATE seller_applications SET status='approved', decided_at=NOW(), decided_by=? WHERE id=?`,
-        [req.user.id, id]
-      );
-      await conn.query(
-        `UPDATE users SET seller_status='approved', seller_rejection_reason=NULL WHERE id=?`,
-        [appRow.user_id]
-      );
-    } else {
-      await conn.query(
-        `UPDATE seller_applications SET status='rejected', rejection_reason=?, decided_at=NOW(), decided_by=? WHERE id=?`,
-        [reason || null, req.user.id, id]
-      );
-      await conn.query(
-        `UPDATE users SET seller_status='rejected', seller_rejection_reason=? WHERE id=?`,
-        [reason || null, appRow.user_id]
-      );
-    }
-
-    await conn.commit();
-    res.json({ ok: true });
-  } catch (e) {
-    await conn.rollback();
-    console.error(e);
-    res.status(500).json({ message: 'Server error' });
-  } finally {
-    conn.release();
-  }
-});
-
-/* ===================== Товары (для одобренных продавцов) ===================== */
-/** POST /products — создать товар (только approved) */
-app.post('/products', requireAuth, requireApprovedSeller, async (req, res) => {
-  const { title, description, price, qty, category } = req.body || {};
-  if (!title || price == null || category == null || String(category).trim() === '') {
-    return res.status(400).json({ message: 'title, price и category обязательны' });
-  }
-
-  try {
-    const [result] = await db.query(
-      `INSERT INTO products (seller_id, title, description, price, qty, category, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-      [req.user.id, title, description || null, Number(price), qty ?? 0, String(category).trim()]
-    );
-
-    const newId = result.insertId;
+    const limit = Math.min(24, Math.max(1, parseInt(req.query.limit ?? '12', 10)));
     const [rows] = await db.query(
-      `SELECT p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
-              u.username AS seller_username
-         FROM products p
-         JOIN users u ON u.id = p.seller_id
-        WHERE p.id = ?`,
-      [newId]
+      `
+      SELECT
+        p.id, p.title, p.price, p.category, p.created_at,
+        COALESCE(NULLIF(TRIM(p.preview_image_url), ''), NULLIF(TRIM(p.image_url), '')) AS preview_image_url,
+        p.image_url
+      FROM products p
+      WHERE p.status = 'active'
+      ORDER BY p.created_at DESC, p.id DESC
+      LIMIT ?
+      `,[limit]
     );
-
-    res.json({ ok: true, item: rows[0] });
+    res.json({ items: rows || [] });
   } catch (e) {
-    console.error('POST /products error', e);
+    console.error('GET /api/reco/personal error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-/* ------- Product details (public) ------- */
+/* ===== Product details & reviews ===== */
 app.get('/api/products/:id', async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ message: 'Invalid id' });
-
   try {
     const [rows] = await db.query(
       `
       SELECT
         p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
+        p.preview_image_url, p.image_url,
         u.id AS seller_id,
         TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS seller_name,
-        /* подзапросы вместо GROUP BY */
-        COALESCE((
-          SELECT ROUND(AVG(r2.rating), 1)
-          FROM product_reviews r2
-          WHERE r2.product_id = p.id
-        ), 0) AS avg_rating,
-        (
-          SELECT COUNT(*) FROM product_reviews r3 WHERE r3.product_id = p.id
-        ) AS reviews_count
+        COALESCE((SELECT ROUND(AVG(r2.rating), 1) FROM product_reviews r2 WHERE r2.product_id = p.id), 0) AS avg_rating,
+        (SELECT COUNT(*) FROM product_reviews r3 WHERE r3.product_id = p.id) AS reviews_count
       FROM products p
       JOIN users u ON u.id = p.seller_id
       WHERE p.id = ?
       LIMIT 1
-      `,
-      [id]
+      `,[id]
     );
-
     const item = rows[0];
     if (!item) return res.status(404).json({ message: 'Товар не найден' });
     return res.json({ item });
@@ -1962,97 +1375,55 @@ app.get('/api/products/:id', async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* ------- Reviews: list (public) ------- */
 app.get('/api/products/:id/reviews', async (req, res) => {
   const productId = Number(req.params.id);
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit ?? '20', 10)));
   const offset = Math.max(0, parseInt(req.query.offset ?? '0', 10));
-
-  if (!Number.isFinite(productId)) {
-    return res.status(400).json({ message: 'Invalid id' });
-  }
-
+  if (!Number.isFinite(productId)) return res.status(400).json({ message: 'Invalid id' });
   try {
     const [rows] = await db.query(
       `
-      SELECT
-        r.id,
-        r.rating,
-        r.comment,
-        r.created_at,
-        r.updated_at,
-        r.user_id,
-        -- удобное отображаемое имя
-        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name,
-        u.username
+      SELECT r.id, r.rating, r.comment, r.created_at, r.updated_at, r.user_id,
+             TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name, u.username
       FROM product_reviews r
       JOIN users u ON u.id = r.user_id
       WHERE r.product_id = ?
       ORDER BY r.created_at DESC, r.id DESC
-      LIMIT ? OFFSET ?
-      `,
+      LIMIT ? OFFSET ?`,
       [productId, limit, offset]
     );
-
     res.json({ items: rows || [], limit, offset });
   } catch (e) {
     console.error('GET /api/products/:id/reviews error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* ------- Reviews: create/update (auth) ------- */
 app.post('/api/products/:id/reviews', requireAuth, async (req, res) => {
   const productId = Number(req.params.id);
   let { rating, comment } = req.body || {};
-
-  if (!Number.isFinite(productId)) {
-    return res.status(400).json({ message: 'Invalid id' });
-  }
-
+  if (!Number.isFinite(productId)) return res.status(400).json({ message: 'Invalid id' });
   rating = parseInt(rating, 10);
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return res.status(400).json({ message: 'rating должен быть целым числом от 1 до 5' });
   }
-
   comment = (comment ?? '').toString().trim() || null;
-
   try {
-    // один отзыв на пользователя для товара (upsert)
     await db.query(
-      `
-      INSERT INTO product_reviews (product_id, user_id, rating, comment)
-      VALUES (?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        rating     = VALUES(rating),
-        comment    = VALUES(comment),
-        updated_at = CURRENT_TIMESTAMP
-      `,
+      `INSERT INTO product_reviews (product_id, user_id, rating, comment)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE rating=VALUES(rating), comment=VALUES(comment), updated_at=CURRENT_TIMESTAMP`,
       [productId, req.user.id, rating, comment]
     );
-
-    // отдаем актуальный отзыв тем же форматом, что GET
     const [rows] = await db.query(
-      `
-      SELECT
-        r.id,
-        r.rating,
-        r.comment,
-        r.created_at,
-        r.updated_at,
-        r.user_id,
-        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name,
-        u.username
-      FROM product_reviews r
-      JOIN users u ON u.id = r.user_id
-      WHERE r.product_id = ? AND r.user_id = ?
-      ORDER BY r.updated_at DESC, r.id DESC
-      LIMIT 1
-      `,
+      `SELECT r.id, r.rating, r.comment, r.created_at, r.updated_at, r.user_id,
+              TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name, u.username
+       FROM product_reviews r
+       JOIN users u ON u.id = r.user_id
+       WHERE r.product_id = ? AND r.user_id = ?
+       ORDER BY r.updated_at DESC, r.id DESC
+       LIMIT 1`,
       [productId, req.user.id]
     );
-
     return res.status(201).json({ item: rows[0] });
   } catch (e) {
     console.error('POST /api/products/:id/reviews error', e);
@@ -2060,23 +1431,16 @@ app.post('/api/products/:id/reviews', requireAuth, async (req, res) => {
   }
 });
 
-/* ===================== CART ===================== */
-
-/* List cart items for current user */
+/* ===== Cart & Checkout ===== */
 app.get('/api/cart', requireAuth, async (req, res) => {
   try {
     const [rows] = await db.query(
       `
-      SELECT
-        ci.product_id,
-        ci.qty,
-        p.title,
-        p.price
+      SELECT ci.product_id, ci.qty, p.title, p.price, p.preview_image_url, p.image_url
       FROM cart_items ci
       JOIN products p ON p.id = ci.product_id
       WHERE ci.user_id = ?
-      ORDER BY ci.updated_at DESC, ci.id DESC
-      `,
+      ORDER BY ci.updated_at DESC, ci.id DESC`,
       [req.user.id]
     );
     res.json({ items: rows || [] });
@@ -2085,21 +1449,16 @@ app.get('/api/cart', requireAuth, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* Add to cart (upsert) */
 app.post('/api/cart', requireAuth, async (req, res) => {
   let { product_id, qty } = req.body || {};
   const pid = Number(product_id);
   const q = Math.max(1, parseInt(qty ?? '1', 10));
   if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid product_id' });
-
   try {
     await db.query(
-      `
-      INSERT INTO cart_items (user_id, product_id, qty)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at = CURRENT_TIMESTAMP
-      `,
+      `INSERT INTO cart_items (user_id, product_id, qty)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at = CURRENT_TIMESTAMP`,
       [req.user.id, pid, q]
     );
     res.status(201).json({ ok: true });
@@ -2108,30 +1467,22 @@ app.post('/api/cart', requireAuth, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* Update quantity (set) */
 app.patch('/api/cart/:productId', requireAuth, async (req, res) => {
   const pid = Number(req.params.productId);
   const q = parseInt((req.body || {}).qty, 10);
   if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid id' });
-
   try {
     if (!Number.isInteger(q) || q <= 0) {
       await db.query(`DELETE FROM cart_items WHERE user_id=? AND product_id=?`, [req.user.id, pid]);
       return res.json({ ok: true, removed: true });
     }
-    await db.query(
-      `UPDATE cart_items SET qty=?, updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND product_id=?`,
-      [q, req.user.id, pid]
-    );
+    await db.query(`UPDATE cart_items SET qty=?, updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND product_id=?`, [q, req.user.id, pid]);
     res.json({ ok: true });
   } catch (e) {
     console.error('PATCH /api/cart/:productId error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* Remove item */
 app.delete('/api/cart/:productId', requireAuth, async (req, res) => {
   const pid = Number(req.params.productId);
   if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid id' });
@@ -2144,84 +1495,54 @@ app.delete('/api/cart/:productId', requireAuth, async (req, res) => {
   }
 });
 
-/* ===================== CHECKOUT (demo) ===================== */
-
-/* Create order from cart + address + demo payment */
 app.post('/api/checkout', requireAuth, async (req, res) => {
   const { address, payment } = req.body || {};
   const country = (address?.country || '').trim();
   const city = (address?.city || '').trim();
   const street = (address?.street || '').trim();
   const postal = (address?.postal || '').trim();
-
   if (!country || !city || !street || !postal) {
     return res.status(400).json({ message: 'Не все поля адреса заполнены' });
   }
-
   try {
-    // 1) читаем корзину
     const [cart] = await db.query(
-      `
-      SELECT ci.product_id, ci.qty, p.price
-      FROM cart_items ci
-      JOIN products p ON p.id = ci.product_id
-      WHERE ci.user_id = ?
-      `,
-      [req.user.id]
+      `SELECT ci.product_id, ci.qty, p.price
+       FROM cart_items ci JOIN products p ON p.id = ci.product_id
+       WHERE ci.user_id = ?`, [req.user.id]
     );
     if (!cart || cart.length === 0) {
       return res.status(400).json({ message: 'Корзина пуста' });
     }
-
-    // 2) создаём заказ
     const total = cart.reduce((s, row) => s + Number(row.price) * Number(row.qty), 0);
-    const [insOrder] = await db.query(
-      `INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, 'created')`,
+    const [insOrder] = await db.query(`INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, 'created')`,
       [req.user.id, total.toFixed(2)]
     );
     const orderId = insOrder.insertId;
-
-    // 3) позиции заказа
     const values = cart.map(r => [orderId, r.product_id, r.qty, r.price]);
-    await db.query(
-      `INSERT INTO order_items (order_id, product_id, qty, price) VALUES ?`,
-      [values]
-    );
-
-    // 4) адрес
-    await db.query(
-      `INSERT INTO order_addresses (order_id, country, city, street, postal_code) VALUES (?, ?, ?, ?, ?)`,
+    await db.query(`INSERT INTO order_items (order_id, product_id, qty, price) VALUES ?`, [values]);
+    await db.query(`INSERT INTO order_addresses (order_id, country, city, street, postal_code) VALUES (?, ?, ?, ?, ?)`,
       [orderId, country, city, street, postal]
     );
-
-    // 5) демо-платёж: валидируем Луна, определяем бренд, сохраняем только last4/brand
     const cardNumber = (payment?.cardNumber || '').replace(/\s+/g, '');
-    const exp = (payment?.exp || '').trim(); // MM/YY
-    const cvc = (payment?.cvc || '').trim(); // не сохраняем
+    const exp = (payment?.exp || '').trim();
+    const cvc = (payment?.cvc || '').trim();
     const luhnOk = /^[0-9]{12,19}$/.test(cardNumber) && luhn(cardNumber);
     if (!luhnOk || !/^\d{2}\/\d{2}$/.test(exp) || !/^\d{3,4}$/.test(cvc)) {
       return res.status(400).json({ message: 'Некорректные карточные данные (демо-валидация)' });
     }
     const last4 = cardNumber.slice(-4);
     const brand = detectBrand(cardNumber);
-
-    // помечаем заказ оплаченным (демо)
     await db.query(`UPDATE orders SET status='paid' WHERE id=?`, [orderId]);
     await db.query(`INSERT INTO payments (order_id, provider, brand, last4, status) VALUES (?, 'demo', ?, ?, 'succeeded')`,
       [orderId, brand, last4]
     );
-
-    // 6) чистим корзину
     await db.query(`DELETE FROM cart_items WHERE user_id=?`, [req.user.id]);
-
     res.status(201).json({ ok: true, order_id: orderId, total, brand, last4 });
   } catch (e) {
     console.error('POST /api/checkout error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/* helpers */
 function luhn(num) {
   let sum = 0, dbl = false;
   for (let i = num.length - 1; i >= 0; i--) {
@@ -2239,7 +1560,7 @@ function detectBrand(n) {
   return 'card';
 }
 
-/* ===================== Users: online status ===================== */
+/* ===== Users: last_seen column ===== */
 (async () => {
   try {
     const [c1] = await db.query("SHOW COLUMNS FROM users LIKE 'last_seen_at'");
@@ -2247,12 +1568,10 @@ function detectBrand(n) {
       await db.query("ALTER TABLE users ADD COLUMN last_seen_at DATETIME NULL, ADD INDEX idx_last_seen (last_seen_at)");
       console.log('✅ added users.last_seen_at');
     }
-  } catch (e) {
-    console.error('ensure last_seen_at error:', e.message || e);
-  }
+  } catch (e) { console.error('ensure last_seen_at error:', e.message || e); }
 })();
 
-/* ===================== Chat schema ===================== */
+/* ===== Chat schema (minimal ensure) ===== */
 (async () => {
   try {
     await db.query(`
@@ -2269,7 +1588,6 @@ function detectBrand(n) {
         CONSTRAINT fk_chat_threads_buyer  FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
-
     await db.query(`
       CREATE TABLE IF NOT EXISTS chat_messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -2289,39 +1607,16 @@ function detectBrand(n) {
   }
 })();
 
-/* ===================== Запуск ===================== */
-const PORT = process.env.PORT || 5050;
-
-// Upload avatar
-app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
-  try {
-    const url = `/uploads/avatars/${req.file.filename}`;
-    await db.query('UPDATE users SET avatar_url=? WHERE id=?', [url, req.user.id]);
-    res.json({ url });
-  } catch (e) {
-    console.error('avatar upload error:', e);
-    res.status(500).json({ error: 'Failed to save avatar' });
-  }
-});
-
-server.listen(PORT, () => {
-  console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
-});
-
-// Public user profile
+/* ===== Public user profile ===== */
 app.get('/api/users/:id/public', async (req, res) => {
   const userId = Number(req.params.id);
   try {
     const [rows] = await db.query(
       `SELECT id, first_name, last_name, contact_email, avatar_url, last_seen_at
-         FROM users
-        WHERE id=? LIMIT 1`,
-      [userId]
+         FROM users WHERE id=? LIMIT 1`, [userId]
     );
     if (!rows.length) return res.status(404).json({ message: 'User not found' });
     const u = rows[0];
-
-    // Average rating across user's products
     const [[r1]] = await db.query(
       `SELECT ROUND(AVG(r.rating), 2) AS rating
          FROM product_reviews r
@@ -2329,20 +1624,15 @@ app.get('/api/users/:id/public', async (req, res) => {
         WHERE p.seller_id = ?`,
       [userId]
     );
-
-    // Items sold count (qty)
     const [[r2]] = await db.query(
       `SELECT COALESCE(SUM(oi.qty),0) AS soldCount
          FROM order_items oi
          JOIN orders o   ON o.id = oi.order_id
          JOIN products p ON p.id = oi.product_id
-        WHERE p.seller_id = ?
-          AND o.status IN ('paid','completed')`,
+        WHERE p.seller_id = ? AND o.status IN ('paid','completed')`,
       [userId]
     );
-
     const online = req.app?.locals?.isOnline ? req.app.locals.isOnline(userId) : false;
-
     res.json({
       id: u.id,
       firstName: u.first_name,
@@ -2358,4 +1648,87 @@ app.get('/api/users/:id/public', async (req, res) => {
     console.error('GET /api/users/:id/public error:', e);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+/* ===== Image proxy (CORS bypass for product images) ===== */
+const _fetch = (typeof fetch === 'function') ? fetch : ((...args) => import('node-fetch').then(({default: f}) => f(...args)));
+app.get('/api/proxy-img', async (req, res) => {
+  const url = req.query.u;
+  if (!url || !/^https?:\/\//i.test(url)) return res.status(400).send('Bad image url');
+  try {
+    const r = await _fetch(url, {
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; QontoBot/1.0)',
+        'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+        'Referer': ''
+      }
+    });
+    if (!r.ok) return res.status(r.status).end();
+    const ct = (r.headers.get && r.headers.get('content-type')) || 'image/jpeg';
+    res.setHeader('Content-Type', ct);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    if (r.body && r.body.pipe) { r.body.pipe(res); }
+    else { const buf = Buffer.from(await r.arrayBuffer()); res.end(buf); }
+  } catch (e) { res.status(502).send('Image fetch failed'); }
+});
+
+/* ===== Chat (OpenRouter proxy) ===== */
+app.post('/api/chat', async (req, res) => {
+  const userMessage = req.body.message;
+  const PRIMARY_MODEL = OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free';
+  const FALLBACK_MODELS = [
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'openrouter/auto'
+  ];
+  if (!OPENROUTER_API_KEY) {
+    return res.status(503).json({ error: 'AI недоступен: отсутствует OPENROUTER_API_KEY на сервере.' });
+  }
+  let systemContext = 'Ты вежливый ИИ-помощник, консультирующий по интернет-магазину.';
+  if (req.user) systemContext += ` Пользователь: ${req.user.username}, email: ${req.user.email}.`;
+
+  async function callModel(model) {
+    const { data } = await axios.post(
+      `${OPENROUTER_BASE_URL}/chat/completions`,
+      { model, messages: [{ role: 'system', content: systemContext }, { role: 'user', content: userMessage }], temperature: 0.7 },
+      { headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'HTTP-Referer': OPENROUTER_SITE_URL, 'X-Title': OPENROUTER_TITLE } }
+    );
+    const aiReply = data?.choices?.[0]?.message?.content || 'Пустой ответ от модели';
+    return { aiReply, usedModel: model };
+  }
+  try {
+    try { const r = await callModel(PRIMARY_MODEL); return res.json({ reply: r.aiReply, model: r.usedModel }); }
+    catch (e) { const s = e.response?.status; if (![401,402,403].includes(s)) throw e; }
+    for (const m of FALLBACK_MODELS) {
+      try { const r = await callModel(m); return res.json({ reply: r.aiReply, model: r.usedModel }); } catch (e) {}
+    }
+    return res.status(503).json({ error: 'AI недоступен для текущего ключа/модели. Проверьте ключ и Allowed Sites.' });
+  } catch (error) {
+    const status = error.response?.status || 500;
+    const detail = error.response?.data || error.message;
+    console.error('Ошибка обращения к OpenRouter:', detail);
+    res.status(status).json({
+      error:
+        status === 401 ? 'Неверный/отключённый OPENROUTER_API_KEY.' :
+        status === 402 ? 'Недостаточно кредитов/лимит.' :
+        status === 403 ? 'Доступ к выбранной модели ограничен (проверьте Allowed Sites/регион/политику).' :
+        'Не удалось связаться с AI.'
+    });
+  }
+});
+
+/* ===== Launch ===== */
+const PORT = process.env.PORT || 5050;
+app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
+  try {
+    const url = `/uploads/avatars/${req.file.filename}`;
+    await db.query('UPDATE users SET avatar_url=? WHERE id=?', [url, req.user.id]);
+    res.json({ url });
+  } catch (e) {
+    console.error('avatar upload error:', e);
+    res.status(500).json({ error: 'Failed to save avatar' });
+  }
+});
+server.listen(PORT, () => {
+  console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
 });
