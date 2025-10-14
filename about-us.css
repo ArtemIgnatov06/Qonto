@@ -1,0 +1,695 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 2650px; /* временно, чтобы не мешал просмотру страницы */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+/* Шрифт Ubuntu, как в макете */
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap");
+
+/* Родитель для абсолютного позиционирования */
+.section-wrap {
+  position: relative;
+}
+
+/* Элемент текста из Figma */
+.about-text {
+  position: absolute;
+  width: 797.96px;
+  height: 186.97px;            /* как в макете; можно убрать, если нужна авто-высота */
+  left: 101.59px;
+  top: 318.02px;
+
+  font-family: "Ubuntu", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;           /* 171% от 14px */
+  color: #363535;
+
+  /* небольшие улучшения рендера и переносов */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;            /* чтобы текст не выходил за заданную высоту */
+  text-overflow: ellipsis;     /* многоточие, если высота фиксирована */
+  display: -webkit-box;
+  -webkit-line-clamp: 8;       /* 186.97 / 24 ≈ 7.79 строк ≈ 8 строк */
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
+/* Контейнер для абсолютного позиционирования этого блока */
+.group-154 {
+  position: absolute;
+  width: 448.79px;
+  height: 134.99px;
+  left: 92px;
+  top: 139.96px;
+}
+
+/* Внутренняя группа */
+.group-20 {
+  position: absolute;
+  left: 0%;
+  right: -108.22%;
+  top: 26.6%;
+  bottom: 0%;
+}
+
+/* Кликабельная иконка (Frame 139) */
+.icon-link {
+  position: absolute;
+  left: 8%;
+  top: 60%;
+  transform: translateY(-50%); /* центрируем по вертикали */
+  display: inline-block;
+  width: 42px;   /* можешь подправить под свою иконку */
+  height: 41px;  /* из макета Frame 139 */
+}
+
+/* Сама картинка иконки — ты подставишь src */
+.icon-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border: none;          /* без контура */
+  outline: none;         /* без фокуса-рамки браузера */
+}
+
+/* Вертикальный разделитель (Vector) */
+.vector {
+  position: absolute;
+  left: 90px;  /* отступ от иконки ~14px + 42px */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 45px;               /* как в макете */
+  /* rotate не нужен, сразу рисуем вертикальную линию */
+}
+
+/* Заголовок Про нас (h2) */
+.page-title {
+  position: absolute;
+  left: 15.92%;   /* как в макете */
+  top: 26.6%;     /* как в макете */
+  margin: 0;
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 64px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+}
+
+/* Дополнительно: убираем фокус-рамку у ссылки мышью,
+   но оставляем доступность с клавиатуры */
+.icon-link:focus-visible {
+  outline: 2px solid #35C65E33; /* мягкая подсветка для клавиатуры */
+  outline-offset: 2px;
+}
+
+.diff-title {
+  position: absolute;
+  width: 586px;
+  height: 40.38px;
+  left: 101.59px;
+  top: 562.36px;
+
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 100;
+  font-size: 25px;
+  line-height: 36px; /* 144% */
+  color: #363535;
+  margin: 0;
+
+  /* для максимально точного рендеринга */
+  letter-spacing: 0;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Контейнер группы */
+.group-140 {
+  position: absolute;
+  width: 690.8px;
+  height: 262.94px;
+  left: 92px;
+  top: 634.64px;
+  font-family: "Ubuntu", sans-serif;
+}
+
+/* Rectangle 23 */
+.rect-23 {
+  box-sizing: border-box;
+  position: absolute;
+  width: 690.8px;
+  height: 262.94px;
+  left: 0;
+  top: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 20px;
+}
+
+/* Вертикальная линия (Line 1) */
+.vline-1 {
+  position: absolute;
+  left: 345.4px;   /* 437.4 - 92 */
+  top: 0;
+  height: 262.94px;
+  border-left: 2px solid #ECECEC;
+}
+
+/* Горизонтальные линии: точные смещения от top контейнера */
+.hline {
+  position: absolute;
+  left: 0;
+  width: 690.8px;
+  border-top: 2px solid #ECECEC;
+  height: 0;
+}
+.hline-1 { top: 52.59px; }   /* Line 2: 687.23 - 634.64 */
+.hline-2 { top: 105.18px; }  /* Line 6: 739.82 - 634.64 */
+.hline-3 { top: 157.77px; }  /* Line 3: 792.41 - 634.64 */
+.hline-4 { top: 210.36px; }  /* Line 7: 845 - 634.64 */
+
+/* Заголовки колонок */
+.col-title {
+  position: absolute;
+  width: 345.5px;              /* левая ширина из макета */
+  height: 18.03px;
+  top: 16.67px;                /* 651.31 - 634.64 */
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;           /* 171% */
+  text-align: center;
+  color: #35C65E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.col-title.right {
+  left: 345.5px;               /* 437.5 - 92 */
+  width: 345.3px;              /* правая ширина из макета */
+}
+.col-title.left {
+  left: 0;
+}
+
+/* Ячейки (текст) */
+.cell {
+  position: absolute;
+  width: 345.5px;              /* по левому столбцу */
+  height: 18.03px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;           /* 171% */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #363535;
+}
+.cell.right {
+  left: 345.5px;               /* правая колонка начинается здесь */
+  width: 345.3px;              /* как в макете */
+}
+.cell.left {
+  left: 0;
+}
+
+.trademate-text {
+  position: absolute;
+  width: 872.33px;
+  height: 120px;
+  left: 202.13px;
+  top: 1069.18px;
+
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px; /* 171% */
+  color: #363535;
+  margin: 0;
+
+  /* точный рендер и контроль высоты */
+  overflow: hidden;              /* строго 120px высоты */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.group-153 {
+  position: absolute;
+  width: 1182.92px;
+  height: 572.37px;
+  left: 202.13px;
+  top: 1248.94px;
+}
+
+/* Картинка растягивается на весь контейнер 1:1 */
+.group-153__img {
+  width: 80%;
+  height: 80%;
+  display: block;
+  object-fit: cover;     /* если нужно без обрезки — замени на `contain` */
+  object-position: center;
+  border: 0;
+  outline: 0;
+}
+
+.qonte-closing {
+  position: absolute;
+  width: 872.33px;
+  height: 48px;
+  left: 202.13px;
+  top: 1971.31px;
+
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px; /* 171% */
+  color: #363535;
+  margin: 0;
+
+  /* жёсткая высота как в макете */
+  overflow: hidden;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.group-152 {
+  position: absolute;
+  width: 1367.38px;
+  height: 703.97px;
+  left: 101.17px;
+  top: 2027.29px;
+}
+
+/* Картинка во весь контейнер */
+.group-152__img {
+  width: 80%;
+  height: 80%;
+  display: block;
+  object-fit: cover;   /* нужно без обрезки — замени на contain */
+  object-position: center;
+  border: 0;
+  outline: 0;
+}
+
+.frame-rot {
+  position: absolute;
+  width: 638.69px;
+  height: 509.4px;
+  left: 890px;
+  top: 230px;
+  transform-origin: 50% 50%; /* как в Figma (центр) */
+}
+
+/* Картинка во весь контейнер */
+.frame-rot__img {
+  width: 110%;
+  height: 110%;
+  display: block;
+  object-fit: cover;   /* нужно без обрезки — замени на contain */
+  object-position: center;
+  border: 0;
+  outline: 0;
+}
