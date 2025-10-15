@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../html/terms-of-use.css';
+import arrowIcon from '../assets/planex.png';
 
 export default function Terms() {
   const [html, setHtml] = useState('<p>Завантаження…</p>');
@@ -44,7 +45,9 @@ export default function Terms() {
     <main className="page terms-page">
       <div className="terms-container">
         <div className="terms-hero">
-          <span className="terms-hero__icon" aria-hidden="true">➤</span>
+          <span className="return-hero__icon" aria-hidden="true">
+            <img src={arrowIcon} alt="" className="page-arrow" />
+          </span>
           <h1 className="terms-hero__title">Умови використання сайту</h1>
         </div>
 

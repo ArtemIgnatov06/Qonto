@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import '../html/contacts.css';
+import arrowIcon from '../assets/planex.png';
 
 /* ВАЖНО: используем абсолютные пути, чтобы dev-сервер отдал файлы из /html */
 // ВАЖНО: картинки из public
-const HOURS_IMG   = process.env.PUBLIC_URL + '/html/schedule.png';   // 1-я карточка
+const HOURS_IMG = process.env.PUBLIC_URL + '/html/schedule.png';   // 1-я карточка
 const VACANCY_IMG = process.env.PUBLIC_URL + '/html/vacantions.png'; // 3-я карточка
 
 export default function ContactsPage() {
@@ -30,8 +31,8 @@ export default function ContactsPage() {
           .forEach(n => n.remove());
 
         // берём три блока (или ближайшие аналоги)
-        const col1 = doc.querySelector('.group-167') || doc.querySelector('.card-hours')   || null;
-        const col2 = doc.querySelector('.group-166') || doc.querySelector('.card-emails')  || null;
+        const col1 = doc.querySelector('.group-167') || doc.querySelector('.card-hours') || null;
+        const col2 = doc.querySelector('.group-166') || doc.querySelector('.card-emails') || null;
         const col3 = doc.querySelector('.group-165') || doc.querySelector('.card-vacancy') || null;
 
         const grid = doc.createElement('div');
@@ -64,11 +65,11 @@ export default function ContactsPage() {
           let built = 0;
           for (let i = 1; i <= 8; i++) {
             const title = col2.querySelector(`.r${i}-title`);
-            const link  = col2.querySelector(`.r${i}-link, .r${i}-email, .r${i}-mail`);
+            const link = col2.querySelector(`.r${i}-link, .r${i}-email, .r${i}-mail`);
             if (!title || !link) continue;
 
-            const row   = doc.createElement('div'); row.className = 'row';
-            const left  = doc.createElement('span'); left.textContent = title.textContent.trim();
+            const row = doc.createElement('div'); row.className = 'row';
+            const left = doc.createElement('span'); left.textContent = title.textContent.trim();
             const right = doc.createElement('a');
             right.href = link.getAttribute('href') || `mailto:${link.textContent.trim()}`;
             right.textContent = link.textContent.trim();
@@ -79,8 +80,8 @@ export default function ContactsPage() {
 
           if (!built) {
             col2.querySelectorAll('a[href]').forEach(a => {
-              const row   = doc.createElement('div'); row.className = 'row';
-              const left  = doc.createElement('span'); left.textContent =
+              const row = doc.createElement('div'); row.className = 'row';
+              const left = doc.createElement('span'); left.textContent =
                 a.previousElementSibling?.textContent?.trim() ||
                 a.parentElement?.firstChild?.textContent?.trim() || '';
               const right = doc.createElement('a'); right.href = a.href; right.textContent = a.textContent.trim();
@@ -105,7 +106,7 @@ export default function ContactsPage() {
           const a = doc.createElement('a');
           a.href = '/vacancies';
           a.className = 'contact-card card-vacancy';
-          a.setAttribute('data-spa','1');
+          a.setAttribute('data-spa', '1');
 
           while (col3.firstChild) a.append(col3.firstChild);
 
@@ -133,7 +134,9 @@ export default function ContactsPage() {
     <main className="page contacts-page">
       <div className="contacts-container">
         <div className="contacts-hero">
-          <span className="contacts-hero__icon" aria-hidden="true">➤</span>
+          <span className="return-hero__icon" aria-hidden="true">
+            <img src={arrowIcon} alt="" className="page-arrow" />
+          </span>
           <h1 className="contacts-hero__title">Контакти</h1>
         </div>
 

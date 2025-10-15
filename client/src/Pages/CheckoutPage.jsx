@@ -5,6 +5,9 @@ import { useTranslation } from "react-i18next";
 import { useCurrency } from "../contexts/CurrencyContext.jsx";
 import "../Styles/make-order.css";
 
+import arrow from "../assets/planex.png";
+import editIcon from "../assets/edit.png";
+
 export default function CheckoutPage() {
   const API = process.env.REACT_APP_API || "";
   const nav = useNavigate();
@@ -133,7 +136,7 @@ export default function CheckoutPage() {
       {/* Заголовок слева */}
       <div className="group-154">
         <div className="group-20">
-          <img className="title-icon" src="/static/planex.png" alt="" />
+          <img className="title-icon" src={arrow} alt="" />
           <h3 className="title-h3">{t("checkout.title", "Оформлення замовлення")}</h3>
         </div>
       </div>
@@ -233,7 +236,7 @@ export default function CheckoutPage() {
           aria-pressed={open === "p1"}
           onClick={() => setOpen(open === "p1" ? null : "p1")}
         >
-          <img className="delivery-icon" src="/static/edit.png" alt="" />
+          <img className="delivery-icon" src={editIcon} alt="" />
           <h4 className="delivery-title">{t("checkout.person.h", "Персонафікація")}</h4>
           <p className="delivery-sub">{t("checkout.person.sub", "Введіть дані одержувача")}</p>
         </button>
@@ -261,7 +264,7 @@ export default function CheckoutPage() {
           aria-pressed={open === "p2"}
           onClick={() => setOpen(open === "p2" ? null : "p2")}
         >
-          <img className="delivery-icon" src="/static/edit.png" alt="" />
+          <img className="delivery-icon" src={editIcon} alt="" />
           <h4 className="delivery-title">{t("checkout.delivery.h", "Спосіб доставки")}</h4>
           <p className="delivery-sub">{t("checkout.delivery.sub", "Вибрати спосіб і адрес доставки")}</p>
         </button>
@@ -300,7 +303,7 @@ export default function CheckoutPage() {
           aria-pressed={open === "p3"}
           onClick={() => setOpen(open === "p3" ? null : "p3")}
         >
-          <img className="delivery-icon" src="/static/edit.png" alt="" />
+          <img className="delivery-icon" src={editIcon} alt="" />
           <h4 className="delivery-title">{t("checkout.payment.h", "Оплата")}</h4>
           <p className="delivery-sub">{t("checkout.payment.sub", "Вибрати спосіб оплати")}</p>
         </button>

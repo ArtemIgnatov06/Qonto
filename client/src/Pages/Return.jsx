@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../html/return.css';
+import arrowIcon from '../assets/planex.png';
 
 export default function ReturnPage() {
   const [html, setHtml] = useState('<p>Завантаження…</p>');
@@ -44,7 +45,9 @@ export default function ReturnPage() {
     <main className="page return-page">
       <div className="return-container">
         <div className="return-hero">
-          <span className="return-hero__icon" aria-hidden="true">➤</span>
+          <span className="return-hero__icon" aria-hidden="true">
+            <img src={arrowIcon} alt="" className="page-arrow" />
+          </span>
           <h1 className="return-hero__title">Повернення</h1>
         </div>
 

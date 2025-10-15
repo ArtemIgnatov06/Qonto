@@ -34,6 +34,36 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+// === SQL loader (generated) ===
+import { readFileSync } from 'fs';
+import { resolve as _resolve } from 'path';
+
+function _parseQueries(filePath) {
+  let src = '';
+  try { src = readFileSync(filePath, 'utf8'); } catch (_) { /* optional */ }
+  const map = {};
+  let current = null, buf = [];
+  const lines = src.split(/\r?\n/);
+  for (const line of lines) {
+    const m = line.match(/^\s*--\s*name:\s*(\w+)/i);
+    if (m) {
+      if (current && buf.length) map[current] = buf.join('\n').trim();
+      current = m[1];
+      buf = [];
+    } else {
+      buf.push(line);
+    }
+  }
+  if (current && buf.length) map[current] = buf.join('\n').trim();
+  return map;
+}
+
+const SQL = Object.freeze({
+  ..._parseQueries(_resolve(__dirname, 'sql/queries.sql')),
+  ..._parseQueries(_resolve(__dirname, 'sql/schema.sql')),
+});
+// === /SQL loader ===
+
 // === CORS
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',');
 
@@ -153,7 +183,7 @@ const db = mysql.createPool({
 
 (async () => {
   try {
-    const [r] = await db.query('SELECT DATABASE() AS db');
+    const [r] = await db.query(SQL.select_general);
     console.log('Connected DB =', r[0].db);
   } catch (e) {
     console.error('DB ping failed:', e.message || e);
@@ -165,21 +195,19 @@ const DB_NAME = process.env.DB_NAME;
 async function ensureUsersExtraSchema() {
   try {
     const [c1] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'contact_email'`,
+      SQL.select_information_schema,
       [DB_NAME]
     );
     if (!c1[0].cnt) {
-      await db.query(`ALTER TABLE users ADD COLUMN contact_email VARCHAR(255) NULL AFTER email`);
+      await db.query(SQL.alter_general);
       console.log('✅ users.contact_email added');
     }
     const [c2] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'avatar_url'`,
+      SQL.select_information_schema_02,
       [DB_NAME]
     );
     if (!c2[0].cnt) {
-      await db.query(`ALTER TABLE users ADD COLUMN avatar_url VARCHAR(512) NULL AFTER contact_email`);
+      await db.query(SQL.alter_general_02);
       console.log('✅ users.avatar_url added');
     }
   } catch (e) {
@@ -211,17 +239,17 @@ const normalizePhone = (raw) => {
 
 async function getUserById(id) {
   const [rows] = await db.query(
-    `SELECT id, first_name, last_name, username, phone, email, contact_email, avatar_url, role, seller_status, seller_rejection_reason FROM users WHERE id=? LIMIT 1`,
+    SQL.select_users,
     [id]
   );
   return rows[0] || null;
 }
 async function findUserByEmail(email) {
-  const [rows] = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+  const [rows] = await db.query(SQL.select_users_02, [email]);
   return rows[0] || null;
 }
 async function findUserByPhone(phone) {
-  const [rows] = await db.query('SELECT * FROM users WHERE phone = ? LIMIT 1', [phone]);
+  const [rows] = await db.query(SQL.select_users_03, [phone]);
   return rows[0] || null;
 }
 async function ensureUniqueUsername(base) {
@@ -229,7 +257,7 @@ async function ensureUniqueUsername(base) {
   if (!u) u = 'user';
   let candidate = u, i = 0;
   while (true) {
-    const [r] = await db.query('SELECT id FROM users WHERE username = ? LIMIT 1', [candidate]);
+    const [r] = await db.query(SQL.select_users_04, [candidate]);
     if (!r.length) return candidate;
     i += 1;
     candidate = `${u}${i}`;
@@ -242,8 +270,7 @@ async function createUserByEmail({ email, first_name, last_name }) {
   const password_hash = '';
   const phone = '';
   const [res] = await db.query(
-    `INSERT INTO users (first_name, last_name, username, password_hash, phone, email)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    SQL.insert_general,
     [first_name || '', last_name || '', username, password_hash, phone, email]
   );
   return { id: res.insertId, email, first_name, last_name, username };
@@ -317,11 +344,7 @@ function requireApprovedSeller(req, res, next) {
 async function ensureCategoriesSchema() {
   try {
     await db.query(
-      `CREATE TABLE IF NOT EXISTS categories (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100) NOT NULL UNIQUE,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
+      SQL.create_general
     );
   } catch (err) {
     console.error('ensureCategoriesSchema error:', err);
@@ -330,44 +353,39 @@ async function ensureCategoriesSchema() {
 async function ensureProductsSchema() {
   try {
     const [c1] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'category'`,
+      SQL.select_information_schema_03,
       [DB_NAME]
     );
     if (!c1[0].cnt) {
-      await db.query(`ALTER TABLE products ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT '' AFTER description`);
+      await db.query(SQL.alter_general_03);
       console.log('✅ products.category добавлен');
     }
     const [cStat] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'status'`,
+      SQL.select_information_schema_04,
       [DB_NAME]
     );
     if (!cStat[0].cnt) {
-      await db.query(`ALTER TABLE products ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active' AFTER qty`);
+      await db.query(SQL.alter_general_04);
       console.log('✅ products.status добавлен');
     }
     const [c2] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'created_at'`,
+      SQL.select_information_schema_05,
       [DB_NAME]
     );
     if (!c2[0].cnt) {
-      await db.query(`ALTER TABLE products ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+      await db.query(SQL.alter_general_05);
       console.log('✅ products.created_at добавлен');
     }
     const [cPrev] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND COLUMN_NAME = 'preview_image_url'`,
+      SQL.select_information_schema_06,
       [DB_NAME]
     );
     if (!cPrev[0].cnt) {
-      await db.query(`ALTER TABLE products ADD COLUMN preview_image_url VARCHAR(500) NULL DEFAULT NULL AFTER status`);
+      await db.query(SQL.alter_general_06);
       console.log('✅ products.preview_image_url добавлен');
     }
     const [i1] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_category'`,
+      SQL.select_information_schema_07,
       [DB_NAME]
     );
     if (!i1[0].cnt) {
@@ -375,8 +393,7 @@ async function ensureProductsSchema() {
       console.log('✅ индекс idx_products_category создан');
     }
     const [i2] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'products' AND INDEX_NAME = 'idx_products_created_at'`,
+      SQL.select_information_schema_08,
       [DB_NAME]
     );
     if (!i2[0].cnt) {
@@ -426,13 +443,12 @@ app.post('/api/register', async (req, res) => {
     if (!firstName || !lastName || !username || !password || !phone || !email) {
       return res.status(400).json({ error: 'Все поля обязательны.' });
     }
-    const [exists] = await db.query('SELECT id FROM users WHERE username = ? OR email = ?', [username, email]);
+    const [exists] = await db.query(SQL.select_users_05, [username, email]);
     if (exists.length) return res.status(400).json({ error: 'Пользователь с таким логином или email уже существует.' });
 
     const password_hash = await bcrypt.hash(password, 10);
     const [result] = await db.query(
-      `INSERT INTO users (first_name, last_name, username, password_hash, phone, email)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      SQL.insert_general_02,
       [firstName, lastName, username, password_hash, phone, email]
     );
 
@@ -449,7 +465,7 @@ app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'Логин и пароль обязательны.' });
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE username = ? LIMIT 1', [username]);
+    const [rows] = await db.query(SQL.select_users_06, [username]);
     if (!rows.length) return res.status(400).json({ error: 'Неверные учетные данные.' });
 
     const userRow = rows[0];
@@ -476,10 +492,10 @@ app.post('/api/register-email', async (req, res) => {
     }
     phone = normalizePhone(phone);
 
-    const [emailExists] = await db.query('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
+    const [emailExists] = await db.query(SQL.select_users_07, [email]);
     if (emailExists.length) return res.status(400).json({ error: 'Пользователь с таким email уже существует.' });
 
-    const [phoneExists] = await db.query('SELECT id FROM users WHERE phone = ? LIMIT 1', [phone]);
+    const [phoneExists] = await db.query(SQL.select_users_08, [phone]);
     if (phoneExists.length) return res.status(400).json({ error: 'Этот номер телефона уже используется.' });
 
     const base = (email || '').split('@')[0] || 'user';
@@ -487,8 +503,7 @@ app.post('/api/register-email', async (req, res) => {
     const password_hash = await bcrypt.hash(password, 10);
 
     const [result] = await db.query(
-      `INSERT INTO users (first_name, last_name, username, password_hash, phone, email)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      SQL.insert_general_02,
       [firstName, lastName, username, password_hash, phone, email]
     );
 
@@ -504,7 +519,7 @@ app.post('/api/login-email', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Укажите email и пароль.' });
 
-    const [rows] = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+    const [rows] = await db.query(SQL.select_users_02, [email]);
     const userRow = rows?.[0];
     if (!userRow) return res.status(400).json({ error: 'Неверный email или пароль.' });
 
@@ -534,10 +549,10 @@ app.post('/api/register-email/start', async (req, res) => {
 
     if (!firstName || !email) return res.status(400).json({ error: 'Заповніть всі поля!!!' });
 
-    const [[e1]] = await db.query('SELECT id FROM users WHERE email=? LIMIT 1',[email]);
+    const [[e1]] = await db.query(SQL.select_users_09,[email]);
     if (e1) return res.status(400).json({ error: 'Користувач з таким email вже існує.' });
     if (phone) {
-      const [[p1]] = await db.query('SELECT id FROM users WHERE phone=? LIMIT 1',[phone]);
+      const [[p1]] = await db.query(SQL.select_users_10,[phone]);
       if (p1) return res.status(400).json({ error: 'Цей номер теелфону вже використовується' });
     }
 
@@ -547,9 +562,7 @@ app.post('/api/register-email/start', async (req, res) => {
     console.log('[OTP start]', email, code, sha256(code));
 
     await db.query(
-      `INSERT INTO email_otps (email, code_hash, expires_at)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE code_hash=VALUES(code_hash), expires_at=VALUES(expires_at), created_at=CURRENT_TIMESTAMP`,
+      SQL.insert_general_03,
       [email, hash, expiresAt]
     );
 
@@ -577,13 +590,13 @@ app.post('/api/register-email/verify', async (req, res) => {
 
     if (!email || !/^\d{6}$/.test(code)) return res.status(400).json({ error: 'Некоректний код' });
 
-    const [[row]] = await db.query('SELECT * FROM email_otps WHERE email=? LIMIT 1', [email]);
+    const [[row]] = await db.query(SQL.select_email_otps, [email]);
     console.log('[OTP verify] row', row?.email, row?.code_hash);
     if (!row) return res.status(400).json({ error: 'Код не запрошений або прострочений' });
     if (new Date(row.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Код прострочений' });
     if (sha256(code) !== row.code_hash) return res.status(400).json({ error: 'Невірний код' });
 
-    await db.query('DELETE FROM email_otps WHERE email=?', [email]);
+    await db.query(SQL.delete_email_otps, [email]);
 
     const reg_token = jwt.sign({ email, stage: 'finish-allowed' }, jwtRegSecret, { expiresIn: '15m' });
     res.json({ ok: true, reg_token });
@@ -606,7 +619,7 @@ app.post('/api/register-email/finish', async (req, res) => {
     }
 
     const email = payload.email;
-    const [[exists]] = await db.query('SELECT id FROM users WHERE email=? LIMIT 1', [email]);
+    const [[exists]] = await db.query(SQL.select_users_09, [email]);
     if (exists) return res.status(400).json({ error: 'Email вже використовується' });
 
     const first_name = payload.firstName || '';
@@ -618,8 +631,7 @@ app.post('/api/register-email/finish', async (req, res) => {
     const password_hash = await bcrypt.hash(password, 10);
 
     const [ins] = await db.query(
-      `INSERT INTO users (first_name, last_name, username, password_hash, phone, email)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      SQL.insert_general_02,
       [first_name, last_name, username, password_hash, phone, email]
     );
 
@@ -646,9 +658,7 @@ app.post('/api/auth/google/start', async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.query(
-      `INSERT INTO email_otps (email, code_hash, expires_at)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP`,
+      SQL.insert_general_04,
       [email, hash, expiresAt]
     );
 
@@ -668,13 +678,13 @@ app.post('/api/auth/google/verify', async (req, res) => {
     const email = payload.email;
     if (!email) return res.status(400).json({ error: 'Email не найден в токене' });
 
-    const [rows] = await db.query('SELECT * FROM email_otps WHERE email = ? LIMIT 1', [email]);
+    const [rows] = await db.query(SQL.select_email_otps_02, [email]);
     const row = rows?.[0];
     if (!row) return res.status(400).json({ error: 'Код не запрошен или истёк' });
     if (new Date(row.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Код истёк, запросите новый' });
     if (sha256(code) !== row.code_hash) return res.status(400).json({ error: 'Неверный код' });
 
-    await db.query('DELETE FROM email_otps WHERE email = ?', [email]);
+    await db.query(SQL.delete_email_otps_02, [email]);
 
     let user = await findUserByEmail(email);
     if (!user) {
@@ -704,7 +714,7 @@ app.post('/api/me/update-phone', requireAuth, async (req, res) => {
 
     phone = normalizePhone(phone);
 
-    const [exists] = await db.query('SELECT id FROM users WHERE phone = ? AND id <> ? LIMIT 1', [phone, req.user.id]);
+    const [exists] = await db.query(SQL.select_users_11, [phone, req.user.id]);
     if (exists.length) return res.status(400).json({ error: 'Этот номер уже привязан к другому аккаунту' });
 
     if (password && password.length < 6) {
@@ -713,9 +723,9 @@ app.post('/api/me/update-phone', requireAuth, async (req, res) => {
 
     if (password) {
       const password_hash = await bcrypt.hash(password, 10);
-      await db.query('UPDATE users SET phone = ?, password_hash = ? WHERE id = ?', [phone, password_hash, req.user.id]);
+      await db.query(SQL.update_general, [phone, password_hash, req.user.id]);
     } else {
-      await db.query('UPDATE users SET phone = ? WHERE id = ?', [phone, req.user.id]);
+      await db.query(SQL.update_general_02, [phone, req.user.id]);
     }
 
     res.json({ ok: true, phone });
@@ -733,7 +743,7 @@ app.post('/api/auth/phone/start', async (req, res) => {
     const user = await findUserByPhone(phone);
     if (!user) return res.status(404).json({ error: 'Этот номер не привязан ни к одному аккаунту' });
 
-    const [last] = await db.query('SELECT created_at FROM phone_otps WHERE phone=?', [phone]);
+    const [last] = await db.query(SQL.select_phone_otps, [phone]);
     if (last.length) {
       const lastTs = new Date(last[0].created_at).getTime();
       if (Date.now() - lastTs < 30 * 1000) {
@@ -746,9 +756,7 @@ app.post('/api/auth/phone/start', async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.query(
-      `INSERT INTO phone_otps (phone, code_hash, expires_at)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP`,
+      SQL.insert_general_05,
       [phone, hash, expiresAt]
     );
 
@@ -765,13 +773,13 @@ app.post('/api/auth/phone/verify', async (req, res) => {
     phone = normalizePhone(phone);
     if (!phone || !code) return res.status(400).json({ error: 'Укажите телефон и код' });
 
-    const [rows] = await db.query('SELECT * FROM phone_otps WHERE phone = ? LIMIT 1', [phone]);
+    const [rows] = await db.query(SQL.select_phone_otps_02, [phone]);
     const row = rows?.[0];
     if (!row) return res.status(400).json({ error: 'Код не запрошен или истёк' });
     if (new Date(row.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Код истёк, запросите новый' });
     if (sha256(code) !== row.code_hash) return res.status(400).json({ error: 'Неверный код' });
 
-    await db.query('DELETE FROM phone_otps WHERE phone = ?', [phone]);
+    await db.query(SQL.delete_phone_otps, [phone]);
 
     const user = await findUserByPhone(phone);
     if (!user) return res.status(404).json({ error: 'Аккаунт не найден' });
@@ -799,10 +807,10 @@ app.post('/api/me/update-profile', requireAuth, async (req, res) => {
     if (!first_name || !last_name || !email) {
       return res.status(400).json({ error: 'Имя, фамилия и email обязательны' });
     }
-    const [exists] = await db.query('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1', [email, req.user.id]);
+    const [exists] = await db.query(SQL.select_users_12, [email, req.user.id]);
     if (exists.length) return res.status(400).json({ error: 'Этот email уже используется' });
 
-    await db.query('UPDATE users SET first_name=?, last_name=?, email=?, contact_email=? WHERE id=?', [ first_name, last_name, email, contact_email || null, req.user.id ]);
+    await db.query(SQL.update_general_03, [ first_name, last_name, email, contact_email || null, req.user.id ]);
 
     const user = await getUserById(req.user.id);
     res.json({ ok: true, user });
@@ -814,7 +822,7 @@ app.post('/api/me/update-profile', requireAuth, async (req, res) => {
 app.get('/api/me', (req, res) => { res.json({ user: req.user || null }); });
 app.post('/api/logout', (req, res) => { res.clearCookie('token'); res.json({ success: true }); });
 app.post('/api/heartbeat', requireAuth, async (req, res) => {
-  try { await db.query('UPDATE users SET last_seen_at = NOW() WHERE id = ?', [req.user.id]); res.json({ ok: true }); }
+  try { await db.query(SQL.update_general_04, [req.user.id]); res.json({ ok: true }); }
   catch { res.status(500).json({ ok: false }); }
 });
 
@@ -829,17 +837,17 @@ app.post('/api/chats/start', requireAuth, async (req, res) => {
     if (!seller_id || seller_id === buyer_id) {
       return res.status(400).json({ error: 'Некорректный продавец' });
     }
-    const [se] = await db.query('SELECT id FROM users WHERE id=? LIMIT 1', [seller_id]);
+    const [se] = await db.query(SQL.select_users_13, [seller_id]);
     if (!se.length) return res.status(404).json({ error: 'Продавец не найден' });
 
     const [ex] = await db.query(
-      'SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',
+      SQL.select_chat_threads,
       [seller_id, buyer_id]
     );
     if (ex.length) return res.json({ id: ex[0].id });
 
-    await db.query('INSERT IGNORE INTO chat_threads (seller_id, buyer_id) VALUES (?, ?)', [seller_id, buyer_id]);
-    const [rows] = await db.query('SELECT id FROM chat_threads WHERE seller_id=? AND buyer_id=? LIMIT 1',[seller_id, buyer_id]);
+    await db.query(SQL.insert_general_06, [seller_id, buyer_id]);
+    const [rows] = await db.query(SQL.select_chat_threads,[seller_id, buyer_id]);
     if (!rows.length) return res.status(500).json({ error: 'Не удалось создать чат' });
     return res.json({ id: rows[0].id });
   } catch (e) {
@@ -854,7 +862,7 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
     const me = req.user.id;
     const body = String(req.body?.body || '').trim();
 
-    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1', [threadId]);
+    const [[t]] = await db.query(SQL.select_chat_threads_02, [threadId]);
     if (!t) return res.status(404).json({ error: 'Диалог не найден' });
     if (t.seller_id !== me && t.buyer_id !== me) {
       return res.status(403).json({ error: 'Нет доступа к диалогу' });
@@ -871,8 +879,7 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
 
     if (body && !files.length) {
       const [r] = await db.query(
-        `INSERT INTO chat_messages (thread_id, sender_id, body)
-         VALUES (?, ?, ?)`,
+        SQL.insert_general_07,
         [threadId, me, body]
       );
       created.push({ id: r.insertId, body });
@@ -886,9 +893,7 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
       const attachSize = f.size || null;
       const thisBody = (i === 0 ? body : '');
       const [r2] = await db.query(
-        `INSERT INTO chat_messages
-           (thread_id, sender_id, body, attachment_url, attachment_type, attachment_name, attachment_size)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        SQL.insert_general_08,
         [threadId, me, thisBody, attachUrl, attachType, attachName, attachSize]
       );
       created.push({ id: r2.insertId, body: thisBody, attachment_url: attachUrl, attachment_type: attachType, attachment_name: attachName, attachment_size: attachSize });
@@ -902,9 +907,9 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
 
     if (receiverMuted) {
       if (receiver === t.seller_id) {
-        await db.query(`UPDATE chat_threads SET muted_unread_seller = muted_unread_seller + ? WHERE id=?`, [created.length, threadId]);
+        await db.query(SQL.update_general_05, [created.length, threadId]);
       } else {
-        await db.query(`UPDATE chat_threads SET muted_unread_buyer = muted_unread_buyer + ? WHERE id=?`, [created.length, threadId]);
+        await db.query(SQL.update_general_06, [created.length, threadId]);
       }
     } else {
       _emitTo(req, receiver, 'chat:message', { thread_id: threadId, items: created });
@@ -932,11 +937,11 @@ app.post('/api/chats/:id/archive', requireAuth, async (req,res)=>{
     const threadId = Number(req.params.id);
     const me = req.user.id;
     const { archive } = req.body;
-    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
+    const [[t]] = await db.query(SQL.select_chat_threads_02,[threadId]);
     if (!t) return res.status(404).json({error:'Диалог не найден'});
     const cols = sideColumns(me, t);
     if (!cols) return res.status(403).json({error:'Нет доступа'});
-    await db.query(`UPDATE chat_threads SET ${cols.archived}=? WHERE id=?`, [archive?1:0, threadId]);
+    await db.query(SQL.update_general_07, [archive?1:0, threadId]);
     res.json({ ok:true, archived: !!archive });
   } catch(e){ console.error('archive', e); res.status(500).json({error:'Server error'}); }
 });
@@ -945,12 +950,12 @@ app.post('/api/chats/:id/mute', requireAuth, async (req,res)=>{
     const threadId = Number(req.params.id);
     const me = req.user.id;
     const { mute } = req.body;
-    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
+    const [[t]] = await db.query(SQL.select_chat_threads_02,[threadId]);
     if (!t) return res.status(404).json({error:'Диалог не найден'});
     const cols = sideColumns(me, t);
     if (!cols) return res.status(403).json({error:'Нет доступа'});
-    await db.query(`UPDATE chat_threads SET ${cols.muted}=? WHERE id=?`, [mute?1:0, threadId]);
-    if (!mute) { await db.query(`UPDATE chat_threads SET ${cols.muted_unread}=0 WHERE id=?`, [threadId]); }
+    await db.query(SQL.update_general_08, [mute?1:0, threadId]);
+    if (!mute) { await db.query(SQL.update_general_09, [threadId]); }
     res.json({ ok:true, muted: !!mute });
   } catch(e){ console.error('mute', e); res.status(500).json({error:'Server error'}); }
 });
@@ -959,11 +964,11 @@ app.post('/api/chats/:id/block', requireAuth, async (req,res)=>{
     const threadId = Number(req.params.id);
     const me = req.user.id;
     const { block } = req.body;
-    const [[t]] = await db.query('SELECT * FROM chat_threads WHERE id=? LIMIT 1',[threadId]);
+    const [[t]] = await db.query(SQL.select_chat_threads_02,[threadId]);
     if (!t) return res.status(404).json({error:'Диалог не найден'});
     const cols = sideColumns(me, t);
     if (!cols) return res.status(403).json({error:'Нет доступа'});
-    await db.query(`UPDATE chat_threads SET ${cols.blocked}=? WHERE id=?`, [block?1:0, threadId]);
+    await db.query(SQL.update_general_10, [block?1:0, threadId]);
     res.json({ ok:true, blocked: !!block });
   } catch(e){ console.error('block', e); res.status(500).json({error:'Server error'}); }
 });
@@ -971,12 +976,7 @@ app.get('/api/chats/unread-count', requireAuth, async (req, res) => {
   try {
     const me = req.user.id;
     const [[{ c }]] = await db.query(
-      `SELECT COUNT(*) AS c
-         FROM chat_messages m
-         JOIN chat_threads t ON t.id=m.thread_id
-        WHERE (t.seller_id=? OR t.buyer_id=?)
-          AND m.sender_id<>?
-          AND m.read_at IS NULL`,
+      SQL.select_chat_messages,
       [me, me, me]
     );
     res.json({ count: c });
@@ -990,16 +990,12 @@ app.get('/api/chats/:id/messages', requireAuth, async (req, res) => {
     const threadId = Number(req.params.id);
     const me = req.user.id;
     const [[thread]] = await db.query(
-      'SELECT * FROM chat_threads WHERE id=? AND (seller_id=? OR buyer_id=?)',
+      SQL.select_chat_threads_03,
       [threadId, me, me]
     );
     if (!thread) return res.status(404).json({ error: 'Диалог не найден' });
     const [items] = await db.query(
-      `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
-              attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
-       FROM chat_messages
-       WHERE thread_id=?
-       ORDER BY created_at ASC`,
+      SQL.select_chat_messages_02,
       [threadId]
     );
     res.json({ thread, items });
@@ -1014,19 +1010,14 @@ app.patch('/api/messages/:id', requireAuth, async (req, res) => {
     const me = req.user.id;
     const body = String(req.body?.body || '').trim();
     const [[m]] = await db.query(
-      `SELECT m.*, t.seller_id, t.buyer_id
-       FROM chat_messages m
-       JOIN chat_threads t ON t.id = m.thread_id
-       WHERE m.id=? LIMIT 1`, [id]
+      SQL.select_chat_messages_03, [id]
     );
     if (!m) return res.status(404).json({ error: 'Сообщение не найдено' });
     if (m.sender_id !== me) return res.status(403).json({ error: 'Можно редактировать только свои сообщения' });
     if (m.deleted_at) return res.status(400).json({ error: 'Сообщение удалено' });
-    await db.query(`UPDATE chat_messages SET body=?, edited_at=NOW() WHERE id=?`, [body, id]);
+    await db.query(SQL.update_general_11, [body, id]);
     const [[updated]] = await db.query(
-      `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
-              attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
-       FROM chat_messages WHERE id=?`, [id]
+      SQL.select_chat_messages_04, [id]
     );
     _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
     _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
@@ -1041,10 +1032,7 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
     const id = Number(req.params.id);
     const me = req.user.id;
     const [[m]] = await db.query(
-      `SELECT m.*, t.seller_id, t.buyer_id
-       FROM chat_messages m
-       JOIN chat_threads t ON t.id = m.thread_id
-       WHERE m.id=? LIMIT 1`, [id]
+      SQL.select_chat_messages_03, [id]
     );
     if (!m) return res.status(404).json({ error: 'Сообщение не найдено' });
     if (m.sender_id !== me) return res.status(403).json({ error: 'Можно удалять только свои сообщения' });
@@ -1059,21 +1047,11 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
       });
     }
     await db.query(
-      `UPDATE chat_messages
-         SET attachment_url=NULL,
-             attachment_type=NULL,
-             attachment_name=NULL,
-             attachment_size=NULL,
-             edited_at=NULL,
-             deleted_at=NOW(),
-             body=''
-       WHERE id=?`,
+      SQL.update_general_12,
       [id]
     );
     const [[updated]] = await db.query(
-      `SELECT id, thread_id, sender_id, body, attachment_url, attachment_type,
-              attachment_name, attachment_size, created_at, read_at, edited_at, deleted_at
-       FROM chat_messages WHERE id=?`, [id]
+      SQL.select_chat_messages_04, [id]
     );
     _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
     _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
@@ -1087,7 +1065,7 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
 /* ===== Categories & Products ===== */
 app.get('/api/categories', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, name FROM categories ORDER BY name ASC');
+    const [rows] = await db.query(SQL.select_categories);
     res.json({ items: rows });
   } catch (e) {
     console.error('GET /api/categories error:', e);
@@ -1100,8 +1078,8 @@ app.post('/admin/categories', requireAuth, requireAdmin, async (req, res) => {
     name = (name || '').toString().trim();
     if (!name) return res.status(400).json({ message: 'Название категории обязательно' });
     if (name.length > 100) return res.status(400).json({ message: 'Слишком длинное название' });
-    await db.query('INSERT INTO categories (name) VALUES (?)', [name]);
-    const [rows] = await db.query('SELECT id, name FROM categories WHERE name = ? LIMIT 1', [name]);
+    await db.query(SQL.insert_general_09, [name]);
+    const [rows] = await db.query(SQL.select_categories_02, [name]);
     res.status(201).json({ item: rows[0] });
   } catch (e) {
     if (e?.code === 'ER_DUP_ENTRY') {
@@ -1151,7 +1129,7 @@ app.get('/api/products', listProducts);
 async function isCategoryExists(name) {
   const cat = String(name || '').trim();
   if (!cat) return false;
-  const [rows] = await db.query('SELECT id FROM categories WHERE name = ? LIMIT 1', [cat]);
+  const [rows] = await db.query(SQL.select_categories_03, [cat]);
   return rows.length > 0;
 }
 const createProduct = async (req, res) => {
@@ -1177,8 +1155,7 @@ const createProduct = async (req, res) => {
       }
     }
     const [result] = await db.query(
-      `INSERT INTO products (seller_id, title, description, price, qty, category, status, preview_image_url, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, 'active', ?, NOW())`,
+      SQL.insert_general_10,
       [req.user.id, title, description || null, p, q, cat, preview]
     );
     const newId = result.insertId;
@@ -1205,10 +1182,7 @@ app.post('/api/products', requireAuth, requireApprovedSeller, createProduct);
 app.get('/api/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT p.id, p.title, p.description, p.price, p.qty, p.category, p.status, p.created_at, p.preview_image_url
-       FROM products p
-       WHERE p.seller_id = ?
-       ORDER BY p.created_at DESC`,
+      SQL.select_products,
       [req.user.id]
     );
     res.json({ items: rows });
@@ -1220,10 +1194,7 @@ app.get('/api/my/products', requireAuth, requireApprovedSeller, async (req, res)
 app.get('/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT p.id, p.title, p.description, p.price, p.qty, p.category, p.status, p.created_at, p.preview_image_url
-       FROM products p
-       WHERE p.seller_id = ?
-       ORDER BY p.created_at DESC`,
+      SQL.select_products,
       [req.user.id]
     );
     res.json({ items: rows });
@@ -1244,8 +1215,7 @@ app.put('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res
       }
     }
     const [result] = await db.query(
-      `UPDATE products SET title = ?, description = ?, price = ?, qty = ?, category = ?
-       WHERE id = ? AND seller_id = ?`,
+      SQL.update_general_13,
       [title, description, price, qty, cat, id, req.user.id]
     );
     if (result.affectedRows === 0) {
@@ -1260,7 +1230,7 @@ app.put('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res
 app.delete('/api/products/:id', requireAuth, requireApprovedSeller, async (req, res) => {
   const { id } = req.params;
   try {
-    const [result] = await db.query(`DELETE FROM products WHERE id = ? AND seller_id = ?`, [id, req.user.id]);
+    const [result] = await db.query(SQL.delete_products, [id, req.user.id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Товар не найден' });
     }
@@ -1280,17 +1250,16 @@ app.delete('/admin/products/:id', requireAuth, requireAdmin, async (req, res) =>
   try {
     await conn.beginTransaction();
     const [rows] = await conn.query(
-      `SELECT id, seller_id, title, price, category FROM products WHERE id = ?`,
+      SQL.select_products_02,
       [productId]
     );
     const prod = rows[0];
     if (!prod) { await conn.rollback(); return res.status(404).json({ message: 'Товар не найден' }); }
     await conn.query(
-      `INSERT INTO product_deletions (product_id, seller_id, title, price, category, admin_id, reason)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      SQL.insert_general_11,
       [prod.id, prod.seller_id, prod.title, prod.price, prod.category, req.user.id, String(reason).trim()]
     );
-    const [delRes] = await conn.query(`DELETE FROM products WHERE id = ?`, [productId]);
+    const [delRes] = await conn.query(SQL.delete_products_02, [productId]);
     if (delRes.affectedRows === 0) { await conn.rollback(); return res.status(409).json({ message: 'Не удалось удалить (возможно, уже удалён)' }); }
     await conn.commit();
     res.json({ ok: true });
@@ -1409,19 +1378,11 @@ app.post('/api/products/:id/reviews', requireAuth, async (req, res) => {
   comment = (comment ?? '').toString().trim() || null;
   try {
     await db.query(
-      `INSERT INTO product_reviews (product_id, user_id, rating, comment)
-       VALUES (?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE rating=VALUES(rating), comment=VALUES(comment), updated_at=CURRENT_TIMESTAMP`,
+      SQL.insert_general_12,
       [productId, req.user.id, rating, comment]
     );
     const [rows] = await db.query(
-      `SELECT r.id, r.rating, r.comment, r.created_at, r.updated_at, r.user_id,
-              TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name, u.username
-       FROM product_reviews r
-       JOIN users u ON u.id = r.user_id
-       WHERE r.product_id = ? AND r.user_id = ?
-       ORDER BY r.updated_at DESC, r.id DESC
-       LIMIT 1`,
+      SQL.select_product_reviews_02,
       [productId, req.user.id]
     );
     return res.status(201).json({ item: rows[0] });
@@ -1456,9 +1417,7 @@ app.post('/api/cart', requireAuth, async (req, res) => {
   if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid product_id' });
   try {
     await db.query(
-      `INSERT INTO cart_items (user_id, product_id, qty)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at = CURRENT_TIMESTAMP`,
+      SQL.insert_general_13,
       [req.user.id, pid, q]
     );
     res.status(201).json({ ok: true });
@@ -1473,10 +1432,10 @@ app.patch('/api/cart/:productId', requireAuth, async (req, res) => {
   if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid id' });
   try {
     if (!Number.isInteger(q) || q <= 0) {
-      await db.query(`DELETE FROM cart_items WHERE user_id=? AND product_id=?`, [req.user.id, pid]);
+      await db.query(SQL.delete_cart_items, [req.user.id, pid]);
       return res.json({ ok: true, removed: true });
     }
-    await db.query(`UPDATE cart_items SET qty=?, updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND product_id=?`, [q, req.user.id, pid]);
+    await db.query(SQL.update_general_14, [q, req.user.id, pid]);
     res.json({ ok: true });
   } catch (e) {
     console.error('PATCH /api/cart/:productId error', e);
@@ -1487,7 +1446,7 @@ app.delete('/api/cart/:productId', requireAuth, async (req, res) => {
   const pid = Number(req.params.productId);
   if (!Number.isFinite(pid)) return res.status(400).json({ message: 'Invalid id' });
   try {
-    await db.query(`DELETE FROM cart_items WHERE user_id=? AND product_id=?`, [req.user.id, pid]);
+    await db.query(SQL.delete_cart_items, [req.user.id, pid]);
     res.json({ ok: true });
   } catch (e) {
     console.error('DELETE /api/cart/:productId error', e);
@@ -1506,21 +1465,19 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
   }
   try {
     const [cart] = await db.query(
-      `SELECT ci.product_id, ci.qty, p.price
-       FROM cart_items ci JOIN products p ON p.id = ci.product_id
-       WHERE ci.user_id = ?`, [req.user.id]
+      SQL.select_cart_items_02, [req.user.id]
     );
     if (!cart || cart.length === 0) {
       return res.status(400).json({ message: 'Корзина пуста' });
     }
     const total = cart.reduce((s, row) => s + Number(row.price) * Number(row.qty), 0);
-    const [insOrder] = await db.query(`INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, 'created')`,
+    const [insOrder] = await db.query(SQL.insert_general_14,
       [req.user.id, total.toFixed(2)]
     );
     const orderId = insOrder.insertId;
     const values = cart.map(r => [orderId, r.product_id, r.qty, r.price]);
-    await db.query(`INSERT INTO order_items (order_id, product_id, qty, price) VALUES ?`, [values]);
-    await db.query(`INSERT INTO order_addresses (order_id, country, city, street, postal_code) VALUES (?, ?, ?, ?, ?)`,
+    await db.query(SQL.insert_general_15, [values]);
+    await db.query(SQL.insert_general_16,
       [orderId, country, city, street, postal]
     );
     const cardNumber = (payment?.cardNumber || '').replace(/\s+/g, '');
@@ -1532,11 +1489,11 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
     }
     const last4 = cardNumber.slice(-4);
     const brand = detectBrand(cardNumber);
-    await db.query(`UPDATE orders SET status='paid' WHERE id=?`, [orderId]);
-    await db.query(`INSERT INTO payments (order_id, provider, brand, last4, status) VALUES (?, 'demo', ?, ?, 'succeeded')`,
+    await db.query(SQL.update_general_15, [orderId]);
+    await db.query(SQL.insert_general_17,
       [orderId, brand, last4]
     );
-    await db.query(`DELETE FROM cart_items WHERE user_id=?`, [req.user.id]);
+    await db.query(SQL.delete_cart_items_02, [req.user.id]);
     res.status(201).json({ ok: true, order_id: orderId, total, brand, last4 });
   } catch (e) {
     console.error('POST /api/checkout error', e);
@@ -1565,7 +1522,7 @@ function detectBrand(n) {
   try {
     const [c1] = await db.query("SHOW COLUMNS FROM users LIKE 'last_seen_at'");
     if (!c1.length) {
-      await db.query("ALTER TABLE users ADD COLUMN last_seen_at DATETIME NULL, ADD INDEX idx_last_seen (last_seen_at)");
+      await db.query(SQL.alter_general_07);
       console.log('✅ added users.last_seen_at');
     }
   } catch (e) { console.error('ensure last_seen_at error:', e.message || e); }
@@ -1612,24 +1569,16 @@ app.get('/api/users/:id/public', async (req, res) => {
   const userId = Number(req.params.id);
   try {
     const [rows] = await db.query(
-      `SELECT id, first_name, last_name, contact_email, avatar_url, last_seen_at
-         FROM users WHERE id=? LIMIT 1`, [userId]
+      SQL.select_users_14, [userId]
     );
     if (!rows.length) return res.status(404).json({ message: 'User not found' });
     const u = rows[0];
     const [[r1]] = await db.query(
-      `SELECT ROUND(AVG(r.rating), 2) AS rating
-         FROM product_reviews r
-         JOIN products p ON p.id = r.product_id
-        WHERE p.seller_id = ?`,
+      SQL.select_product_reviews_03,
       [userId]
     );
     const [[r2]] = await db.query(
-      `SELECT COALESCE(SUM(oi.qty),0) AS soldCount
-         FROM order_items oi
-         JOIN orders o   ON o.id = oi.order_id
-         JOIN products p ON p.id = oi.product_id
-        WHERE p.seller_id = ? AND o.status IN ('paid','completed')`,
+      SQL.select_order_items,
       [userId]
     );
     const online = req.app?.locals?.isOnline ? req.app.locals.isOnline(userId) : false;
@@ -1722,7 +1671,7 @@ const PORT = process.env.PORT || 5050;
 app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
   try {
     const url = `/uploads/avatars/${req.file.filename}`;
-    await db.query('UPDATE users SET avatar_url=? WHERE id=?', [url, req.user.id]);
+    await db.query(SQL.update_general_16, [url, req.user.id]);
     res.json({ url });
   } catch (e) {
     console.error('avatar upload error:', e);

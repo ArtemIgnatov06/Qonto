@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 // если стили лежат рядом со страницей, лучше: './vacancies.css'
 import '../html/vacancy.css';
+import arrowIcon from '../assets/planex.png';
 
 export default function Vacancies() {
   const [html, setHtml] = useState('<p>Завантаження…</p>');
@@ -49,8 +50,8 @@ export default function Vacancies() {
     <main className="page vacancy-page">
       <div className="vacancy-container">
         <div className="vacancy-hero">
-          <span className="vacancy-hero__icon" aria-hidden="true">
-            ➤
+          <span className="return-hero__icon" aria-hidden="true">
+            <img src={arrowIcon} alt="" className="page-arrow" />
           </span>
           <h1 className="vacancy-hero__title">Вакансії</h1>
         </div>
