@@ -8,6 +8,7 @@ import '../App.css';
 import '../Styles/Home.css';
 import { catalogItems } from '../data/catalogItems'; // путь подправь под свой
 import BannerCarousel from '../Components/BannerCarousel';
+import * as WL from '../lib/wishlist.js'; // ✅ добавили библиотеку вишлиста
 
 const API = process.env.REACT_APP_API || '';
 
@@ -89,8 +90,18 @@ export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // локальные состояния UI
-  const [favIds, setFavIds] = useState(() => new Set());
+  // ✅ Избранное: берём из localStorage через wishlist.js и держим синхронно
+  const [favIds, setFavIds] = useState(() => new Set(WL.getIds()));
+  useEffect(() => {
+    const sync = () => setFavIds(new Set(WL.getIds()));
+    sync();
+    window.addEventListener('wishlist:changed', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('wishlist:changed', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
 
   // фильтры (правая панель)
   const [flt, setFlt] = useState({
@@ -285,9 +296,7 @@ export default function Home() {
     }
   };
 
-
-  
-return (
+  return (
   <div className="page page-home" style={{ paddingRight: 0 }}>
     {loading && <p className="text-muted">{t('common.loading')}</p>}
     {error && <p className="text-danger">{t('home.errors.loadFailed')}: {error}</p>}
@@ -383,11 +392,8 @@ return (
                         aria-label={t('favorites', 'В обране')}
                         onClick={(e) => {
                           e.preventDefault();
-                          setFavIds(prev => {
-                            const n = new Set(prev);
-                            if (n.has(p.id)) n.delete(p.id); else n.add(p.id);
-                            return n;
-                          });
+                          // ✅ используем wishlist.js — он сохранит в localStorage и разошлет событие
+                          WL.toggle(p);
                         }}
                       >
                         <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -412,12 +418,12 @@ return (
                           <mask id={`cart-${p.id}`} fill="white">
                             <path d="M16 16.5C14.89 16.5 14 17.39 14 18.5C14 19.0304 14.2107 19.5391 14.5858 19.9142C14.9609 20.2893 15.4696 20.5 16 20.5C16.5304 20.5 17.0391 20.2893 17.4142 19.9142C17.7893 19.5391 18 19.0304 18 18.5C18 17.9696 17.7893 17.4609 17.4142 17.0858C17.0391 16.7107 16.5304 16.5 16 16.5ZM0 0.5V2.5H2L5.6 10.09L4.24 12.54C4.09 12.82 4 13.15 4 13.5C4 14.0304 4.21071 14.5391 4.58579 14.9142C4.96086 15.2893 5.46957 15.5 6 15.5H18V13.5H6.42C6.3537 13.5 6.29011 13.4737 6.24322 13.4268C6.19634 13.3799 6.17 13.3163 6.17 13.25C6.17 13.2 6.18 13.16 6.2 13.13L7.1 11.5H14.55C15.3 11.5 15.96 11.08 16.3 10.47L19.88 4C19.95 3.84 20 3.67 20 3.5C20 3.23478 19.8946 2.98043 19.7071 2.79289C19.5196 2.60536 19.2652 2.5 19 2.5H4.21L3.27 0.5M6 16.5C4.89 16.5 4 17.39 4 18.5C4 19.0304 4.21071 19.5391 4.58579 19.9142C4.96086 15.2893 5.46957 15.5 6 15.5C6.53043 15.5 7.03914 15.5 7.41421 19.9142C7.78929 19.5391 8 19.0304 8 18.5C8 17.9696 7.78929 17.4609 7.41421 17.0858C7.03914 16.7107 6.53043 16.5 6 16.5Z"/>
                           </mask>
-                          <path d="M3.27 0.5V-0.25H0V0.5V1.25H3.27V0.5Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
+                          <path d="M3.27 0.5V-0.25H0V0.5V1.25H3.27В0.5Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
                           <path d="M20 15.5H18V13.5H20V15.5Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
                           <path d="M18 13.5V15.5H6V13.5H18Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
-                          <path d="M4 18.5C4 17.39 4.89 16.5 6 16.5V18C5.71843 18 5.5 18.2184 5.5 18.5H4Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
-                          <path d="M14 18.5C14 17.39 14.89 16.5 16 16.5V18C15.7184 18 15.5 18.2184 15.5 18.5H14Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
-                          <path d="M19 2.5H4.21L3.27 0.5H0V2.5H2L5.6 10.09L4.24 12.54C4.09 12.82 4 13.15 4 13.5C4 14.0304 4.21071 14.5391 4.58579 14.9142C4.96086 15.2893 5.46957 15.5 6 15.5H18V13.5H6.42C6.3537 13.5 6.29011 13.4737 6.24322 13.4268C6.19634 13.3799 6.17 13.3163 6.17 13.25C6.17 13.2 6.18 13.16 6.2 13.13L7.1 11.5H14.55C15.3 11.5 15.96 11.08 16.3 10.47L19.88 4C19.95 3.84 20 3.67 20 3.5C20 3.23478 19.8946 2.98043 19.7071 2.79289C19.5196 2.60536 19.2652 2.5 19 2.5Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
+                          <path d="M4 18.5C4 17.39 4.89 16.5 6 16.5V18C5.71843 18 5.5 18.2184 5.5 18.5H4З" fill="#35C65E" mask={`url(#cart-${p.id})`} />
+                          <path d="M14 18.5C14 17.39 14.89 16.5 16 16.5V18C15.7184 18 15.5 18.2184 15.5 18.5H14З" fill="#35C65E" mask={`url(#cart-${p.id})`} />
+                          <path d="M19 2.5H4.21L3.27 0.5H0V2.5H2L5.6 10.09L4.24 12.54C4.09 12.82 4 13.15 4 13.5C4 14.0304 4.21071 14.5391 4.58579 14.9142C4.96086 15.2893 5.46957 15.5 6 15.5H18V13.5H6.42C6.3537 13.5 6.29011 13.4737 6.24322 13.4268C6.19634 13.3799 6.17 13.3163 6.17 13.25C6.17 13.2 6.18 13.16 6.2 13.13L7.1 11.5H14.55C15.3 11.5 15.96 11.08 16.3 10.47L19.88 4C19.95 3.84 20 3.67 20 3.5C20 3.23478 19.8946 2.98043 19.7071 2.79289C19.5196 2.60536 19.2652 2.5 19 2.5H4.21L3.27 0.5M6 16.5C4.89 16.5 4 17.39 4 18.5C4 19.0304 4.21071 19.5391 4.58579 19.9142C4.96086 15.2893 5.46957 15.5 6 15.5H18V13.5H6.42Z" fill="#35C65E" mask={`url(#cart-${p.id})`} />
                         </svg>
                       </button>
                     </div>
