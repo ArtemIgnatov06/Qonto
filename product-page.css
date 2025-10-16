@@ -1694,6 +1694,114 @@ body.no-scroll{ overflow:hidden; }
   border-color: #2fb357;
 }
 
+.report-open{
+  position:absolute;
+  left:1253px; top:249px;
+  width:21px; height:21px;
+  padding:0; background:transparent; border:0; cursor:pointer;
+}
+.report-open__ico{
+  position:absolute; right:0; top:0;
+  width:21px; height:21px; object-fit:contain; display:block;
+}
+.report-open::after{ /* «Vector» сірий фон-колір іконки з макета */
+  content:""; position:absolute;
+  left:8.33%; right:8.33%; top:8.33%; bottom:8.33%;
+  background:#828181; border-radius:2px; filter:opacity(0.0001); /* декоративно */
+}
+
+.report-toast{
+  position: fixed;
+  left: 50%; transform: translateX(-50%);
+  top: 155px;
+  width: 469px; height: 64px;
+  z-index: 3000;
+  opacity: 1;
+  transition: opacity .25s ease, transform .25s ease;
+  will-change: opacity, transform;
+}
+.report-toast[hidden]{ display:none; }
+.report-toast__box{
+  position:absolute; left:0; top:0;
+  width:469px; height:64px; background:#FFFFFF; border-radius:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+.report-toast__text{
+  position:absolute; left:596px; top:175px; /* макетні координати в межах сторінки */
+  transform:translateX(calc(-596px + 16px)) translateY(calc(-175px + 20px));
+  width:363px; height:24px;
+  font:400 18px/24px "Ubuntu", sans-serif; color:#363535; display:flex; align-items:center; white-space: nowrap;
+}
+
+.report-toast__close::after{
+  content:""; position:absolute; inset:29.69%;
+  border:1.5px solid #828181;
+}
+.report-toast.is-hiding{
+  opacity: 0;
+  transform: translateX(-50%) translateY(-6px);
+}
+
+/* ===== МОДАЛ (Group 1197) ===== */
+.report-modal[hidden]{ display:none; }
+.report-modal{ position:fixed; inset:0; z-index:2500; }
+
+.report-modal__backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.35);
+}
+
+.report-modal__card{
+  position:absolute;
+  width:412px; height:399px;
+  left:calc(50% - 412px/2);
+  top:282px;
+  background:#FFFFFF; border-radius:20px;
+  box-shadow:0 16px 40px rgba(0,0,0,.16);
+  font-family:"Ubuntu", sans-serif;
+}
+
+/* Заголовок — «Виберіть причину…» */
+.report-title{
+  position:absolute; left:20px; top:20px; /* як у макеті */
+  margin:0; width:217px; height:24px;
+  display:flex; align-items:center;
+  font:400 18px/24px "Ubuntu", sans-serif; color:#363535;
+  white-space: nowrap;
+}
+
+/* Кнопки-опції — чотири рядки із точними рамками/висотами */
+.report-opt{
+  position:absolute; left: 30px; width:352px; height:50px;
+  border:2px solid #ECECEC; border-radius:10px; background:#fff; cursor:pointer;
+  font:400 14px/24px "Ubuntu", sans-serif; color:#363535;
+  display:flex; align-items:center; justify-content:center;
+  transition:background-color .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.report-opt:nth-of-type(1){ top:80px; } /* Group 1176 */
+.report-opt:nth-of-type(2){ top:140px; } /* Group 1177 */
+.report-opt:nth-of-type(3){ top:200px; } /* Group 1178 */
+.report-opt:nth-of-type(4){ top:260px; } /* Group 1179 */
+
+/* Активна опція = «загорілась червоним» */
+.report-opt.is-active{
+  border-color:#FF6B5B; background:rgba(255,107,91,.08); color:#FF3B2F;
+  box-shadow:0 0 0 2px rgba(255,107,91,.25) inset;
+}
+
+/* Кнопка «Поскаржитися на товар» (Group 1175) */
+.report-submit{
+  position:absolute; left:30px; top:330px; width:352px; height:43px;
+  border:2px solid #828181; border-radius:10px; background:#fff; cursor:not-allowed;
+  font:400 18px/24px "Ubuntu", sans-serif; color:#828181; text-align:center;
+  transition:color .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .16s ease; white-space: nowrap;
+}
+.report-submit:not([disabled]){
+  border-color:#35C65E; color:#35C65E; cursor:pointer;
+}
+.report-submit:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+
+
 
 
 

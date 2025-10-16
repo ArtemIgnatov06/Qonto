@@ -626,6 +626,37 @@
 </a>
 
 
+<!-- КНОПКА-ТРИГГЕР (Component 129) -->
+<button class="report-open" type="button" aria-haspopup="dialog" aria-controls="reportModal" aria-expanded="false">
+  <img class="report-open__ico" src="report.png" alt="Інформація / Скарга">
+</button>
+
+<!-- ТОСТ-ПОВІДОМЛЕННЯ (Group 1253) -->
+<div class="report-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+  <div class="report-toast__box">
+    <span class="report-toast__text">Ваша скарга на товар прийнята на розгляд</span>
+  </div>
+</div>
+
+<!-- МОДАЛ (Group 1197) -->
+<div class="report-modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle" hidden>
+  <div class="report-modal__backdrop" data-close="1" aria-hidden="true"></div>
+
+  <div class="report-modal__card">
+    <h5 class="report-title" id="reportTitle">Виберіть причину скарги:</h5>
+
+    <!-- Опції -->
+    <button class="report-opt" data-reason="copyright">Порушення авторських прав</button>
+    <button class="report-opt" data-reason="misleading">Недостовірна або оманлива інформація</button>
+    <button class="report-opt" data-reason="restricted">Заборонений або обмежений товар</button>
+    <button class="report-opt" data-reason="harmful">Неетична або шкідлива продукція</button>
+
+    <!-- Надіслати -->
+    <button class="report-submit" type="button" disabled>Поскаржитися на товар</button>
+  </div>
+</div>
+
+
 
 
 
@@ -1305,6 +1336,94 @@
 
   // Диагностика перекрытий (включи временно при отладке)
   // setTimeout(()=>{ document.querySelectorAll('.rev-like').forEach(b=> b.style.outline='1px dashed red'); }, 0);
+})();
+
+(()=>{
+  const openBtn  = document.querySelector('.report-open');
+  const modal    = document.getElementById('reportModal');
+  const backdrop = modal?.querySelector('.report-modal__backdrop');
+  const opts     = Array.from(modal?.querySelectorAll('.report-opt')||[]);
+  const submit   = modal?.querySelector('.report-submit');
+  const toast    = document.querySelector('.report-toast');
+  const toastClose = toast?.querySelector('.report-toast__close');
+
+  let selectedReason = null;
+  let toastTimer = null;
+  let sending = false;              // ← защита от даблкликов
+
+  const openModal = ()=>{
+    if (!modal) return;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    openBtn?.setAttribute('aria-expanded','true');
+    selectedReason = null;
+    sending = false;                // сбрасываем состояние отправки при каждом открытии
+    opts.forEach(b=> b.classList.remove('is-active'));
+    if (submit) submit.disabled = true;
+  };
+  const closeModal = ()=>{
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    openBtn?.setAttribute('aria-expanded','false');
+  };
+
+  openBtn?.addEventListener('click', openModal);
+  backdrop?.addEventListener('click', closeModal);
+  document.addEventListener('keydown', e=>{
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  opts.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      opts.forEach(b=> b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      selectedReason = btn.getAttribute('data-reason');
+      if (submit) submit.disabled = !selectedReason || sending;
+    });
+  });
+
+  submit?.addEventListener('click', async ()=>{
+    if (!selectedReason || sending) return;  // ← не даём отправить дважды
+    sending = true;
+    submit.disabled = true;
+
+    // тут твой реальный запрос на бекенд
+    // await fetch('/api/report', {method:'POST', body:JSON.stringify({reason:selectedReason})});
+
+    closeModal();
+    showToast();
+  });
+
+  function showToast(){
+    if (!toast) return;
+    clearTimeout(toastTimer);
+    // показать с плавностью (если было скрыто)
+    toast.classList.remove('is-hiding');
+    toast.hidden = false;
+    // автозакрытие
+    toastTimer = setTimeout(hideToast, 2000);
+  }
+
+  function hideToast(){
+    if (!toast) return;
+    // запускаем анимацию скрытия
+    toast.classList.add('is-hiding');
+    // после окончания анимации — реально скрываем
+    const onEnd = (e)=>{
+      if (e.propertyName !== 'opacity') return;
+      toast.hidden = true;
+      toast.classList.remove('is-hiding');
+      toast.removeEventListener('transitionend', onEnd);
+      sending = false;              // ← теперь снова можно отправлять новую жалобу
+    };
+    toast.addEventListener('transitionend', onEnd);
+  }
+
+  toastClose?.addEventListener('click', ()=>{
+    clearTimeout(toastTimer);
+    hideToast();
+  });
 })();
 </script>
 
