@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="product-page.css" />
+  <!-- ШРИФТЫ -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+  <title>Product</title>
+</head>
+<body>
+    <header class="hdr">
+  <!-- фоновый прямоугольник -->
+  <div class="hdr-bg"></div>
+
+  <!-- LOGO -->
+  <a class="logo" href="#">
+    <span class="logo-text">Qonte</span>
+    <span class="logo-dot" aria-hidden="true"></span>
+  </a>
+
+  <!-- SEARCH GROUP -->
+  <form class="search-wrap" action="#" role="search">
+  <input class="search-input" type="text" placeholder="Пошук..." aria-label="Пошук">
+  <button class="search-btn" type="submit" aria-label="Найти">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" fill="none" stroke="#7AD293" stroke-width="1.5"/>
+      <rect x="16" y="16" width="6" height="6" rx="1.2" fill="#7AD293"/>
+    </svg>
+  </button>
+</form>
+
+  <!-- КНОПКА AI -->
+<button class="btn-ai" type="button">
+  <span class="ai-ico" aria-hidden="true">
+    <!-- иконка «робот/ИИ» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <circle cx="9" cy="10" r="1"/>
+      <circle cx="15" cy="10" r="1"/>
+      <path d="M8 15c1.5 1 3.5 1 5 0"/>
+    </svg>
+  </span>
+  <span class="ai-label">AI-Консультант</span>
+</button>
+
+<!-- КНОПКА КАТАЛОГ -->
+<button class="btn-cat" type="button">
+  <span class="cat-ico" aria-hidden="true">
+    <!-- иконка «меню/каталог» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <rect x="3" y="4" width="7" height="7"/>
+      <rect x="14" y="4" width="7" height="7"/>
+      <rect x="3" y="13" width="7" height="7"/>
+      <rect x="14" y="13" width="7" height="7"/>
+    </svg>
+  </span>
+  <span class="cat-label">Каталог</span>
+</button>
+
+  <!-- ИКОНКИ 3–6 -->
+  <button class="ico ico-lang" type="button" aria-label="Выбор языка">
+    <!-- Иконка "язык" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-heart" type="button" aria-label="Избранное">
+    <!-- Иконка "сердце" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 21s-6-4.3-9-8.6C1 9.3 3.5 5 7.5 5c2.1 0 3.5 1.1 4.5 2.5C13 6.1 14.4 5 16.5 5 20.5 5 23 9.3 21 12.4c-3 4.3-9 8.6-9 8.6z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-cart" type="button" aria-label="Корзина">
+    <!-- Иконка "корзина" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-user" type="button" aria-label="Аккаунт">
+    <!-- Иконка "пользователь" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#7AD293" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+    </svg>
+  </button>
+</header>
+
+
+
+
+
+
+<!-- === ГЛАВНОЕ ФОТО (бокс) 586×489 @ (202,239) === -->
+<div class="pdp-main" data-product-id="SKU123">
+  <div class="pdp-main__frame">
+    <img class="pdp-main__img" src="product1.jpg" alt="Фото товару">
+    <span class="pdp-main__radial" aria-hidden="true"></span>
+  </div>
+</div>
+
+<!-- === ЛЕВАЯ КОЛОНКА ПРЕВЬЮ 97×489 @ (80.05,239) === -->
+<div class="pdp-thumbs" aria-label="Галерея зображень">
+  <div class="pdp-thumbs__bg" aria-hidden="true"></div>
+
+  <!-- пять слотов; подставь свои ссылки -->
+  <button class="pdp-thumb" type="button" style="top:0px; height:98px;"
+          data-full="product2.jpg" data-thumb="thumb-1.jpg" aria-label="1">
+    <img src="product2.jpg" alt="">
+  </button>
+
+  <button class="pdp-thumb" type="button" style="top:98px; height:98px;"
+          data-full="product3.jpg" data-thumb="thumb-2.jpg" aria-label="2">
+    <img src="product3.jpg" alt="">
+  </button>
+
+  <button class="pdp-thumb" type="button" style="top:196px; height:96.99px;"
+          data-full="product4.jpg" data-thumb="thumb-3.jpg" aria-label="3">
+    <img src="product4.jpg" alt="">
+  </button>
+
+  <button class="pdp-thumb" type="button" style="top:293px; height:98px;"
+          data-full="product5.jpg" data-thumb="thumb-4.jpg" aria-label="4">
+    <img src="product5.jpg" alt="">
+  </button>
+
+  <button class="pdp-thumb" type="button" style="top:391px; height:98px;"
+          data-full="product6.jpg" data-thumb="thumb-5.jpg" aria-label="5">
+    <img src="product6.jpg" alt="">
+  </button>
+</div>
+
+
+
+
+<!-- === Обёртка под оба состояния: 209×55 @ (813,454) === -->
+<div class="cart-control" data-qty="1">
+  <!-- Состояние 1: большая зелёная кнопка -->
+  <a href="#" class="btn-cart is-once" role="button" aria-label="Додати до кошику">
+    <span class="btn-cart__bg"></span>
+    <span class="btn-cart__text">Додати до кошику</span>
+    <span class="btn-cart__icon"><img src="basket-white.png" alt=""></span>
+  </a>
+
+  <!-- Состояние 2: счётчик + малая кнопка -->
+  <div class="qty-cart" hidden>
+    <!-- ЛЕВАЯ часть (Group 524 / Rectangle 58) -->
+    <div class="qty-box">
+      <!-- минус -->
+      <button type="button" class="qty-btn qty-minus" aria-label="Зменшити">−</button>
+      <!-- значение -->
+      <div class="qty-value" aria-live="polite">1х</div>
+      <!-- плюс -->
+      <button type="button" class="qty-btn qty-plus" aria-label="Збільшити">+</button>
+    </div>
+
+    <!-- ПРАВАЯ часть (Group 523 / маленькая кнопка з іконкою) -->
+    <button type="button" class="mini-cart" aria-label="Підтвердити">
+      <span class="mini-cart__bg"></span>
+      <span class="mini-cart__icon"><img src="basket-full.png" alt=""></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+<!-- Group 636 — 234.99×36 @ (813, 393) -->
+<div class="p-price">
+  <!-- 487 грн -->
+  <div class="p-price__now">487 грн</div>
+
+  <!-- Красная таблетка как иконка (вставишь сам) -->
+  <div class="p-price__badge">
+    <img src="discount.png" alt="-20%">
+  </div>
+
+  <!-- 519 грн (зачёркнуто, 50% opacity) -->
+  <div class="p-price__old">519 грн</div>
+</div>
+
+
+
+
+
+
+
+<!-- Group 518 — 309×39 @ (813.05, 329) -->
+<div class="p-opts" role="radiogroup" aria-label="Вага">
+  <!-- Group 516 — 450 г (active) : left:0%, right:76.38% -->
+  <button class="option-btn is-active" role="radio" aria-checked="true"
+          style="left:0%; right:76.38%;" data-value="450">
+    <span>256GB</span>
+  </button>
+
+  <!-- Group 515 — 800 г : left:26.86%, right:49.51% -->
+  <button class="option-btn" role="radio" aria-checked="false"
+          style="left:26.86%; right:49.51%;" data-value="800">
+    <span>512GB</span>
+  </button>
+
+  <!-- Group 513 — 1 кг : left:53.72%, right:26.21% -->
+  <button class="option-btn" role="radio" aria-checked="false"
+          style="left:53.72%; right:26.21%;" data-value="1000">
+    <span>1TB</span>
+  </button>
+
+  <!-- Group 514 — 1,5 кг : left:77.02%, right:0% -->
+  <button class="option-btn" role="radio" aria-checked="false"
+          style="left:77.02%; right:0%;" data-value="1500">
+    <span>2TB</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+<!-- Название товара — 405×36 @ (813.05, 239) -->
+<h1 class="pdp-title">iPhone 17 Pro</h1>
+
+<!-- Группа рейтинга и відгуків — 164.95×24 @ (812.05, 280) -->
+<div class="pdp-rating">
+  <!-- Звезда (иконка) 17×17 @ (812.05, 284.5) -->
+  <span class="pdp-star">
+    <img src="star.png" alt="" />
+  </span>
+
+  <!-- Число рейтинга 20×24 @ (832.05, 280) -->
+  <span class="pdp-score">4,4</span>
+
+  <!-- Точка-разделитель 6×6 @ (864, 289) -->
+  <span class="pdp-dot" aria-hidden="true"></span>
+
+  <!-- Відгуки (113×24 @ (864, 280); текстовый блок 94×24 @ (883, 280)) -->
+  <a href="#reviews" class="pdp-reviews">96 782 відгука</a>
+</div>
+
+
+
+
+
+<!-- Group 471 — 271×24 @ (80,185) -->
+<nav class="crumbs" aria-label="Навігація: категорії">
+  <!-- Продукти та алкоголь -->
+  <a href="#" class="crumbs__link crumbs__link--root">Продукти та алкоголь</a>
+
+  <!-- стрелка между -->
+  <span class="crumbs__arrow crumbs__arrow--1" aria-hidden="true">
+    <img src="arrow-green.png" alt="">
+  </span>
+
+  <!-- Сухофрукти -->
+  <a href="#" class="crumbs__link crumbs__link--leaf">Сухофрукти</a>
+
+  <!-- стрелка справа (если нужна визуально) -->
+  <span class="crumbs__arrow crumbs__arrow--2" aria-hidden="true">
+    <img src="arrow-green.png" alt="">
+  </span>
+</nav>
+
+
+
+
+
+
+<!-- ====== ЛЕВЫЙ БЛОК (Group 683) 341×155 @ (813,573) ====== -->
+<a href="#" class="shop-card" aria-label="Super Noname Store">
+  <!-- Верхний баннер 341×90 -->
+  <div class="shop-card__banner">
+    <img src="shop-brand.png" alt="">
+  </div>
+
+  <!-- Внешняя рамка -->
+  <span class="shop-card__frame" aria-hidden="true"></span>
+
+  <!-- Название магазина -->
+  <div class="shop-card__title">Super Noname Store</div>
+
+  <!-- Ссылка «Перейти до магазину» + стрелка -->
+  <div class="shop-card__go">
+    <span class="shop-card__go-text">Перейти до магазину</span>
+    <span class="shop-card__go-ico" aria-hidden="true">
+      <img src="arrow-green.png" alt="">
+    </span>
+  </div>
+</a>
+
+<!-- ====== ПРАВЫЙ БЛОК (Frame 736) 341×155 @ (1179,573) ====== -->
+<a href="#" class="brand-card" aria-label="LakomstvoOtBabushki — сторінка бренду">
+  <!-- Верхний фон 341×90 (цвет/оверлей) -->
+  <div class="brand-card__topbg" aria-hidden="true"></div>
+
+  <!-- Внутренний квадратик-логотип 77×76 @ (68,7) -->
+  <div class="brand-card__logo">
+    <img src="brand.png" alt="">
+  </div>
+
+  <!-- Внешняя рамка -->
+  <span class="brand-card__frame" aria-hidden="true"></span>
+
+
+  <!-- Название бренда 143×24 @ (20,100) -->
+  <div class="brand-card__name">LakomstvoOtBabushki</div>
+
+  <!-- Нижняя строка: «Оригінал • Перейти до сторінки бренду» -->
+  <div class="brand-card__meta">
+    <span class="brand-card__orig">Оригінал</span>
+    <span class="brand-card__dot" aria-hidden="true"></span>
+    <span class="brand-card__link">Перейти до сторінки бренду</span>
+    <span class="brand-card__arrow" aria-hidden="true">
+      <img src="arrow-green.png" alt="">
+    </span>
+  </div>
+</a>
+
+
+<h5 class="pdp-subhead shop-label">Магазин</h5>
+<h5 class="pdp-subhead brand-label">Бренд</h5>
+
+
+<!-- ===== ПОДРОБНАЯ ИНФА О ТОВАРЕ. ПОДВЯЖЕШЬ Я ДУМАЮ КАК ТО С БЕКЭНДОМ, Я ТЕБЕ ПОМОГУ ЕСЛИ ЧТО-->
+<!-- ===== ЛЕВАЯ КОЛОНКА: Характеристики ===== -->
+<h5 class="specs-title">Характеристики товару</h5>
+
+<!-- линии -->
+<span class="specs-line specs-line--875" aria-hidden="true"></span>
+<span class="specs-line specs-line--943" aria-hidden="true"></span>
+
+<!-- группа 713 -->
+<div class="specs-key specs-key--type">Тип</div>
+<div class="specs-key specs-key--kind">Вид сухофрутів</div>
+<div class="specs-val specs-val--type">Сухофрукти</div>
+<div class="specs-val specs-val--kind">Банани</div>
+
+<!-- группа 714 -->
+<div class="specs-key specs-key--glaze">Тип глазурі</div>
+<div class="specs-key specs-key--shape">Форма шматків</div>
+<div class="specs-val specs-val--glaze">Цукрова</div>
+<div class="specs-val specs-val--shape">Слайси</div>
+
+<!-- группа 715 -->
+<div class="specs-key specs-key--process">Вид обробки сухофруктів</div>
+<div class="specs-val specs-val--process">Сушені</div>
+
+<!-- ===== ПРАВАЯ КОЛОНКА: Пищевая ценность ===== -->
+<div class="nutri-title">Харчова цінність продукту на 100 г:</div>
+
+<!-- линии -->
+<span class="nutri-line nutri-line--880" aria-hidden="true"></span>
+<span class="nutri-line nutri-line--924" aria-hidden="true"></span>
+<span class="nutri-line nutri-line--968" aria-hidden="true"></span>
+
+<div class="nutri-key nutri-key--protein">Білки</div>
+<div class="nutri-val nutri-val--protein">2.3</div>
+
+<div class="nutri-key nutri-key--fat">Жири</div>
+<div class="nutri-val nutri-val--fat">33.6</div>
+
+<div class="nutri-key nutri-key--carb">Вуглеводи</div>
+<div class="nutri-val nutri-val--carb">59.7</div>
+
+<div class="nutri-key nutri-key--kcal">Ккал</div>
+<div class="nutri-val nutri-val--kcal">519</div>
+
+
+
+
+
+
+<!-- ===== Заголовок секции — 87×24 @ (80, 778) -->
+<h5 class="about-title">Про товар</h5>
+
+<!-- ===== Краткое описание (Component 52) — 707×144 @ (80, 817) -->
+<section class="desc-card" aria-labelledby="aboutTitle">
+  <!-- сам текст — 708×120 @ (0,0) -->
+  <p id="aboutTitle" class="desc-text"
+     data-full-text="
+Сушені банани – чудовий вибір для любителів здорового харчування та активного способу життя. Цей продукт, представлений в упаковці масою 1000 г, стане чудовим доповненням до вашого раціону. Сушені банани зберігають всі корисні властивості свіжих фруктів, включаю чи вітаміни та мінерали. Вони ідеально підходять для перекушування, легко засвоюються і дають заряд енергії. Сушені банани можна використовувати як здорове доповнення до ранкових каш або йогурту, додаючи їм солодкий смак та текстуру. Вони також чудово поєднуються з горіхами та іншими сухофруктами, що робить їх чудовим варіантом для створення суміші для сніданку чи снеку. Крім того, сушені банани відмінно підійдуть для використання у випічці, додаючи натуральну насолоду до різних десертів. Відсутність доданого цукру робить цей продукт особливо привабливим для тих, хто стежить за своїм харчуванням та прагне зменшити споживання рафінованих вуглеводів. Переконайтеся, що ви завжди маєте під рукою упаковку із сушеними бананами для легкого та корисного перекушування протягом дня. Банани, що пройшли процес сушіння, стають хрусткими та ароматними, що робить їх відмінним вибором для тих, хто шукає смачні та корисні альтернативи традиційним солодощам. Сушені банани – це не лише смачно, а й корисно. Ви зможете насолоджуватись їх відмінним смаком у будь-яку пору року, незалежно від сезону.
+">
+Сушені банани – чудовий вибір для любителів здорового харчування та активного способу життя. Цей продукт, представлений в упаковці масою 1000 г, стане чудовим доповненням до вашого раціону. Сушені банани зберігають всі корисні властивості свіжих фруктів, включаю чи вітаміни та мінерали. Вони ідеально підходять для перекушування, легко засвоюються і дають заряд енергії...
+  </p>
+
+  <!-- «Детальніше» 82×24 @ (0,120) + иконка 24×24 @ (82,122) -->
+  <button type="button" class="desc-more" aria-haspopup="dialog" aria-controls="descModal">
+    <span class="desc-more__text">Детальніше</span>
+    <span class="desc-more__icon" aria-hidden="true">
+      <img src="arrow-green.png" alt="">
+    </span>
+  </button>
+</section>
+
+<!-- ===== Модалка с полным описанием (скрыта по умолчанию) ===== -->
+<div class="desc-overlay" id="descModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="desc-modal" role="document">
+    <button type="button" class="desc-close" aria-label="Закрити">×</button>
+    <h5 class="desc-modal__title">Про товар</h5>
+    <div class="desc-modal__body"></div>
+  </div>
+</div>
+
+<!-- Rectangle 142 -->
+<div class="rect-142" aria-hidden="false">
+  <!-- Вариант с <img>: просто задай src -->
+  <img src="advertisment.png" alt="" class="rect-142__img">
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Group 665 / товар блок 268×356 @ (80, 1864) -->
+<div class="product-card pdp-solo" role="group" aria-label="Товар">
+  <!-- Фото: маска 268×270 -->
+  <div class="photo-mask">
+    <div class="photo-bg"></div>
+    <!-- основное фото внутри маски -->
+    <img class="photo-img" src="product-more.png" alt="">
+    <!-- клик по фото ведёт на страницу товара -->
+    <a class="product-link" href="#"></a>
+  </div>
+
+  <!-- Внешняя рамка карточки -->
+  <div class="card-frame"></div>
+
+  <!-- Тайтл -->
+  <div class="title">iPhone 17 base</div>
+
+  <!-- Рейтинг (звезда + число) -->
+  <div class="rating">
+    <span class="val">4,4</span>
+    <span class="star"><img src="star.png" alt="Рейтинг"></span>
+  </div>
+
+  <!-- Строка цен и кнопок -->
+  <div class="price-row">
+    <div class="price-now">207 грн</div>
+    <div class="price-old">259 грн</div>
+
+    <!-- правая пара квадратных кнопок -->
+    <button class="btn-ghost" type="button" aria-label="Дія 1">
+      <img src="favorites.png" alt="">
+    </button>
+    <button class="btn-green" type="button" aria-label="Дія 2">
+      <img src="basket.png" alt="">
+    </button>
+  </div>
+
+  <!-- Бейдж скидки -->
+  <div class="badge">
+    <div class="badge-bg"></div>
+    <img class="badge-img" src="discount.png" alt="-20%">
+  </div>
+</div>
+
+
+<!-- Слева: "Схожі товари" -->
+<div class="similar-title">Схожі товари</div>
+
+<!-- Справа: "Більше товарів цієї категорії" + иконка -->
+<a class="similar-more" href="#">
+  <span class="text">Більше товарів цієї категорії</span>
+  <span class="icon"><img src="arrow.png" alt=""></span>
+</a>
+
+
+
+
+
+
+
+<!-- REVIEW BAR -->
+<div class="review-bar" aria-label="Відгук">
+  <!-- верхняя рамка поля -->
+  <div class="rb-frame"></div>
+
+  <!-- 5 зірок -->
+  <div class="rev-stars" data-rating="0">
+    <button class="star-btn" type="button" aria-checked="false" style="left:1.34%; top:13px;">
+      <img class="star-img" src="starg.png" data-off-src="starg.png" data-on-src="star.png" alt="1/5">
+    </button>
+    <button class="star-btn" type="button" aria-checked="false" style="left:3.76%; top:13px;">
+      <img class="star-img" src="starg.png" data-off-src="starg.png" data-on-src="star.png" alt="2/5">
+    </button>
+    <button class="star-btn" type="button" aria-checked="false" style="left:6.19%; top:13px;">
+      <img class="star-img" src="starg.png" data-off-src="starg.png" data-on-src="star.png" alt="3/5">
+    </button>
+    <button class="star-btn" type="button" aria-checked="false" style="left:8.61%; top:13px;">
+      <img class="star-img" src="starg.png" data-off-src="starg.png" data-on-src="star.png" alt="4/5">
+    </button>
+    <button class="star-btn" type="button" aria-checked="false" style="left:11.04%; top:13px;">
+      <img class="star-img" src="starg.png" data-off-src="starg.png" data-on-src="star.png" alt="5/5">
+    </button>
+  </div>
+
+  <!-- плейсхолдер/поле ввода -->
+  <input class="rev-input" type="text" placeholder="Залишіть свій відгук" />
+
+  <!-- скрепка -->
+  <button class="rev-attach" type="button" aria-label="Прикріпити файл">
+    <img src="add.png" alt="">
+  </button>
+
+  <!-- кнопка-стрілка ВІДПРАВИТИ -->
+  <button class="rev-send" type="button" aria-label="Надіслати">
+  <!-- вставь сюда свою іконку-стрілку -->
+  <img class="rev-send-img" src="send.png" alt="">
+  </button>
+
+  <!-- низ: анонімний відгук -->
+  <div class="anon-wrap">
+    <span class="anon-label">Анонімний відгук</span>
+    <button class="anon-toggle" type="button" role="checkbox" aria-checked="false" aria-label="Анонімний"></button>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- REVIEW CARD -->
+<div class="review-card" style="left:80px; top:1135px;">
+  <div class="review-box" aria-label="Відгук користувача">
+    <!-- header -->
+    <div class="rev-head">
+      <div class="rev-author">Анастасія Птічка</div>
+
+      <!-- ЗВЁЗДЫ КАК ИЗОБРАЖЕНИЯ -->
+      <div class="rev-stars-review" data-rating="4" role="img" aria-label="Оцінка: 4 з 5">
+        <span class="star">
+          <img class="star-img" alt="" data-on-src="star.png" data-off-src="star-off.png">
+        </span>
+        <span class="star">
+          <img class="star-img" alt="" data-on-src="star.png" data-off-src="star-off.png">
+        </span>
+        <span class="star">
+          <img class="star-img" alt="" data-on-src="star.png" data-off-src="star-off.png">
+        </span>
+        <span class="star">
+          <img class="star-img" alt="" data-on-src="star.png" data-off-src="star-off.png">
+        </span>
+        <span class="star">
+          <img class="star-img" alt="" data-on-src="star.png" data-off-src="starg.png">
+        </span>
+      </div>
+    </div>
+
+    <!-- text -->
+    <p class="rev-text">
+      Недавно спробувала сушені банани з цього магазину – і тепер це мій улюблений перекус! … дуже смачно!
+    </p>
+
+    <!-- media strip -->
+    <div class="rev-media">
+      <!-- Кнопка с миниатюрой. data-full — большая версия. -->
+      <button class="rev-thumb" type="button" aria-label="Переглянути фото 1" data-full="full-1.jpg">
+        <img src="product1.jpg" alt="">
+      </button>
+      <button class="rev-thumb" type="button" aria-label="Переглянути фото 2" data-full="full-2.jpg">
+        <img src="product2.jpg" alt="">
+      </button>
+      <button class="rev-thumb" type="button" aria-label="Переглянути фото 3" data-full="full-3.jpg">
+        <img src="product3.jpg" alt="">
+      </button>
+    </div>
+
+    <!-- footer -->
+    <div class="rev-foot">
+      <button class="rev-like" type="button" aria-pressed="false">
+  <img class="like-ico" src="favorites.png"
+       data-normal-src="favorites.png"
+       data-black-src="favorites-full.png" alt="">
+  <span class="like-num">17</span>
+</button>
+    </div>
+  </div>
+</div>
+
+<!-- ЛОКАЛЬНЫЙ ЛАЙТБОКС -->
+<div class="lb-overlay" id="lbOverlay" aria-hidden="true">
+  <div class="lb-inner">
+    <img class="lb-img" alt="">
+  </div>
+</div>
+
+
+<!-- КНОПКА: Більше відгуків -->
+<a class="btn-more-reviews" href="#" aria-label="Більше відгуків">
+  <span class="btn-more-reviews__text">Більше відгуків</span>
+  <span class="btn-more-reviews__icon">
+    <!-- Подставь своё изображение стрелки -->
+    <img src="arrow-white.png" alt="" />
+  </span>
+</a>
+
+
+<!-- КНОПКА-ТРИГГЕР (Component 129) -->
+<button class="report-open" type="button" aria-haspopup="dialog" aria-controls="reportModal" aria-expanded="false">
+  <img class="report-open__ico" src="report.png" alt="Інформація / Скарга">
+</button>
+
+<!-- ТОСТ-ПОВІДОМЛЕННЯ (Group 1253) -->
+<div class="report-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+  <div class="report-toast__box">
+    <span class="report-toast__text">Ваша скарга на товар прийнята на розгляд</span>
+  </div>
+</div>
+
+<!-- МОДАЛ (Group 1197) -->
+<div class="report-modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle" hidden>
+  <div class="report-modal__backdrop" data-close="1" aria-hidden="true"></div>
+
+  <div class="report-modal__card">
+    <h5 class="report-title" id="reportTitle">Виберіть причину скарги:</h5>
+
+    <!-- Опції -->
+    <button class="report-opt" data-reason="copyright">Порушення авторських прав</button>
+    <button class="report-opt" data-reason="misleading">Недостовірна або оманлива інформація</button>
+    <button class="report-opt" data-reason="restricted">Заборонений або обмежений товар</button>
+    <button class="report-opt" data-reason="harmful">Неетична або шкідлива продукція</button>
+
+    <!-- Надіслати -->
+    <button class="report-submit" type="button" disabled>Поскаржитися на товар</button>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<footer class="ftr" role="contentinfo">
+  <div class="ftr-bg"></div>
+
+  <!-- Колонки -->
+  <h4 class="ftr-h4 ftr-h4--info">Інформація о компанії</h4>
+  <ul class="ftr-list ftr-list--info">
+    <li><a href="#">Про нас</a></li>
+    <li><a href="#">Умови використання сайту</a></li>
+    <li><a href="#">Вакансії</a></li>
+    <li><a href="#">Контакти</a></li>
+    <li><a href="#">Зворотній зв’язок</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--help">Допомога</h4>
+  <ul class="ftr-list ftr-list--help">
+    <li><a href="#">Часті питання</a></li>
+    <li><a href="#">Доставка та оплата</a></li>
+    <li><a href="#">Гарантія</a></li>
+    <li><a href="#">Повернення</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--sellers">Продавцям</h4>
+  <ul class="ftr-list ftr-list--sellers">
+    <li><a href="#">Продавати товари</a></li>
+    <li><a href="#">Правила торгівлі</a></li>
+  </ul>
+
+  <!-- Соцсети -->
+  <h4 class="ftr-h4 ftr-h4--social">Ми в соціальних мережах</h4>
+  <a class="ftr-soc ftr-soc--ig" href="#" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1" fill="#ECECEC"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--fb" href="#" aria-label="Facebook">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M13.5 21v-7h2.3l.4-3H13.5V9.1c0-.9.3-1.5 1.7-1.5H16V5.1c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 3.9V11H7v3h2.6v7h3.9z"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--tt" href="#" aria-label="TikTok">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M15 3c.6 1.8 2 3.2 3.8 3.7v3.1c-1.5-.1-2.9-.6-4-1.5v5.9a5.6 5.6 0 1 1-5.6-5.6c.5 0 1 .1 1.4.2v3a2.5 2.5 0 1 0 2.2 2.5V3h2.2z"/>
+    </svg>
+  </a>
+
+  <!-- Декоративная фигура справа -->
+  <img class="ftr-mascot" src="maskotfooter.png" alt="Маскот Qonto">
+
+  <!-- Копирайт -->
+  <p class="ftr-copy">©2025 Платформа онлайн-торгівлі «Qonto» — використовується на підставі ліцензії правовласника</p>
+</footer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+(function start(fn){
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fn, {once:true});
+  } else { fn(); }
+})(function initPage(){
+
+  /* ===========================
+     ГАЛЕРЕЯ: левый столбец ⇄ главное фото
+     =========================== */
+  const mainImg   = document.querySelector('.pdp-main__img');
+  const thumbsBox = document.querySelector('.pdp-thumbs');
+  if (mainImg && thumbsBox){
+    const allThumbs = () => Array.from(thumbsBox.querySelectorAll('.pdp-thumb'));
+    const getImg    = (btn) => btn?.querySelector('img');
+    const fullURL   = (btn) => btn?.dataset.full  || getImg(btn)?.getAttribute('src') || '';
+    const thumbURL  = (btn) => btn?.dataset.thumb || getImg(btn)?.getAttribute('src') || '';
+
+    function markActive(btn){
+      allThumbs().forEach(t => t.removeAttribute('aria-current'));
+      btn && btn.setAttribute('aria-current', 'true');
+    }
+    function preload(url){
+      return new Promise((resolve, reject)=>{
+        if (!url) return reject('empty');
+        const im = new Image();
+        im.onload = ()=> resolve(url);
+        im.onerror= ()=> reject('error');
+        im.src = url;
+      });
+    }
+
+    (async function setInitial(){
+      if ((mainImg.getAttribute('src')||'').trim()) return;
+      for (const btn of allThumbs()){
+        const f = fullURL(btn);
+        try { await preload(f); mainImg.src = f; markActive(btn); break; }
+        catch(_){ /* next */ }
+      }
+    })();
+
+    async function swapWithMain(btn){
+      const newFull = fullURL(btn);
+      if (!newFull) return;
+
+      const prevFull = mainImg.getAttribute('src') || '';
+      if (prevFull === newFull) { markActive(btn); return; }
+
+      try{
+        await preload(newFull);
+        mainImg.src = newFull;                 // 1) новое — в главное
+        const imgEl = getImg(btn);
+        if (imgEl && prevFull) imgEl.src = prevFull;  // 2) прежнее — в слот
+        if (prevFull) btn.dataset.full = prevFull;    // 3) чтобы следующий своп работал
+        markActive(btn);
+      }catch(_e){
+        console.warn('Не вдалося завантажити:', newFull);
+      }
+    }
+
+    thumbsBox.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.pdp-thumb');
+      if (btn && thumbsBox.contains(btn)) swapWithMain(btn);
+    });
+    thumbsBox.addEventListener('keydown', (e)=>{
+      if (e.key!=='Enter' && e.key!==' ') return;
+      const btn = e.target.closest('.pdp-thumb');
+      if (btn && thumbsBox.contains(btn)) { e.preventDefault(); swapWithMain(btn); }
+    });
+  }
+
+  /* ======================================
+     КНОПКА "Додати до кошику" ⇄ СЧЁТЧИК
+     ====================================== */
+  const wrap      = document.querySelector('.cart-control');
+  const oneBtn    = wrap?.querySelector('.btn-cart');     // большая зелёная
+  const qtyWrap   = wrap?.querySelector('.qty-cart');     // блок со счётчиком+малой
+  const minusBtn  = wrap?.querySelector('.qty-minus');
+  const plusBtn   = wrap?.querySelector('.qty-plus');
+  const valEl     = wrap?.querySelector('.qty-value');
+  const confirmBt = wrap?.querySelector('.mini-cart');
+
+  if (wrap && oneBtn && qtyWrap && minusBtn && plusBtn && valEl && confirmBt){
+    function getQty(){ return Math.max(1, parseInt(wrap.dataset.qty || '1', 10)); }
+    function setQty(n){ wrap.dataset.qty = String(Math.max(1, n)); updateText(); }
+    function updateText(){ valEl.textContent = getQty() + 'х'; }
+
+    function showQty(e){ e && e.preventDefault(); oneBtn.hidden = true; qtyWrap.hidden = false; updateText(); }
+    function backToOne(e){ e && e.preventDefault(); qtyWrap.hidden = true; oneBtn.hidden = false; }
+
+    oneBtn.addEventListener('click', showQty);
+    plusBtn.addEventListener('click', ()=> setQty(getQty()+1));
+    minusBtn.addEventListener('click', ()=> setQty(getQty()-1));
+    confirmBt.addEventListener('click', backToOne);
+
+    [plusBtn, minusBtn, confirmBt].forEach(b=>{
+      b.addEventListener('keydown', (e)=>{
+        if (e.key==='Enter' || e.key===' ') { e.preventDefault(); b.click(); }
+      });
+    });
+  }
+
+  /* ======================================
+     ОПЦИИ ВАГИ: 4 кнопки-радио с подсветкой
+     ====================================== */
+  const optsBox = document.querySelector('.p-opts');
+  if (optsBox){
+    const options = () => Array.from(optsBox.querySelectorAll('.option-btn'));
+    function setActive(btn){
+      options().forEach(b=>{
+        b.classList.remove('is-active');
+        b.setAttribute('aria-checked','false');
+      });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-checked','true');
+
+      const value = btn.getAttribute('data-value') || '';
+      const label = btn.textContent.trim();
+
+      // пробрасываем выбранный вариант наружу
+      optsBox.dispatchEvent(new CustomEvent('variant:change', {detail:{value, label}}));
+
+      // чтобы бэку было удобно: положим значение ещё и в .cart-control
+      if (wrap) wrap.dataset.variant = value;
+    }
+
+    // Инициализация: если ничего не активно — активируем самую левую
+    (function initVariant(){
+      const current = options().find(b => b.classList.contains('is-active')) || options()[0];
+      if (current) setActive(current);
+    })();
+
+    optsBox.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.option-btn');
+      if (!btn || !optsBox.contains(btn)) return;
+      setActive(btn);
+    });
+
+    // Клавиатурная навигация (стрелки, Enter, Space)
+    optsBox.addEventListener('keydown', (e)=>{
+      const list = options();
+      const current = e.target.closest('.option-btn');
+      const idx = list.indexOf(current);
+
+      if (e.key === ' ' || e.key === 'Enter'){
+        e.preventDefault();
+        if (current) setActive(current);
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown'){
+        e.preventDefault();
+        const n = list[Math.min(list.length-1, idx+1)] || list[0];
+        n.focus();
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
+        e.preventDefault();
+        const p = list[Math.max(0, idx-1)] || list[list.length-1];
+        p.focus();
+      }
+    });
+
+    // tabindex на всякий случай
+    options().forEach(b=>{
+      if (!b.hasAttribute('tabindex')) b.setAttribute('tabindex','0');
+      if (!b.hasAttribute('role'))     b.setAttribute('role','radio');
+    });
+  }
+  (function(){
+  // Узлы
+  const card      = document.querySelector('.desc-card');
+  const moreBtn   = card?.querySelector('.desc-more');
+  const textEl    = card?.querySelector('.desc-text');
+  const overlay   = document.getElementById('descModal');
+  const modalBody = overlay?.querySelector('.desc-modal__body');
+  const closeBtn  = overlay?.querySelector('.desc-close');
+
+  if (!card || !moreBtn || !textEl || !overlay || !modalBody || !closeBtn) return;
+
+  // Открыть модалку
+  function openModal(){
+    const full = textEl.getAttribute('data-full-text') || textEl.textContent || '';
+    modalBody.textContent = full.trim();
+    overlay.setAttribute('aria-hidden','false');
+    document.body.classList.add('no-scroll');
+    closeBtn.focus();
+  }
+
+  // Закрыть модалку
+  function closeModal(){
+    overlay.setAttribute('aria-hidden','true');
+    document.body.classList.remove('no-scroll');
+    moreBtn.focus();
+  }
+
+  // Клики
+  moreBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+
+  // Клик по фону — закрыть
+  overlay.addEventListener('mousedown', (e)=>{
+    const dlg = e.target.closest('.desc-modal');
+    if (!dlg) closeModal();
+  });
+
+  // Esc — закрыть
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+  });
+})();
+
+
+
+});
+
+(function(){
+  // ========= ИНИЦИАЛИЗАЦИЯ ЗВЁЗД =========
+  const bar   = document.querySelector('.review-bar');
+  if (!bar) return;
+
+  const starsBox = bar.querySelector('.rev-stars');
+  const starBtns = starsBox ? Array.from(starsBox.querySelectorAll('.star-btn')) : [];
+
+  function setStars(count){
+    if (!starsBox) return;
+    const n = Math.max(0, Math.min(5, count|0));
+    starsBox.dataset.rating = String(n);
+    starBtns.forEach((btn, i)=>{
+      const img = btn.querySelector('.star-img');
+      const on  = img?.dataset.onSrc  || img?.getAttribute('data-on-src')  || '';
+      const off = img?.dataset.offSrc || img?.getAttribute('data-off-src') || '';
+      const active = i < n;
+      btn.setAttribute('aria-checked', String(active));
+      if (img && (on || off)) img.src = active ? on : off;
+    });
+  }
+
+  // по умолчанию все «off»
+  setStars(Number(starsBox?.dataset.rating || 0));
+
+  // Клик по звезде
+  starBtns.forEach((btn, idx)=>{
+    btn.addEventListener('click', ()=> setStars(idx+1));
+    btn.addEventListener('keydown', (e)=>{
+      if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); setStars(idx+1); }
+      if (e.key === 'ArrowRight'){ e.preventDefault(); setStars(Math.min(5, Number(starsBox.dataset.rating||0)+1)); }
+      if (e.key === 'ArrowLeft'){  e.preventDefault(); setStars(Math.max(0, Number(starsBox.dataset.rating||0)-1)); }
+    });
+  });
+
+  // ========= АНОНИМНЫЙ ТУМБЛЕР =========
+  const anon = bar.querySelector('.anon-toggle');
+  if (anon){
+    const toggle = ()=> {
+      const next = !(anon.getAttribute('aria-checked') === 'true');
+      anon.setAttribute('aria-checked', String(next));
+      // при желании можно эмитить событие наружу:
+      bar.dispatchEvent(new CustomEvent('review:anonymous', { detail:{ anonymous: next }}));
+    };
+    anon.addEventListener('click', toggle);
+    anon.addEventListener('keydown', (e)=>{
+      if (e.key===' ' || e.key==='Enter'){ e.preventDefault(); toggle(); }
+    });
+  }
+
+  // ========= СКРЕПКА (можно повесить свой обработчик) =========
+  const attach = bar.querySelector('.rev-attach');
+  if (attach){
+    attach.addEventListener('click', ()=> {
+      bar.dispatchEvent(new CustomEvent('review:attach'));
+      // здесь подключишь свой input[type=file] или модалку
+    });
+  }
+})();
+
+(function(){
+  const bar     = document.querySelector('.review-bar');
+  if (!bar) return;
+
+  const sendBtn = bar.querySelector('.rev-send');
+  const input   = bar.querySelector('.rev-input');
+  const stars   = bar.querySelector('.rev-stars');
+
+  function getRating(){
+    return Number(stars?.dataset.rating || 0) || 0;
+  }
+
+  function doSend(){
+    const payload = {
+      text: (input?.value || '').trim(),
+      rating: getRating(),
+      anonymous: bar.querySelector('.anon-toggle')?.getAttribute('aria-checked') === 'true'
+    };
+    // эмитим событие — бэкенд/интеграция подцепится где нужно
+    bar.dispatchEvent(new CustomEvent('review:submit', { detail: payload }));
+
+    // быстрый UX-реcет (по желанию)
+    // input.value = '';
+    // bar.querySelector('.anon-toggle')?.setAttribute('aria-checked','false');
+    // stars && (stars.dataset.rating = '0');
+  }
+
+  if (sendBtn){
+    sendBtn.addEventListener('click', doSend);
+    sendBtn.addEventListener('keydown', (e)=>{
+      if (e.key===' ' || e.key==='Enter'){ e.preventDefault(); doSend(); }
+    });
+  }
+
+  // submit по Enter в инпуте
+  if (input){
+    input.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter'){ e.preventDefault(); doSend(); }
+    });
+  }
+})();
+
+(function(){
+  // Контейнер блоку відгуку
+  const bar = document.querySelector('.review-bar');
+  const attachBtn = bar?.querySelector('.rev-attach');
+  if (!bar || !attachBtn) return;
+
+  // Додаємо один прихований file input (якщо його ще немає)
+  let fileInput = bar.querySelector('#reviewFiles');
+  if (!fileInput) {
+    fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.id = 'reviewFiles';
+    fileInput.accept = 'image/*';
+    fileInput.multiple = true;          // можна обрати кілька фото
+    fileInput.hidden = true;            // не займає місця в макеті
+    bar.appendChild(fileInput);
+  }
+
+  // (необов’язково) обмеження — підкоригуєш при потребі
+  const MAX_FILES = 10;                 // макс. кількість файлів
+  const MAX_MB    = 15;                 // макс. розмір одного файлу
+
+  // Відкриваємо системний діалог вибору файлів
+  function openPicker(e){
+    e && e.preventDefault();
+    fileInput.click();
+  }
+
+  // Обробка вибраних файлів
+  fileInput.addEventListener('change', ()=>{
+    const chosen = Array.from(fileInput.files || []);
+    const valid = [];
+    const errors = [];
+
+    chosen.forEach((f, idx) => {
+      if (idx >= MAX_FILES) return; // обрізаємо зайві
+      if (f.size > MAX_MB * 1024 * 1024) {
+        errors.push(`"${f.name}" перевищує ${MAX_MB} МБ`);
+      } else {
+        valid.push(f);
+      }
+    });
+
+    // Зберігаємо у пам’яті вузла (не у dataset, бо там не можна зберігати File-об’єкти)
+    bar._selectedFiles = valid;
+
+    // Даємо сигнал назовні (бекендерам/іншому коду)
+    bar.dispatchEvent(new CustomEvent('review:filesSelected', {
+      detail: { files: valid, errors }
+    }));
+
+    // (опційно) покажемо повідомлення у консолі для дебагу
+    if (errors.length) console.warn('Відкинуті файли:', errors);
+  });
+
+  // Клік / клавіатура по скріпці
+  attachBtn.addEventListener('click', openPicker);
+  attachBtn.addEventListener('keydown', (e)=>{
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); openPicker(); }
+  });
+})();
+
+(function(){
+  /* ===== ЗВЁЗДЫ (img on/off) ===== */
+  document.querySelectorAll('.rev-stars-review').forEach(wrap=>{
+    const rating = Math.max(0, Math.min(5, parseInt(wrap.dataset.rating||'0',10)));
+    wrap.querySelectorAll('.star-img').forEach((img, idx)=>{
+      const on  = img.getAttribute('data-on-src')  || img.dataset.onSrc  || '';
+      const off = img.getAttribute('data-off-src') || img.dataset.offSrc || '';
+      img.src = (idx < rating ? on : off) || off || on || '';
+    });
+  });
+
+  /* ===== ЛАЙТБОКС ===== */
+  const overlay = document.getElementById('lbOverlay');
+  const lbImg   = overlay?.querySelector('.lb-img');
+
+  function openLightbox(src){
+    if (!overlay || !lbImg || !src) return;
+    lbImg.src = src;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(){
+    if (!overlay || !lbImg) return;
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+    // по желанию: очищать src, чтобы выгружать картинку
+    // lbImg.src = '';
+  }
+
+  // клики по миниатюрам
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.rev-thumb');
+    if (!btn) return;
+    const full = btn.getAttribute('data-full') || btn.querySelector('img')?.getAttribute('src');
+    if (full) openLightbox(full);
+  });
+
+  // закрытие по клику вне изображения
+  overlay?.addEventListener('mousedown', (e)=>{
+    if (e.target === overlay) closeLightbox();
+  });
+
+  // Esc
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && overlay?.classList.contains('is-open')) closeLightbox();
+  });
+
+  /* лайк — прежняя логика */
+  document.querySelectorAll('.rev-like').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      const numEl = btn.querySelector('.like-num');
+      if (numEl){
+        const v = parseInt(numEl.textContent||'0',10)||0;
+        numEl.textContent = String(pressed ? Math.max(0, v-1) : v+1);
+      }
+    });
+  });
+})();
+
+(function(){
+  /* ===== ЗВЁЗДЫ (img on/off) — без изменений ===== */
+  document.querySelectorAll('.rev-stars').forEach(wrap=>{
+    const rating = Math.max(0, Math.min(5, parseInt(wrap.dataset.rating||'0',10)));
+    wrap.querySelectorAll('.star-img').forEach((img, idx)=>{
+      const on  = img.getAttribute('data-on-src')  || img.dataset.onSrc  || '';
+      const off = img.getAttribute('data-off-src') || img.dataset.offSrc || '';
+      img.src = (idx < rating ? on : off) || off || on || '';
+    });
+  });
+
+  /* ===== ЛАЙК: число + инверт иконки ===== */
+  function setLikeState(btn, next){
+    btn.setAttribute('aria-pressed', String(next));
+    btn.classList.toggle('is-active', next);
+
+    // число
+    const numEl = btn.querySelector('.like-num');
+    if (numEl){
+      const v = parseInt(numEl.textContent||'0',10) || 0;
+      numEl.textContent = String(next ? v+1 : Math.max(0, v-1));
+    }
+
+    // если это IMG и у тебя есть альтернативы — можешь переключать src
+    const img = btn.querySelector('.like-ico');
+    if (img && img.tagName === 'IMG'){
+      const black  = img.dataset.blackSrc  || img.getAttribute('data-black-src');
+      const normal = img.dataset.normalSrc || img.getAttribute('data-normal-src');
+      if (black && normal){
+        img.src = next ? black : normal;     // используем твои файлы
+        btn.classList.remove('is-active');   // фильтр не нужен при замене src
+      }
+    }
+    // если SVG с currentColor — чёрный цвет придёт от color у .rev-like (через is-active)
+  }
+
+  document.querySelectorAll('.rev-like').forEach(btn=>{
+    // стартовое состояние, если разметка уже с aria-pressed="true"
+    setLikeState(btn, btn.getAttribute('aria-pressed') === 'true');
+
+    btn.addEventListener('click', ()=>{
+      const next = !(btn.getAttribute('aria-pressed') === 'true');
+      setLikeState(btn, next);
+    });
+  });
+
+  /* ===== ЛАЙТБОКС: гарантированно показывает картинку ===== */
+  const overlay = document.getElementById('lbOverlay');
+  const lbImg   = overlay?.querySelector('.lb-img');
+
+  function openLightbox(src){
+    if (!overlay || !lbImg || !src) return;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+
+    // плавное появление после загрузки
+    lbImg.classList.remove('is-ready');
+    lbImg.onload = ()=> lbImg.classList.add('is-ready');
+    lbImg.onerror = ()=> {
+      lbImg.classList.add('is-ready');
+      // опционально: показать плейсхолдер или уведомление
+    };
+    lbImg.src = src;
+  }
+
+  function closeLightbox(){
+    if (!overlay || !lbImg) return;
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+    // по желанию — очищать src
+    // lbImg.src = '';
+  }
+
+  // открыть по миниатюрам отзывов
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.rev-thumb');
+    if (!btn) return;
+    const full = btn.getAttribute('data-full') || btn.querySelector('img')?.getAttribute('src');
+    if (full) {
+      e.preventDefault();
+      openLightbox(full);
+    }
+  });
+
+  // закрытие: клик по затемнению, но не по картинке
+  overlay?.addEventListener('mousedown', (e)=>{
+    if (e.target === overlay) closeLightbox();
+  });
+
+  // Esc — закрыть
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && overlay?.classList.contains('is-open')) closeLightbox();
+  });
+})();
+
+(function(){
+  // универсальная функция состояния лайка
+  function setLikeState(btn, next){
+    btn.setAttribute('aria-pressed', String(next));
+    btn.classList.toggle('is-active', next);
+
+    // число
+    const numEl = btn.querySelector('.like-num');
+    if (numEl){
+      const v = parseInt(numEl.textContent||'0', 10) || 0;
+      numEl.textContent = String(next ? v+1 : Math.max(0, v-1));
+    }
+
+    // если используешь разные источники картинок
+    const img = btn.querySelector('.like-ico');
+    if (img && img.tagName === 'IMG'){
+      const black  = img.dataset.blackSrc  || img.getAttribute('data-black-src');
+      const normal = img.dataset.normalSrc || img.getAttribute('data-normal-src');
+      if (black && normal){
+        img.src = next ? black : normal;
+        // при смене src фильтр не нужен
+        btn.classList.remove('is-active');
+      }
+    }
+  }
+
+  // ДЕЛЕГИРОВАННЫЙ клик по всей странице
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.rev-like');
+    if (!btn) return;
+    // если что-то сверху ловит клик — останавливаем всплытие
+    e.stopPropagation();
+    e.preventDefault(); // если кнопка обёрнута ссылкой/формой
+    const next = !(btn.getAttribute('aria-pressed') === 'true');
+    setLikeState(btn, next);
+  });
+
+  // Клавиатура — Enter/Space
+  document.addEventListener('keydown', (e)=>{
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    const btn = e.target.closest('.rev-like');
+    if (!btn) return;
+    e.preventDefault();
+    const next = !(btn.getAttribute('aria-pressed') === 'true');
+    setLikeState(btn, next);
+  });
+
+  // Автодобавим доступность на все лайки (на случай голой разметки)
+  document.querySelectorAll('.rev-like').forEach(btn=>{
+    if (!btn.hasAttribute('role')) btn.setAttribute('role','button');
+    if (!btn.hasAttribute('tabindex')) btn.setAttribute('tabindex','0');
+    if (!btn.hasAttribute('aria-pressed')) btn.setAttribute('aria-pressed','false');
+  });
+
+  // Диагностика перекрытий (включи временно при отладке)
+  // setTimeout(()=>{ document.querySelectorAll('.rev-like').forEach(b=> b.style.outline='1px dashed red'); }, 0);
+})();
+
+(()=>{
+  const openBtn  = document.querySelector('.report-open');
+  const modal    = document.getElementById('reportModal');
+  const backdrop = modal?.querySelector('.report-modal__backdrop');
+  const opts     = Array.from(modal?.querySelectorAll('.report-opt')||[]);
+  const submit   = modal?.querySelector('.report-submit');
+  const toast    = document.querySelector('.report-toast');
+  const toastClose = toast?.querySelector('.report-toast__close');
+
+  let selectedReason = null;
+  let toastTimer = null;
+  let sending = false;              // ← защита от даблкликов
+
+  const openModal = ()=>{
+    if (!modal) return;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    openBtn?.setAttribute('aria-expanded','true');
+    selectedReason = null;
+    sending = false;                // сбрасываем состояние отправки при каждом открытии
+    opts.forEach(b=> b.classList.remove('is-active'));
+    if (submit) submit.disabled = true;
+  };
+  const closeModal = ()=>{
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    openBtn?.setAttribute('aria-expanded','false');
+  };
+
+  openBtn?.addEventListener('click', openModal);
+  backdrop?.addEventListener('click', closeModal);
+  document.addEventListener('keydown', e=>{
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  opts.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      opts.forEach(b=> b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      selectedReason = btn.getAttribute('data-reason');
+      if (submit) submit.disabled = !selectedReason || sending;
+    });
+  });
+
+  submit?.addEventListener('click', async ()=>{
+    if (!selectedReason || sending) return;  // ← не даём отправить дважды
+    sending = true;
+    submit.disabled = true;
+
+    // тут твой реальный запрос на бекенд
+    // await fetch('/api/report', {method:'POST', body:JSON.stringify({reason:selectedReason})});
+
+    closeModal();
+    showToast();
+  });
+
+  function showToast(){
+    if (!toast) return;
+    clearTimeout(toastTimer);
+    // показать с плавностью (если было скрыто)
+    toast.classList.remove('is-hiding');
+    toast.hidden = false;
+    // автозакрытие
+    toastTimer = setTimeout(hideToast, 2000);
+  }
+
+  function hideToast(){
+    if (!toast) return;
+    // запускаем анимацию скрытия
+    toast.classList.add('is-hiding');
+    // после окончания анимации — реально скрываем
+    const onEnd = (e)=>{
+      if (e.propertyName !== 'opacity') return;
+      toast.hidden = true;
+      toast.classList.remove('is-hiding');
+      toast.removeEventListener('transitionend', onEnd);
+      sending = false;              // ← теперь снова можно отправлять новую жалобу
+    };
+    toast.addEventListener('transitionend', onEnd);
+  }
+
+  toastClose?.addEventListener('click', ()=>{
+    clearTimeout(toastTimer);
+    hideToast();
+  });
+})();
+</script>
+
+
+</script>
+
+
+</body>
+</html>
