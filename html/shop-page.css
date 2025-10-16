@@ -1,0 +1,1969 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 2650px; /* временно, чтобы не мешал просмотру страницы */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+/* === Group 738: Продавець === */
+.seller-badge {
+  position: absolute;
+  width: 131px;
+  height: 36px;
+  left: 813px;
+  top: 263.09px;
+
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px; /* 144% */
+  color: #828181;
+}
+
+/* === Group 737: заголовок магазина === */
+.store-title {
+  position: absolute;
+  width: 359px;
+  height: 43px;
+  left: 813px;
+  top: 307.51px;
+
+  margin: 0;
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 37.5px;
+  line-height: 43px; /* identical to box height */
+  color: #363535;
+}
+
+.group-683 {
+  position: absolute;
+  width: 1092px;
+  height: 296.46px;
+  left: 80px;
+  top: 263.09px;
+}
+
+/* Изображение вместо background */
+.rect-144__img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 652.2px;
+  height: 296.46px;
+  display: block;
+  object-fit: cover;        /* нужно без обрезки — замени на contain */
+  object-position: center;
+  border-radius: 19.1261px; /* как в макете */
+  border: 0;
+  outline: 0;
+}
+
+/* Рамка поверх изображения */
+.rect-145 {
+  box-sizing: border-box;
+  pointer-events: none;     /* клики остаются по картинке */
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 652.2px;
+  height: 296.46px;
+  border: 2px solid #ECECEC;
+  border-radius: 19.1261px;
+}
+
+/* === Group 771: вкладки (без изменений в позициях кнопок) === */
+.group-771 {
+  position: absolute;
+  width: 341.19px;
+  height: 28.15px;
+  left: 813px;
+  top: 448px;
+}
+
+.group-771 .tab {
+  position: absolute;
+  top: 0%;
+  bottom: 14.76%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: 400 14px/24px "Ubuntu", sans-serif;
+  color: #828181;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Геометрия кнопок строго как в макете */
+.group-771 .tab-goods   { left: 0%;     right: 71.57%; }
+.group-771 .tab-about   { left: 35.76%; right: 35.78%; }
+.group-771 .tab-reviews { left: 71.54%; right: 0%; }
+
+.group-771 .tab.is-active { color: #363535; }
+
+/* Зелёная линия-индикатор — анимируем left/width */
+.group-771 .tab-underline {
+  position: absolute;
+  top: 100%;
+  height: 0;
+  left: 0;
+  width: 0;
+  border-top: 1.5px solid #35C65E;
+  /* плавный «перелив» */
+  transition: left 220ms cubic-bezier(.22,.61,.36,1), width 220ms cubic-bezier(.22,.61,.36,1);
+}
+
+/* Уважение к системной настройке «уменьшить движение» */
+@media (prefers-reduced-motion: reduce) {
+  .group-771 .tab-underline {
+    transition: none;
+  }
+}
+
+/* Group 678 */
+.group-678 {
+  position: absolute;
+  width: 192.9px;
+  height: 36px;
+  left: 813px;
+  top: 362.29px;
+  font-family: "Ubuntu", sans-serif;
+}
+
+/* Group 9 */
+.group-9 {
+  position: absolute;
+  width: 70.9px;
+  height: 36px;
+  left: 0px;          /* 813 - 813 */
+  top: 0px;           /* 362.29 - 362.29 */
+}
+
+/* material-symbols:star (иконку вставишь сам) */
+.star-icon {
+  position: absolute;
+  width: 30.51px;
+  height: 30.51px;
+  left: 0px;          /* 813 - 813 */
+  top: 2.74px;        /* 365.03 - 362.29 */
+  display: block;
+  object-fit: contain;
+  border: 0;
+  outline: 0;
+}
+
+/* 4,4 */
+.rating {
+  position: absolute;
+  width: 35px;
+  height: 36px;
+  left: 35.9px;       /* 848.9 - 813 */
+  top: 0px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;  /* 144% */
+  color: #828181;
+  display: flex;
+  align-items: center;
+}
+
+/* Group 353 */
+.group-353 {
+  position: absolute;
+  width: 113px;
+  height: 24px;
+  left: 79.9px;       /* 892.9 - 813 */
+  top: 7.66px;        /* 369.95 - 362.29 */
+}
+
+/* Rectangle 84: зелёная точка */
+.sep-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  left: 0px;          /* внутри Group 353 */
+  top: 9px;           /* 16.66 - 7.66 */
+  background: #35C65E;
+  border-radius: 10px;
+}
+
+/* 96 782 відгука */
+.reviews {
+  position: absolute;
+  width: 94px;
+  height: 24px;
+  left: 19px;         /* 911.9 - 892.9 */
+  top: 0px;           /* 369.95 - 369.95 */
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;  /* 171% */
+  color: #35C65E;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.group-471 {
+  position: absolute;
+  width: 380px;
+  height: 24px;
+  left: 80px;
+  top: 185px;
+  font-family: "Ubuntu", sans-serif;
+}
+
+.group-471 .crumb {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  color: #363535;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.group-471 .crumb-root {
+  left: 0px;      /* 80 -> 0 относительно группы */
+  top: 0px;
+  width: 134px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px; /* 200% */
+}
+
+.group-471 .crumb-mid {
+  left: 171px;    /* 251 - 80 */
+  top: 0px;
+  width: 73px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px; /* 200% */
+}
+
+.group-471 .crumb-leaf {
+  left: 281px;    /* 361 - 80 */
+  top: 0px;
+  width: 99px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px; /* 171% */
+}
+
+.group-471 .arrow {
+  position: absolute;
+  width: 21px;
+  height: 21px;
+  display: block;
+  object-fit: contain;
+  border: 0;
+  outline: 0;
+  top: 2px;       /* 187 - 185 */
+}
+
+.group-471 .arrow-1 { left: 140px; }
+
+.group-471 .arrow-2 { left: 250px; }
+
+/* Панель вкладки: по умолчанию скрыта */
+.tab-panel { display: none; }
+.tab-panel.is-visible { display: block; }
+
+/* Карточка: 268×356 @ (80, 1096) */
+.product-card{
+  position:absolute;
+  left:80px; top:700px;
+  width:268px; height:356px;
+  box-sizing:border-box;
+  font-family:'Ubuntu',sans-serif;
+}
+
+/* ===== ФОТО (Mask group) 268×270 ===== */
+.product-card .photo-mask{
+  position:absolute; left:0; top:0;
+  width:268px; height:270px;
+  overflow:hidden;                   /* маска */
+}
+
+/* Rectangle 13 — зелёная подложка */
+.product-card .photo-bg{
+  position:absolute; left:0; top:0;
+  width:268px; height:270px;
+}
+
+/* ===== Внешняя рамка карточки (Rectangle 14) ===== */
+.product-card .card-frame{
+  position:absolute; left:0; top:0;
+  width:268px; height:356px;
+  border:2px solid #ECECEC;
+  border-radius:15px;
+  box-sizing:border-box;
+}
+
+/* ===== Заголовок (Group 160) 228×24 @ (20, 283) ===== */
+.product-card .title{
+  position:absolute; left:20px; top:283px;
+  width:228px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#363535;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ===== Рейтинг (Group 9) ===== */
+/* Звезда 17×17 @ (208, 287.5) и значение 20×24 @ (228, 283) */
+.product-card .rating .star{
+  position:absolute; left:205px; top:285.5px;
+  width:17px; height:17px; display:block; overflow:hidden;
+}
+.product-card .rating .star img{
+  width:100%; height:100%; object-fit:contain; display:block;
+}
+.product-card .rating .val{
+  position:absolute; left:180px; top:283px;
+  width:20px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+}
+
+/* ===== Цены и кнопки (Group 161) 228×24 @ (20, 315) ===== */
+.product-card .price-row{
+  position:absolute; left:20px; top:315px;
+  width:228px; height:24px;
+}
+
+/* 207 грн (43×24 @ 20, 315) */
+.product-card .price-now{
+  position:absolute; left:0; top:0;
+  width:43px; height:24px;
+  font-weight:500; font-size:12px; line-height:24px;
+  color:#35C65E;
+}
+
+/* 259 грн (36×11 @ 86.39, 322), перечёркнутая, 50% непрозр. */
+.product-card .price-old{
+  position:absolute; left:66.39px; top:7px; /* 86.39-20, 322-315 */
+  width:36px; height:11px;
+  font-weight:400; font-size:10px; line-height:11px;
+  color:#828181; text-decoration:line-through;
+  opacity:.5;
+}
+
+/* две квадратные кнопки справа (иконки внутри — по желанию) */
+/* Vector 21×20 @ (195, 317.5) — серый контур */
+.product-card .btn-ghost{
+  position:absolute; left:175px; top:2.5px; /* 195-20, 317.5-315 */
+  width:21px; height:20px;
+  padding:0; background:#fff; border:1.5px solid #363535; box-sizing:border-box;
+  border-radius:2px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.product-card .btn-ghost img{ max-width:100%; max-height:100%; display:block; }
+
+/* Vector 20×20 @ (228, 317.5) — зелёный контур */
+.product-card .btn-green{
+  position:absolute; left:208px; top:2.5px; /* 228-20, 317.5-315 */
+  width:20px; height:20px;
+  padding:0; background:#fff; border:1.5px solid #35C65E; box-sizing:border-box;
+  border-radius:2px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.product-card .btn-green img{ max-width:100%; max-height:100%; display:block; }
+
+/* ===== Бейдж скидки (Group 170) ===== */
+/* Контейнер 57.99×24 @ (13.81, 235.08) — для плейсмента */
+.product-card .badge{
+  position:absolute; left:13.81px; top:235.08px;
+  width:57.99px; height:24px; display:block;
+}
+
+/* Таблетка (Rectangle 47) 56.55×20.24 @ (15.25, 236.95) */
+.product-card .badge-bg{
+  position:absolute; left:1.44px; top:1.87px; /* 15.25-13.81, 236.95-235.08 */
+  width:56.55px; height:20.24px;
+  background:#FF6B5B; border:2px solid #FFFFFF; border-radius:40px;
+  box-sizing:border-box;
+}
+
+/* Текст "-20%" как изображение, на весь контейнер бейджа */
+.product-card .badge-img{
+  position:absolute; left:0; top:0;
+  width:100%; height:100%; object-fit:contain; display:block;
+}
+
+/* Снятие обводок кнопок, как ты просил */
+.product-card .btn-ghost,
+.product-card .btn-green {
+  border: none !important;
+  background: #FFFFFF;
+}
+
+/* Фокус-доступность — тонкий инсет вместо классического outline */
+.product-card .btn-ghost:focus-visible,
+.product-card .btn-green:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #35C65E;
+}
+
+/* Уточнение рендера фото (конечная версия — fill контейнера) */
+.product-card .photo-img {
+  left: 0; top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;           /* заполняет без искажений */
+  object-position: center;     /* центр кадра */
+  image-rendering: auto;
+  transform: translateZ(0);
+}
+
+.product-card .product-link {
+  position: absolute;
+  inset: 0;              /* top:0; right:0; bottom:0; left:0 */
+  z-index: 1;            /* ниже внутренних кнопок, чтобы они работали */
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* чтобы внутренние action-кнопки были поверх hit-area */
+.product-card .btn-ghost,
+.product-card .btn-green {
+  position: absolute;    /* уже так */
+  z-index: 2;            /* выше .product-link */
+}
+
+/* ===== Кнопка сортування — Group 270: 136.98×30 @ (660.98, 222.14) ===== */
+.sort-btn{
+  position:absolute;
+  left:1000.98px; top:640.14px; /* 340 + 200 */
+  width:136.98px; height:30px;
+  border:0; background:transparent; cursor:pointer;
+  transition:transform 120ms ease, filter 120ms ease;
+  z-index:1000; /* над popup'ом */
+}
+.sort-btn:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.sort-btn:active{ transform:translateY(0);    filter:brightness(0.98); }
+.sort-btn:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Frame 7 — область під іконку зліва (як у макеті) */
+.sort-btn .sort-ico-wrap{
+  position:absolute; left:0%; right:78.1%; top:0%; bottom:0%; display:block;
+}
+.sort-btn .sort-icon-img{
+  position:absolute; left:9.86px; top:5.28px;
+  width:19.43px; height:19.43px; display:block; object-fit:contain;
+  pointer-events:none;
+}
+
+/* Текст «З початку нові» */
+.sort-btn .sort-text{
+  position:absolute; left:30.65%; right:0%; top:10%; height:80%;
+  display:flex; align-items:center; justify-content:flex-start;
+  font-family:'Ubuntu'; font-weight:400; font-size:14px; line-height:24px;
+  color:#363535; white-space:nowrap;
+}
+
+/* ===== Вікно сортування — Group 584: 182.95×160.06 @ (640, 242.14) ===== */
+.sort-popup{
+  position:absolute; left:980px; top:660.14px;
+  width:182.95px; height:160.06px;
+  pointer-events:none; /* поки сховано */
+  opacity:0; transition:opacity 160ms ease;
+}
+.sort-popup.is-open{ opacity:1; pointer-events:auto; }
+.sort-popup[aria-hidden="true"]{ opacity:0; pointer-events:none; }
+
+/* Rectangle 129 — фон вікна */
+.sort-popup .sort-box{
+  position:absolute; left:0; top:0;
+  width:182.95px; height:160.06px;
+  background:#FFFFFF; border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+/* Кожен пункт (30px) — «пікс у пікс» відносно popup */
+.sort-popup .sort-opt{
+  position:absolute; left:20.98px; /* 660.98 - 640 */
+  width:auto; height:30px; border:0; background:transparent; cursor:pointer;
+  display:block; padding:0; text-align:left;
+}
+
+/* top’и з макета: 264.06/308.06/352.06 -> мінус 242.14 */
+.sort-popup .opt-old       { top:21.92px;  width:141px; } /* Group 271 */
+.sort-popup .opt-price-asc { top:65.92px;  width:134px; } /* Group 272 */
+.sort-popup .opt-price-desc{ top:109.92px; width:130px; } /* Group 273 */
+
+/* Іконка зліва в пункті */
+.sort-popup .opt-ico-wrap{
+  position:absolute; left:0; top:0; bottom:0; width:30px; display:block;
+}
+.sort-popup .opt-icon-img{
+  position:absolute; left:9.86px; top:5.28px;
+  width:19.43px; height:19.43px; object-fit:contain; display:block;
+  pointer-events:none;
+}
+
+/* Текст пунктів — відсоткові відступи з макета */
+.sort-popup .opt-old .opt-label{
+  position:absolute; left:29.48%; right:0.3%; top:10%; height:80%;
+}
+.sort-popup .opt-price-asc .opt-label{
+  position:absolute; left:31.02%; right:-0.43%; top:10%; height:80%;
+}
+.sort-popup .opt-price-desc .opt-label{
+  position:absolute; left:31.98%; right:0.33%; top:10%; height:80%;
+}
+
+/* Типографіка пунктів */
+.sort-popup .opt-label{
+  display:flex; align-items:center; justify-content:flex-start;
+  font-family:'Ubuntu'; font-weight:400; font-size:14px; line-height:24px;
+  color:#363535; white-space:nowrap;
+}
+
+/* Ховер/фокус пунктів */
+.sort-popup .sort-opt:hover .opt-label{ text-decoration:underline; }
+.sort-popup .sort-opt:focus-visible{ outline:2px solid #35C65E; border-radius:6px; }
+
+/* Контейнер для карточек товаров (виден только на 1-й вкладке) */
+.products-strip{
+  position:relative; /* сюда вставляй .product-card, как давал ранее */
+}
+
+/* Позиція та розмір панелі — ПІКС-В-ПІКС */
+.side-panel-local{
+  position: absolute;
+  left: 1301px;
+  top: 690.21px;
+  width: 313.83px;
+  height: 847.75px;
+  z-index: 1001;
+  transform: translateX(0);            /* завжди видно */
+  pointer-events: auto;                /* активна */
+}
+
+/* Прямокутник панелі */
+.side-panel-local .panel-rect{
+  box-sizing: border-box;
+  position: absolute;
+  left: 0%; right: 0%; top: 0%; bottom: 0%;
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 10px;
+}
+/* службові та анімаційні стани (залишаю — раптом згодяться) */
+.is-hidden{ display:none!important; }
+.popular-title,.sale-title,.link-all,.link-more,.catalog-btn,.catalog-btn-sm{
+  will-change: opacity, transform;
+  transition: opacity .18s ease, transform .22s ease;
+}
+.is-vanished{ opacity:0; transform:translateY(-8px); pointer-events:none; }
+
+/* Переміщення картки (якщо треба) */
+.product-card{ transition: top .28s ease, left .28s ease, transform .28s ease, opacity .18s ease; }
+.product-card--moved{ left:80px!important; top:688px!important; }
+
+/* Типографіка */
+.flt-title,.flt-label{ font-family:'Ubuntu',sans-serif; font-style:normal; font-weight:400; font-size:14px; line-height:24px; }
+
+/* ===== Позиції — як у макеті ===== */
+.flt-title.flt-availability{ position:absolute; left:10.24%; top:17.82%; color:#828181; display:flex; align-items:center; }
+.flt-label.lbl-instock{ position:absolute; left:18.41%; top:21.87%; color:#363535; display:flex; align-items:center; }
+.flt-box.box-instock{ position:absolute; left:10.44%; top:189.89px; width:15px; height:15px; }
+.flt-label.lbl-outstock{ position:absolute; left:18.41%; top:25.49%; color:#363535; display:flex; align-items:center; }
+.flt-box.box-outstock{ position:absolute; left:10.44%; top:220.59px; width:15px; height:15px; }
+
+.flt-title.flt-promo{ position:absolute; left:10.24%; top:31.85%; color:#828181; display:flex; align-items:center; }
+.flt-label.lbl-promo-yes{ position:absolute; left:18.41%; top:35.9%; color:#363535; display:flex; align-items:center; }
+.flt-box.box-promo-yes{ position:absolute; left:10.44%; top:308.85px; width:15px; height:15px; }
+.flt-label.lbl-promo-no{ position:absolute; left:45.65%; top:35.9%; color:#363535; display:flex; align-items:center; }
+.flt-box.box-promo-no{ position:absolute; left:37.69%; top:308.85px; width:15px; height:15px; }
+
+.flt-title.flt-rating-title{ position:absolute; left:10.24%; top:75.33%; color:#828181; display:flex; align-items:center; }
+.stars-group{ position:absolute; left:16.98%; right:21.21%; top:79.34%; bottom:17.12%; }
+.stars-group .star{ position:absolute; width:30px; height:30px; padding:0; border:none; background:transparent; cursor:pointer; display:block; }
+.stars-group .star:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(53,198,94,.35); border-radius:4px; }
+.stars-group .star:nth-child(1){ left:0%; top:0; }
+.stars-group .star:nth-child(2){ left:21.13%; top:0; }
+.stars-group .star:nth-child(3){ left:42.27%; top:0; }
+.stars-group .star:nth-child(4){ left:63.4%;  top:0; }
+.stars-group .star:nth-child(5){ left:84.54%; top:0; }
+.stars-group .star-img{ width:100%; height:100%; object-fit:contain; display:block; user-select:none; pointer-events:none; }
+
+.cat-title{ position:absolute; left:10.24%; top:42.27%; color:#828181; display:flex; align-items:center; }
+.cat-scroll{ position:absolute; left:10.44%; right:35.07%; top:46.31%; bottom:28.21%; overflow-y:auto; padding-right:6px; width:80%; }
+.cat-scroll::-webkit-scrollbar{ width:6px; }
+.cat-scroll::-webkit-scrollbar-thumb{ background:#ECECEC; border-radius:4px; }
+.cat-scroll{ scrollbar-width:thin; scrollbar-color:#ECECEC transparent; }
+
+.cat-item{ position:relative; height:24px; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.cat-check{ width:15px; height:15px; box-sizing:border-box; border:2px solid #ECECEC; border-radius:5px; background:#FFFFFF; padding:0; cursor:pointer; transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.cat-check.is-checked,.cat-check[aria-checked="true"]{ background:#35C65E; border-color:#35C65E; }
+.cat-check:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(53,198,94,.35); }
+.cat-label{ font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px; color:#363535; cursor:pointer; white-space:nowrap; }
+.cat-label:hover{ text-decoration:underline; text-underline-offset:2px; }
+
+/* ===== Ціна ===== */
+.price-group,.price-title,.price-label,.price-input{ font-family:'Ubuntu',sans-serif; font-weight:400; font-size:14px; line-height:24px; }
+.price-group{ position:absolute; left:10.24%; right:10.24%; top:3.9%; bottom:85.71%; }
+.price-title{ position:absolute; left:0%; right:80.21%; top:-30%; bottom:93.27%; color:#828181; display:flex; align-items:center; }
+.price-track{ position:absolute; left:10.24%; right:10.24%; top:8.7%; bottom:90.12%; }
+.price-track-line{ position:absolute; left:10.24%; right:10.24%; top:9.43%; bottom:90.57%; border-top:2px solid #ffffff; }
+
+.price-active{ position:absolute; height:2px; top:calc(9.43% - 1px); background:#35C65E; border-radius:2px; transition:left .18s ease, width .18s ease, opacity .18s ease; }
+.price-dot{ position:absolute; width:10px; height:10px; top:calc(9.43% - 5px); margin-left:-5px; background:#35C65E; border-radius:50%; box-shadow:0 0 0 2px #fff; transition:left .18s ease, opacity .18s ease, transform .18s ease; }
+.price-dot:not([hidden]){ opacity:1; } .price-dot[hidden]{ opacity:0; }
+.price-dot:hover{ transform:scale(1.05); }
+
+.price-io{ position:absolute; left:10.24%; right:23.01%; top:30.46%; bottom:85.71%; }
+.price-label{ position:absolute; color:#363535; display:flex; align-items:center; }
+.price-label--from{ left:10.24%; top:0; }
+.price-label--to{   left:46.61%; top:0; }
+
+.price-input{ position:absolute; width:20%; padding:0 2px; border:none; outline:none; background:transparent; color:#363535; }
+.price-input--from{ left:21.64%; top:50%; }
+.price-input--to{   left:58.07%; top:50%; }
+
+.price-underline{ position:absolute; border-top:2px solid #ECECEC; }
+.price-underline--from{ left:21.64%; right:59.43%; top:58%; }
+.price-underline--to{   left:58.07%; right:23.01%; top:58%; }
+
+.price-input:focus ~ .price-underline--from{ border-color:var(--from-focus,#ECECEC); }
+.price-input:focus ~ .price-underline--to{   border-color:var(--to-focus,#ECECEC); }
+
+/* База чекбоксів */
+.flt-box{ box-sizing:border-box; border:2px solid #ECECEC; border-radius:5px; background:#FFFFFF; padding:0; cursor:pointer; transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.flt-box.is-checked,.flt-box[aria-checked="true"]{ background:#35C65E; border-color:#35C65E; }
+.flt-box:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(53,198,94,.35); }
+.flt-label{ cursor:pointer; } .flt-label:hover{ text-decoration:underline; text-underline-offset:2px; }
+
+.flt-title.flt-popularity{
+  position:absolute;
+  left:10.24%;
+  top:725.67px;
+  color:#828181;
+  display:flex; align-items:center;
+}
+
+.flt-label.lbl-hit{
+  position:absolute;
+  left:18.41%;
+  top:762.04px; 
+  color:#363535;
+  display:flex; align-items:center;
+}
+
+.flt-box.box-hit{
+  position:absolute;
+  left:10.44%;
+  top:764.47px;
+  width:15px; height:15px;
+}
+
+.flt-label.lbl-new{
+  position:absolute;
+  left:18.41%;
+  top:790.70px;
+  color:#363535;
+  display:flex; align-items:center;
+}
+.flt-box.box-new{
+  position:absolute;
+  left:10.44%;
+  top:795.17px;
+  width:15px; height:15px;
+}
+
+/* Контейнер боксу (Group 804) */
+.group-804{
+  position:absolute;
+  width:584.5px;
+  height:397.7px;
+  left:80.5px;
+  top:628.26px;
+  font-family:"Ubuntu",sans-serif;
+}
+
+/* Rectangle 49 — рамка */
+.workbox-frame{
+  box-sizing:border-box;
+  position:absolute;
+  left:0; top:0;
+  width:584.5px; height:397.7px;
+  border:2px solid #EBEBEC;
+  border-radius:19px;
+}
+
+/* Frame — зона для зображення (428.77×308.93 @ (0, 86.94) всередині групи) */
+.workbox-photo{
+  position:absolute;
+  left:0px;
+  top:86.94px; /* 715.2 - 628.26 */
+  width:428.77px;
+  height:308.93px;
+  overflow:hidden;
+  border-radius:12px; /* легке згладжування країв зони фото */
+}
+
+/* саме зображення — ти підставиш src */
+.workbox-photo__img{
+  position:absolute;
+  left:0; top:0;
+  width:100%; height:100%;
+  display:block;
+  object-fit:cover;     /* без спотворень, заповнює область */
+  object-position:center;
+  border:0; outline:0;
+}
+
+
+
+/* Правий текстовий блок (Group 185) */
+.workbox-text{
+  position:absolute;
+  width:201.08px;
+  height:106.89px;
+  left:312.89px; /* 393.39 - 80.5 */
+  top:46.43px;   /* 674.69 - 628.26 */
+}
+
+/* «Графік роботи продавця» */
+.workbox-caption{
+  position:absolute;
+  left:16.15px;  /* 409.54 - 393.39 */
+  top:0;
+  width:168.79px;
+  height:24px;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px; /* 171% */
+  color:#828181;
+}
+
+/* «Пн-Пт…» */
+.workbox-hours{
+  position:absolute;
+  left:0; top:34.88px; /* 709.57 - 674.69 */
+  width:201.08px;
+  height:72px;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px; /* 144% */
+  color:#363535;
+  text-align:center;
+  white-space:pre-line; /* перенос за <br> */
+}
+
+.workbox-text{
+  position:absolute;
+  width:201.08px;
+  height:106.89px;
+  left:312.89px;   /* 393.39 - 80.5 */
+  top:46.43px;     /* 674.69 - 628.26 */
+  --clr-text:#363535;
+  --clr-muted:#363535;
+  --lh:36px;       /* line-height 36px по макету */
+  --fs:25px;       /* font-size 25px по макету */
+}
+
+/* Заголовок */
+.workbox-caption{
+  position:absolute;
+  left:16.15px; top:0;
+  width:168.79px; height:24px;
+  font: 400 14px/24px "Ubuntu", sans-serif;
+  color: var(--clr-muted);
+}
+
+/* Список графіка — занимает прежний блок "Пн-Пт… / Сб-Нд…" */
+.schedule{
+  position:absolute;
+  left:0; top:34.88px;          /* 709.57 - 674.69 */
+  width:201.08px; height:72px;  /* как в макете */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;       /* центр по вертикали, как было */
+  gap:0;                        /* строки вплотную: 2 × 36px */
+  text-align:center;
+}
+
+/* Одна строка графіка */
+.sch-row{
+  position:relative;
+  height:var(--lh);
+  display:grid;
+  grid-template-columns: 1fr auto 1fr; /* день | сепаратор | часи */
+  align-items:center;
+  font: 400 var(--fs)/var(--lh) "Ubuntu", sans-serif;
+  color: var(--clr-text);
+}
+
+/* Левая часть (дні) и правая (часи) */
+.sch-days{ justify-self:end; padding-right:6px; white-space:nowrap; }
+.sch-time{ justify-self:start; padding-left:6px; white-space:nowrap; }
+
+/* Тонкий «сепаратор-точечки» посередині (адаптивно заполняет зазор) */
+.sch-sep{
+  display:block;
+  height:2px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent 0, #EBEBEC 48%, transparent 100%);
+  opacity:.9;
+  transform: translateY(1px);
+}
+
+/* Закрытая строка */
+.sch-row.is-closed .sch-time{
+  color: var(--clr-muted);
+}
+
+/* Контейнер блока */
+.group-810{
+  position:absolute;
+  width:462.5px;
+  height:159.37px;
+  left:80.5px;
+  top:1050.96px;
+  font-family:"Ubuntu",sans-serif;
+}
+
+/* Рамка (Rectangle 50) */
+.since-frame{
+  box-sizing:border-box;
+  position:absolute;
+  left:0; top:0;
+  width:462.5px; height:159.37px;
+  border:2px solid #EBEBEC;
+  border-radius:19px;
+}
+
+/* Контентная группа (Group 806): 346.31×36 @ (121.73, 1112.64) */
+.since-row{
+  position:absolute;
+  left:41.23px;   /* 121.73 - 80.5 */
+  top:61.68px;    /* 1112.64 - 1050.96 */
+  width:346.31px;
+  height:36px;
+}
+
+/* «З нами з» — 56×24 @ (121.73, 1118.64) */
+.since-label{
+  position:absolute;
+  left:0;
+  top:6px;        /* 1118.64 - 1112.64 */
+  width:56px;
+  height:24px;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;     /* 171% */
+  color:#828181;
+  display:flex; align-items:center;
+  white-space:nowrap;
+}
+
+/* Дата — 241×36 @ (227.04, 1112.64) */
+.since-date{
+  position:absolute;
+  left:105.31px;  /* 227.04 - 121.73 */
+  top:0;
+  width:241px;
+  height:36px;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;     /* 144% */
+  color:#363535;
+  display:flex; align-items:center;
+  white-space:nowrap;
+}
+
+/* === Контейнер блока (Group 816) === */
+.group-816{
+  position:absolute;
+  width:463px;
+  height:159.37px;
+  left:568px;
+  top:1050.96px;
+  font-family:"Ubuntu",sans-serif;
+}
+
+/* Рамка (Rectangle 51/52) */
+.trust-frame{
+  box-sizing:border-box;
+  position:absolute;
+  left:0; top:0;
+  width:462.5px; height:159.37px;   /* як у макеті */
+  border:2px solid #EBEBEC;
+  border-radius:19px;
+}
+
+/* Текст «Надійний продавець» (74×48 @ 610.84, 1080.94) */
+.trust-text{
+  position:absolute;
+  left:42.84px;   /* 610.84 - 568 */
+  top:29.98px;    /* 1080.94 - 1050.96 */
+  width:74px;
+  height:48px;
+  font-weight:500;
+  font-size:14px;
+  line-height:24px;   /* 171% */
+  color:#35C65E;
+  display:flex;
+  align-items:center;
+}
+
+/* === Правий медіаблок (Group 255) === */
+/* 314×141 @ (717, 1068.44) */
+.trust-media{
+  position:absolute;
+  left:149px;     /* 717 - 568 */
+  top:17.48px;    /* 1068.44 - 1050.96 */
+  width:314px;
+  height:141px;
+  overflow:hidden;
+  border-radius:12px; /* легке згладжування — не заважає пікс-в-пікс в середині */
+}
+
+.trust-img{
+  position:absolute;
+  left:0; top:0;
+  width:100%; height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border:0; outline:0;
+}
+
+/* === Декор (Group 814) — позиції як у макеті === */
+/* Контейнер 323.9×302.87 @ (-6.11, -34.55), rotate(9.12deg) */
+.decor-814{
+  position:absolute;
+  width:323.9px;
+  height:302.87px;
+  left:-6.11px;
+  top:-34.55px;
+  transform:rotate(9.12deg);
+  pointer-events:none;
+}
+
+/* Біла «юніон» рамка з зеленим обводом */
+.decor-814 .u-main{
+  position:absolute;
+  left:-1.95%;
+  right:-1.21%;
+  top:-3.94%;
+  bottom:-90.04%;
+  background:#FFFFFF;
+  border:2px solid #7AD293;
+  transform:rotate(9.12deg);
+}
+
+/* Зовнішній контур */
+.decor-814 .v-outline{
+  position:absolute;
+  box-sizing:border-box;
+  left:-0.31%;
+  right:-1.19%;
+  top:-3.36%;
+  bottom:-90.62%;
+  background:#FFFFFF;
+  border:2.71301px solid #35C65E;
+  transform:rotate(9.12deg);
+}
+
+/* Косий «Icon»-контур (matrix) */
+.decor-814 .v-icon{
+  position:absolute;
+  left:5.16%;
+  right:67.82%;
+  top:16.14%;
+  bottom:25.29%;
+  background:#FFFFFF;
+  border:2.71301px solid #35C65E;
+  transform:matrix(-0.88,-0.47,-0.47,0.88,0,0);
+}
+
+/* Контейнер блока (Group 809) */
+.group-809{
+  position:absolute;
+  width:462.5px;
+  height:159.37px;
+  left:1057.5px;
+  top:1050.96px;
+  font-family:"Ubuntu",sans-serif;
+}
+
+/* Рамка (Rectangle 52) */
+.social-frame{
+  box-sizing:border-box;
+  position:absolute;
+  left:0; top:0;
+  width:462.5px; height:159.37px;
+  border:2px solid #EBEBEC;
+  border-radius:19px;
+}
+
+/* Заголовок: 183×24 @ (1197.75, 1082.09) */
+.social-title{
+  position:absolute;
+  left:140.25px;   /* 1197.75 - 1057.5 */
+  top:31.13px;     /* 1082.09 - 1050.96 */
+  width:183px;
+  height:24px;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;   /* 171% */
+  color:#828181;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+/* Базовый стиль иконок (каждая — 44.96×44.96) */
+.social-icon{
+  position:absolute;
+  width:44.96px;
+  height:44.96px;
+  display:block;
+  border:0;
+  outline:0;
+}
+.social-icon img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+}
+
+/* Instagram: @ (1227.11, 1130.64) */
+.social-icon.ig{
+  left:169.61px;  /* 1227.11 - 1057.5 */
+  top:79.68px;    /* 1130.64 - 1050.96 */
+}
+
+/* TikTok: @ (1306.43, 1130.64) */
+.social-icon.tk{
+  left:248.93px;  /* 1306.43 - 1057.5 */
+  top:79.68px;    /* 1130.64 - 1050.96 */
+}
+
+/* Контейнер блока (Group 1258) */
+.group-1258{
+  position:absolute;
+  width:830px;
+  height:397.7px;
+  left:690px;
+  top:628.26px;
+  font-family:"Ubuntu",sans-serif;
+}
+
+/* Рамка (Rectangle 49) */
+.sr-frame{
+  position:absolute;
+  left:0; top:0;
+  width:830px; height:397.7px;
+  box-sizing:border-box;
+  border:2px solid #EBEBEC;
+  border-radius:19px;
+}
+
+/* Заголовок (Group 185) — 582.46×36 @ (832.3, 677.43) */
+.sr-title{
+  position:absolute;
+  left:142.3px;       /* 832.3 - 690 */
+  top:49.17px;        /* 677.43 - 628.26 */
+  width:582.46px;
+  height:36px;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;   /* 144% */
+  text-align:center;
+  color:#363535;
+}
+
+/* Левая «плашка» средней оценки (Group 797) 116.35×53.85 @ (770.22, 749.1) */
+.sr-avg{
+  position:absolute;
+  left:80.22px;       /* 770.22 - 690 */
+  top:120.84px;       /* 749.1 - 628.26 */
+  width:116.35px;
+  height:53.85px;
+}
+.sr-avg__star{
+  position:absolute;
+  left:0; top:0;
+  width:53.85px; height:53.85px;
+  display:block; object-fit:contain;
+}
+.sr-avg__value{
+  position:absolute;
+  left:63.35px;       /* 833.57 - 770.22 */
+  top:5.43px;         /* 754.53 - 749.1  */
+  width:53px; height:43px;
+  font-weight:500;
+  font-size:37.5px;
+  line-height:43px;
+  color:#828181;
+  display:flex; align-items:center;
+}
+
+/* Пять звёзд под заголовком (макетная зона Group 803) 671.02×299.36 @ (770.22, 677.43) */
+.sr-stars{
+  position:absolute;
+  left:40.3px;       /* визуально под заголовком, центр */
+  top:180px;
+  width:200px;        /* ширина для пяти иконок */
+  height:32px;
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  align-items:center;
+}
+.sr-star{
+  width:32px; height:32px;
+  display:block; object-fit:contain;
+}
+
+/* Правая колонка (Group 798) 444.44×226.88 @ (996.81, 743.09) */
+.sr-bars{
+  position:absolute;
+  left:306.81px;      /* 996.81 - 690 */
+  top:114.83px;       /* 743.09 - 628.26 */
+  width:444.44px;
+  height:226.88px;
+}
+
+/* Одна строка */
+.sr-row{
+  position:absolute;
+  width:444.44px; height:36px;
+  display:block;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#363535;
+}
+
+/* Вертикали строк (точные top’ы по макету) */
+.sr-row[data-stars="5"]{ top:0px; }            /* 743.09 */
+.sr-row[data-stars="4"]{ top:49.42px; }        /* 792.51 */
+.sr-row[data-stars="3"]{ top:98.85px; }        /* 841.94 */
+.sr-row[data-stars="2"]{ top:148.27px; }       /* 891.36 */
+.sr-row[data-stars="1"]{ top:197.69px; }       /* 940.78 */
+
+/* Метка слева: «5», «4», ... (15×36 @ 996.81, …) */
+.sr-row__label{
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:15px; height:36px;
+  font-family:"Ubuntu",sans-serif;
+  font-weight:400; font-size:25px; line-height:36px; color:#363535;
+  display:flex; align-items:center;
+}
+
+/* Трек (фон/база/зелёная) — ширины и left из макета */
+.sr-row__track{
+  position:absolute;
+  left:42.09px;            /* 1009.9 - 996.81 */
+  top:21.38px;             /* 764.47 - 743.09  (по первой строке) */
+  width:365.84px; height:0;  /* Line 29 width */
+}
+
+/* Base (тёмная) 333.98px @ 1038.26 */
+.sr-row__base{
+  position:absolute;
+  left:28.36px;            /* 1038.26 - 1009.9 */
+  top:0;
+  width:333.98px; height:0;
+  border-top:4px solid #828181;
+}
+
+/* BG (светло-серый) 365.84 */
+.sr-row__bg{
+  position:absolute;
+  left:0; top:0;
+  width:365.84px; height:0;
+  border-top:4px solid #ECECEC;
+}
+
+/* Fill (зелёный) — ДИНАМИЧЕСКИЙ px (0..333.98) */
+.sr-row__fill{
+  position:absolute;
+  left:0; top:0;
+  height:0;
+  border-top:4px solid #35C65E;
+  width:0; /* зададим из JS */
+}
+
+/* Количество справа — точные позиции из макета (1398.24 - 996.81 = 401.43px) */
+.sr-row__count{
+  position:absolute;
+  left:420.43px;
+  top:5.48px;  /* выравнивание по визуальному центру */
+  width:43px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px; color:#363535;
+  text-align:left; white-space:nowrap;
+}
+
+.store-desc{
+  position:absolute;
+  width:704.46px;
+  height:103.4px;
+  left:815.54px;
+  top:502.26px;
+
+  font-family:'Ubuntu', sans-serif;
+  font-style:normal;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;   /* 171% */
+  color:#363535;
+
+  margin:0;
+}
+
+/* Контейнер блока */
+.group-819{
+  position:absolute;
+  width:208.33px;
+  height:55px;
+  left:1268.84px;
+  top:302px;
+  font-family:'Ubuntu',sans-serif;
+}
+
+/* Кнопка заповнює контейнер */
+.contact-btn{
+  position:absolute;
+  left:0; top:0;
+  width:100%; height:100%;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+}
+
+/* Rectangle 58 — зелена рамка */
+.contact-rect{
+  position:absolute;
+  left:0; right:0; top:0; bottom:0;
+  box-sizing:border-box;
+  border:2px solid #35C65E;
+  border-radius:10px;
+}
+
+/* Текст (пікс-у-пікс відсотки з макета) */
+.contact-label{
+  position:absolute;
+  left:27.96%;
+  right:7.72%;
+  top:28.91%;
+  bottom:27.45%;
+  display:flex;
+  align-items:center;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;   /* 171% */
+  color:#35C65E;
+}
+
+/* Іконка зліва: висота 25px, обертання 8.45deg */
+.contact-ico{
+  position:absolute;
+  height:20px;
+  left:10.46%;
+  top:17.22px;
+  display:block;
+  object-fit:contain;
+}
+
+/* (необов’язково) фокус/ховер — без зсувів геометрії */
+.contact-btn:focus-visible{ outline:2px solid rgba(53,198,94,.5); outline-offset:3px; }
+.contact-btn:hover .contact-rect{ box-shadow:0 0 0 1px rgba(53,198,94,.25) inset; }
+
+/* Контейнер блока (Group 820) */
+.group-820{
+  position:absolute;
+  width:952px;
+  height:55px;
+  left:323.25px;
+  top:598px;
+  font-family:'Ubuntu',sans-serif;
+}
+
+/* Rectangle 58 — фон плашки.
+   З макета: left 20.2%, right 20.3%, вертикальні відступи ≈14.3% */
+.order-banner-bg{
+  position:absolute;
+  left:20.2%;
+  right:20.3%;
+  top:7.88px;                   /* 14.33% від 55px ≈ 7.88 */
+  height:39.24px;               /* рівномірна висота між верх/низ */
+  background:#ECECEC;
+  border-radius:10px;
+}
+
+/* Текст (Group 251) — відсотки як у макеті */
+.order-banner-text{
+  position:absolute;
+  left:21.45%;
+  top:8.09px;                   /* 14.71% від 55px ≈ 8.09 */
+  height:38.82px;               /* щоб вертикально центрувати у пігулці */
+  display:flex;
+  align-items:center;
+
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;             /* 171% */
+  color:#828181;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Іконка праворуч
+   За макетом: висота 30px, left: 76.35% від групи, top = 611px по сторінці → 13px відносно групи */
+.order-banner-ico{
+  position:absolute;
+  height:20px;
+  left:76.35%;
+  top:16px;
+  display:block;
+  object-fit:contain;
+}
+/* контейнер по макету — ширина фикс, высота авто */
+.review-card{
+  position:absolute;
+  width:1196px;
+}
+
+/* рамка */
+.review-box{
+  position:relative;
+  width:100%;
+  border:2px solid #ECECEC;
+  border-radius:10px;
+  padding:15px 20px 16px 20px; /* top≈15, left/right=20, bottom≈16 как в фигме */
+  background:#fff;
+  box-sizing:border-box;
+  top: -450px;
+  left: 100px;
+}
+
+/* шапка */
+.rev-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  min-height:30px; /* высота области звезд из макета */
+}
+.rev-author{
+  font-family:'Ubuntu', sans-serif;
+  font-weight:500; /* btn */
+  font-size:14px;
+  line-height:24px;
+  color:#363535;
+}
+
+/* звезды справа */
+.rev-stars-review{
+  display:flex;
+  gap:9px;                 /* 1030,1059,1088,1117,1146 => шаг 29px; 30px ширина → 29-30 = ~ -1, но визуально лучше 9px с padding */
+  padding-right:0;
+  top: 10%;
+  left: 80%;
+}
+.rev-stars-review .star{
+  display:inline-flex;
+  width:30px;
+  height:30px;
+}
+.rev-stars-review .star-v{
+  flex:1 0 auto;
+  border:2px solid #828181;   /* пустая */
+  border-radius:1px;
+  background:transparent;
+  display:block;
+}
+.rev-stars-review .star.on .star-v{   /* заполненная */
+  border:none;
+  background:#35C65E;
+}
+
+/* текст */
+.rev-text{
+  width:1156px;            /* как в макете */
+  max-width:100%;
+  margin:12px 0 0 0;       /* отступ от шапки ~12px (между 18px и 30px линиями) */
+  font-family:'Ubuntu', sans-serif;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;        /* 171% */
+  text-align:justify;
+  color:#363535;
+}
+
+/* медиа полоса */
+.rev-media{
+  display:flex;
+  gap:5px;                 /* расстояние между 65×65 — минимальное */
+  margin-top:16px;         /* ~ отступ до 132px зоны */
+}
+.rev-thumb{
+  position:relative;
+  width:65px; height:65px;
+  border-radius:5px;
+  overflow:hidden;
+  padding:0; border:0; background:#D9D9D9;
+  cursor:pointer;
+}
+.rev-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* бейджик времени и “плей” */
+.rev-badge-time{
+  position:absolute;
+  right:6px; bottom:4px;
+  font-family:'Ubuntu', sans-serif;
+  font-weight:400;
+  font-size:11px; line-height:18px;
+  color:#fff;
+  background:rgba(0,0,0,.35);
+  border-radius:3px; padding:0 4px;
+}
+.rev-badge-play{
+  position:absolute;
+  left:calc(50% - 8px);
+  top:calc(50% - 8px);
+  width:16px; height:16px;
+  background:#fff;         /* заменишь на свою иконку */
+  border-radius:1px;
+  transform:rotate(90deg);
+}
+
+/* футер */
+.rev-foot{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:16px;         /* чтобы общий низ примерно сходился с 213px линии */
+}
+
+/* лайк-счетчик слева */
+.rev-like{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:0; background:none; border:0; cursor:pointer;
+  font-family:'Ubuntu', sans-serif;
+  font-weight:500; font-size:14px; line-height:24px;
+  color:#363535;
+}
+.like-ico{
+  width:21px; height:20px;
+  box-sizing:border-box;
+  display:inline-block;
+}
+.like-num{ display:inline-block; }
+
+/* “Коментарі (2)” справа */
+.rev-comments{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:'Ubuntu', sans-serif;
+  font-weight:500; font-size:14px; line-height:24px; /* btn */
+  color:#363535; text-decoration:none;
+}
+.rev-comments:hover{ text-decoration:underline; text-underline-offset:2px; }
+.arrow-ico{
+  width:24px; height:24px;
+  display:inline-block;
+  transform:rotate(90deg);       /* как в макете */
+  background:#363535;            /* заменишь на свою стрелку */
+  mask: none;                    /* если будет SVG-иконка — убери фон */
+}
+
+
+/* звёзды-изображения */
+.rev-stars{ display:flex; gap:9px; }
+.rev-stars .star{ width:30px; height:30px; display:inline-flex; }
+.rev-stars .star-img{ width:30px; height:30px; display:block; object-fit:contain; }
+
+/* лайтбокс */
+.lb-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.65);
+  display:none; align-items:center; justify-content:center;
+  z-index:9999;
+  cursor: zoom-out;
+}
+.lb-overlay.is-open{ display:flex; }
+.lb-img{
+  max-width:90vw; max-height:90vh;
+  border-radius:6px;
+  background:#fff; /* на случай прозрачности */
+  display:block;
+}
+
+/* ===== LIKE: иконка чернеет при on ===== */
+.rev-like{
+  display:inline-flex; align-items:center; gap:6px;
+  color:#828181; /* на случай SVG с currentColor */
+}
+.rev-like .like-ico{
+  width:20px; height:20px; display:block;
+  transition: filter 140ms ease, opacity 140ms ease, color 140ms ease;
+}
+/* IMG-иконка: делаем чёрной через filter, если не меняем src */
+.rev-like.is-active .like-ico,
+.rev-like[aria-pressed="true"] .like-ico{
+  filter: brightness(0); /* чёрный */
+}
+.rev-like .like-num{ font-weight:500; }
+
+/* ===== LIGHTBOX: всегда поверх, плавное появление картинки ===== */
+.lb-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.65);
+  display:none; align-items:center; justify-content:center;
+  z-index:2147483647; /* выше всего */
+  cursor: zoom-out;
+}
+.lb-overlay.is-open{ display:flex; }
+
+.lb-inner{
+  max-width:90vw; max-height:90vh;
+  display:flex; align-items:center; justify-content:center;
+}
+.lb-img{
+  max-width:100%; max-height:100%;
+  display:block;
+  border-radius:6px;
+  background:#fff;             /* если у картинки прозрачность */
+  opacity:0; transition:opacity 160ms ease;
+}
+.lb-img.is-ready{ opacity:1; }
+
+/* лайк всегда кликабелен */
+  .rev-like{
+    display:inline-flex; align-items:center; gap:6px;
+    cursor:pointer;
+    pointer-events:auto;            /* на случай, если родитель вырубил события */
+    user-select:none;
+  }
+  .rev-like .like-ico{ width:20px; height:20px; display:block; transition:filter .14s ease; }
+  .rev-like.is-active .like-ico,
+  .rev-like[aria-pressed="true"] .like-ico{ filter:brightness(0); } /* чёрный */
+
+  /* оверлей лайтбокса не перехватывает клики, когда скрыт */
+  #lbOverlay{ pointer-events:none; }
+  #lbOverlay.is-open{ pointer-events:auto; }
+
+  /* Кнопка лайка — без контура вообще */
+.rv-like-btn{
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+/* Иконка внутри — тоже без рамок */
+.rv-like-btn .rv-like-icon,
+.rv-like-btn img.rv-like-icon{
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Если иконка — inline SVG, убираем stroke/fill-бордеры */
+.rv-like-btn .rv-like-icon,
+.rv-like-btn .rv-like-icon *{
+  stroke: none !important;
+}
+
+/* (опционально) не показывать focus-рамку */
+.rv-like-btn:focus,
+.rv-like-btn:focus-visible{
+  outline: none;
+  box-shadow: none;
+}
+
+
+
