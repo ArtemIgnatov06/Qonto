@@ -836,6 +836,52 @@ app.post('/api/chats/start', requireAuth, async (req, res) => {
     const buyer_id  = Number(req.user.id);
     if (!seller_id || seller_id === buyer_id) {
       return res.status(400).json({ error: 'Некорректный продавец' });
+
+// === Chat list for /chats page ===
+app.get('/api/chats/my', requireAuth, async (req, res) => {
+  try {
+    const me = req.user.id;
+    const [rows] = await db.query(
+      `
+      SELECT
+        t.id, t.seller_id, t.buyer_id, t.updated_at,
+        CASE WHEN t.seller_id = ? THEN t.buyer_id ELSE t.seller_id END AS other_id,
+        TRIM(CONCAT(COALESCE(uo.first_name,''), ' ', COALESCE(uo.last_name,''))) AS other_name,
+        uo.username      AS other_username,
+        uo.avatar_url    AS other_avatar_url,
+        (SELECT m.body FROM chat_messages m WHERE m.thread_id = t.id ORDER BY m.created_at DESC, m.id DESC LIMIT 1) AS last_text,
+        (SELECT MAX(m.created_at) FROM chat_messages m WHERE m.thread_id = t.id) AS last_created_at,
+        (SELECT COUNT(*) FROM chat_messages m WHERE m.thread_id = t.id AND m.sender_id <> ? AND m.read_at IS NULL) AS unread
+      FROM chat_threads t
+      JOIN users uo ON uo.id = CASE WHEN t.seller_id = ? THEN t.buyer_id ELSE t.seller_id END
+      WHERE t.seller_id = ? OR t.buyer_id = ?
+      ORDER BY COALESCE((SELECT MAX(m.created_at) FROM chat_messages m WHERE m.thread_id = t.id), t.updated_at) DESC, t.id DESC
+      `,
+      [me, me, me, me, me]
+    );
+    res.json({ items: rows || [] });
+  } catch (e) {
+    console.error('GET /api/chats/my error', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// === Remove a chat thread completely ===
+app.delete('/api/chats/:id', requireAuth, async (req, res) => {
+  try {
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+    const [[t]] = await db.query(`SELECT id, seller_id, buyer_id FROM chat_threads WHERE id = ? LIMIT 1`, [threadId]);
+    if (!t) return res.status(404).json({ error: 'Диалог не найден' });
+    if (t.seller_id !== me && t.buyer_id !== me) return res.status(403).json({ error: 'Нет доступа' });
+    const [r] = await db.query(`DELETE FROM chat_threads WHERE id = ?`, [threadId]);
+    if (!r.affectedRows) return res.status(409).json({ error: 'Не удалось удалить' });
+    res.json({ ok: true, id: threadId });
+  } catch (e) {
+    console.error('DELETE /api/chats/:id error', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
     }
     const [se] = await db.query(SQL.select_users_13, [seller_id]);
     if (!se.length) return res.status(404).json({ error: 'Продавец не найден' });
@@ -855,6 +901,53 @@ app.post('/api/chats/start', requireAuth, async (req, res) => {
     return res.status(500).json({ error: 'Server error' });
   }
 });
+
+// Список чатов текущего пользователя
+app.get('/api/chats/my', requireAuth, async (req, res) => {
+  try {
+    const me = req.user.id;
+    const [rows] = await db.query(
+      `
+      SELECT
+        t.id, t.seller_id, t.buyer_id, t.updated_at,
+        CASE WHEN t.seller_id = ? THEN t.buyer_id ELSE t.seller_id END AS other_id,
+        TRIM(CONCAT(COALESCE(uo.first_name,''), ' ', COALESCE(uo.last_name,''))) AS other_name,
+        uo.username AS other_username,
+        uo.avatar_url AS other_avatar_url,
+        (SELECT m.body FROM chat_messages m WHERE m.thread_id = t.id ORDER BY m.created_at DESC, m.id DESC LIMIT 1) AS last_text,
+        (SELECT MAX(m.created_at) FROM chat_messages m WHERE m.thread_id = t.id) AS last_created_at,
+        (SELECT COUNT(*) FROM chat_messages m WHERE m.thread_id = t.id AND m.sender_id <> ? AND m.read_at IS NULL) AS unread
+      FROM chat_threads t
+      JOIN users uo ON uo.id = CASE WHEN t.seller_id = ? THEN t.buyer_id ELSE t.seller_id END
+      WHERE t.seller_id = ? OR t.buyer_id = ?
+      ORDER BY COALESCE((SELECT MAX(m.created_at) FROM chat_messages m WHERE m.thread_id = t.id), t.updated_at) DESC, t.id DESC
+      `,
+      [me, me, me, me, me]
+    );
+    res.json({ items: rows || [] });
+  } catch (e) {
+    console.error('GET /api/chats/my error', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Удалить чат целиком
+app.delete('/api/chats/:id', requireAuth, async (req, res) => {
+  try {
+    const threadId = Number(req.params.id);
+    const me = req.user.id;
+    const [[t]] = await db.query(`SELECT id, seller_id, buyer_id FROM chat_threads WHERE id = ? LIMIT 1`, [threadId]);
+    if (!t) return res.status(404).json({ error: 'Диалог не найден' });
+    if (t.seller_id !== me && t.buyer_id !== me) return res.status(403).json({ error: 'Нет доступа' });
+    const [r] = await db.query(`DELETE FROM chat_threads WHERE id = ?`, [threadId]);
+    if (!r.affectedRows) return res.status(409).json({ error: 'Не удалось удалить' });
+    res.json({ ok: true, id: threadId });
+  } catch (e) {
+    console.error('DELETE /api/chats/:id error', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // single handler that supports text + file attachments
 app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), async (req, res) => {
   try {
@@ -932,46 +1025,6 @@ function sideColumns(me, t) {
   }
   return null;
 }
-app.post('/api/chats/:id/archive', requireAuth, async (req,res)=>{
-  try {
-    const threadId = Number(req.params.id);
-    const me = req.user.id;
-    const { archive } = req.body;
-    const [[t]] = await db.query(SQL.select_chat_threads_02,[threadId]);
-    if (!t) return res.status(404).json({error:'Диалог не найден'});
-    const cols = sideColumns(me, t);
-    if (!cols) return res.status(403).json({error:'Нет доступа'});
-    await db.query(SQL.update_general_07, [archive?1:0, threadId]);
-    res.json({ ok:true, archived: !!archive });
-  } catch(e){ console.error('archive', e); res.status(500).json({error:'Server error'}); }
-});
-app.post('/api/chats/:id/mute', requireAuth, async (req,res)=>{
-  try {
-    const threadId = Number(req.params.id);
-    const me = req.user.id;
-    const { mute } = req.body;
-    const [[t]] = await db.query(SQL.select_chat_threads_02,[threadId]);
-    if (!t) return res.status(404).json({error:'Диалог не найден'});
-    const cols = sideColumns(me, t);
-    if (!cols) return res.status(403).json({error:'Нет доступа'});
-    await db.query(SQL.update_general_08, [mute?1:0, threadId]);
-    if (!mute) { await db.query(SQL.update_general_09, [threadId]); }
-    res.json({ ok:true, muted: !!mute });
-  } catch(e){ console.error('mute', e); res.status(500).json({error:'Server error'}); }
-});
-app.post('/api/chats/:id/block', requireAuth, async (req,res)=>{
-  try{
-    const threadId = Number(req.params.id);
-    const me = req.user.id;
-    const { block } = req.body;
-    const [[t]] = await db.query(SQL.select_chat_threads_02,[threadId]);
-    if (!t) return res.status(404).json({error:'Диалог не найден'});
-    const cols = sideColumns(me, t);
-    if (!cols) return res.status(403).json({error:'Нет доступа'});
-    await db.query(SQL.update_general_10, [block?1:0, threadId]);
-    res.json({ ok:true, blocked: !!block });
-  } catch(e){ console.error('block', e); res.status(500).json({error:'Server error'}); }
-});
 app.get('/api/chats/unread-count', requireAuth, async (req, res) => {
   try {
     const me = req.user.id;

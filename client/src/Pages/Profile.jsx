@@ -1,5 +1,5 @@
-// client/src/Pages/Profile.jsx — refined per feedback
-import React, { useEffect, useState } from 'react';
+// client/src/Pages/Profile.jsx — merged with avatar upload
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import '../Styles/Profile.css';
 import { useAuth } from '../Hooks/useAuth';
@@ -17,6 +17,10 @@ const Profile = () => {
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
   const [showEdit, setShowEdit] = useState(false); // <-- toggle editor
+
+  // ---- avatar upload
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -47,23 +51,51 @@ const Profile = () => {
 
   const goApply = () => navigate('/seller/apply');
 
+  // ---- avatar helpers
+  const pickFile = () => fileRef.current?.click();
+  const onAvatarSelected = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('avatar', file);
+    try {
+      setUploading(true);
+      await axios.post('/api/me/avatar', fd, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      await refresh(); // подтянуть новый avatar_url
+      setMsg(t('profile.avatarUpdated', { defaultValue: 'Аватар оновлено' }));
+    } catch (e) {
+      setErr(t('profile.avatarUploadFailed', { defaultValue: 'Не вдалося завантажити аватар' }));
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
   if (!user) return <div className="container">...</div>;
 
   const fullName = [form.first_name, form.last_name].filter(Boolean).join(' ') || t('profile.noName', { defaultValue: 'Без имени' });
+  const avatarUrl = user?.avatar_url || user?.avatarUrl || null;
 
   return (
     <main className="container page-grid">
       {/* === Sidebar (left) === */}
       <aside className="sidebar" aria-label="Панель профілю">
         <div className="profile">
-          <div className="avatar-lg" aria-hidden="true">👤</div>
+          <div className="avatar-lg" aria-hidden="true">
+            {avatarUrl
+              ? <img src={avatarUrl} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}}/>
+              : '👤'}
+          </div>
           <div className="role">{t('profile.roleBuyer', { defaultValue: 'Покупець' })}</div>
           <h1 className="username">{fullName}</h1>
           <div className="profile-actions">
             <button className="btn btn-primary" type="button" onClick={() => setShowEdit(v => !v)}>
               {showEdit ? (t('common.close', { defaultValue: 'Закрыть' })) : (t('profile.edit', { defaultValue: 'Редагувати профіль' }))}
             </button>
-            <Link className="btn btn-ghost" to="/chat">{t('profile.chat', { defaultValue: 'Чати' })}</Link>
+            <Link className="btn btn-ghost" to="/chats">{t('profile.chat', { defaultValue: 'Чати' })}</Link>
           </div>
           <div className="side-links mtop-8">
             <Link to="/cart" className="side-link underlined">{t('profile.cart', { defaultValue: 'Кошик' })}</Link>
@@ -90,13 +122,11 @@ const Profile = () => {
             <p className="muted mt-8">{t('seller.status.reason')}: {user.seller_rejection_reason}</p>
           )}
         </section>
-
-        {/* Убрали лишнюю кнопку "Чаты" под промо */}
       </aside>
 
       {/* === Content (right) === */}
       <section className="content">
-        {/* Редактирование профиля (по требованию — здесь же в контенте) */}
+        {/* Редактирование профиля */}
         {showEdit && (
           <div className="card mb-16">
             <div className="grid-2 gap-16">
@@ -118,9 +148,22 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Перенёс сюда блок изменения телефона/пароля */}
+            {/* Телефон/пароль */}
             <div className="mt-16">
               <PhoneBinder />
+            </div>
+
+            {/* === NEW: Загрузить аватар под телефоном === */}
+            <div className="mt-16">
+              <label className="label">{t('profile.uploadAvatar', { defaultValue: 'Завантажити аватар' })}</label>
+              <div className="row gap-12">
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onAvatarSelected} />
+                <button type="button" className="btn" onClick={pickFile} disabled={uploading}>
+                  {uploading ? t('common.loading', { defaultValue: 'Завантаження...' }) : t('common.chooseFile', { defaultValue: 'Вибрати зображення' })}
+                </button>
+                {avatarUrl && <img src={avatarUrl} alt="" style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',border:'1px solid #e5e7eb'}}/>}
+              </div>
+              <div className="muted-12 mt-8">{t('profile.avatarHint', { defaultValue: 'PNG/JPG до 5 МБ. Картинка буде в круглій рамці.' })}</div>
             </div>
 
             <div className="row gap-12 mt-16">

@@ -7,6 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { authSocket } from '../lib/socket';
 import AvatarCircle from '../Components/AvatarCircle';
 import '../Styles/ChatThread.css';
+import AttachIcon from '../assets/green-add.png';
+import SendIcon from '../assets/send.png';
+import BackArrow from '../assets/planex-invert.png';
 
 const API = 'http://localhost:5050';
 
@@ -23,16 +26,12 @@ export default function ChatThread() {
   const [files, setFiles] = useState([]);
   const [typing, setTyping] = useState(false);
 
-  const [muted, setMuted] = useState(false);
-  const [archived, setArchived] = useState(false);
-  const [blocked, setBlocked] = useState(false);
-
-  // редактирование
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
 
   const boxRef = useRef(null);
   const typingTimer = useRef(null);
+  const taRef = useRef(null);
 
   const scrollBottom = () => {
     const el = boxRef.current;
@@ -52,9 +51,6 @@ export default function ChatThread() {
     const { data } = await axios.get(`${API}/api/chats/${id}/messages`, { withCredentials: true });
     setThread(data.thread);
     setMsgs(data.items || []);
-    setMuted(!!data.thread?.muted_by_me);
-    setArchived(!!data.thread?.archived_by_me);
-    setBlocked(!!data.thread?.blocked_by_me);
 
     const otherId = user?.id === data.thread.seller_id ? data.thread.buyer_id : data.thread.seller_id;
     const u = await axios.get(`${API}/api/users/${otherId}/public`, { withCredentials: true });
@@ -123,30 +119,9 @@ export default function ChatThread() {
     // eslint-disable-next-line
   }, [id, user]);
 
-  // actions
-  const toggleMute = async () => {
-    try {
-      const { data } = await axios.post(`${API}/api/chats/${id}/mute`, { mute: !muted }, { withCredentials: true });
-      setMuted(!!data.muted);
-    } catch {}
-  };
-  const toggleArchive = async () => {
-    try {
-      const { data } = await axios.post(`${API}/api/chats/${id}/archive`, { archive: !archived }, { withCredentials: true });
-      setArchived(!!data.archived);
-    } catch {}
-  };
-  const toggleBlock = async () => {
-    try {
-      const { data } = await axios.post(`${API}/api/chats/${id}/block`, { block: !blocked }, { withCredentials: true });
-      setBlocked(!!data.blocked);
-    } catch {}
-  };
-
   const send = async () => {
     const body = text.trim();
     if (!body && files.length === 0) return;
-    if (blocked) return;
 
     const fd = new FormData();
     if (body) fd.append('body', body);
@@ -158,27 +133,33 @@ export default function ChatThread() {
     try {
       await axios.post(`${API}/api/chats/${id}/messages`, fd, {
         withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       setTimeout(load, 80);
     } catch {}
   };
 
-  const handleTyping = (e) => {
+  // textarea autosize
+  const onMsgChange = (e) => {
     const v = e.target.value;
     setText(v);
-    authSocket(user.id).emit('thread:typing', { threadId: Number(id), from: user.id });
+    const el = taRef.current;
+    if (!el) return;
+    const LINE = 24, MIN_H = 55, MAX_LINES = 3, BORDER = 4, PAD_SINGLE = 27, PAD_MULTI = 16;
+    el.style.height = 'auto';
+    const innerMeasured = el.scrollHeight - BORDER;
+    const oneLineInner = PAD_SINGLE + LINE;
+    const isMulti = innerMeasured > oneLineInner + 0.5;
+    const pads = isMulti ? PAD_MULTI : PAD_SINGLE;
+    const innerMax = pads + LINE * MAX_LINES;
+    const innerClamped = Math.max(oneLineInner, Math.min(innerMeasured, innerMax));
+    const finalH = Math.max(MIN_H, innerClamped + BORDER);
+    el.style.height = `${finalH}px`;
+    el.classList.toggle('multiline', isMulti);
   };
 
-  // edit / delete
-  const startEdit = (m) => {
-    setEditingId(m.id);
-    setEditText(m.body || '');
-  };
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditText('');
-  };
+  const startEdit = (m) => { setEditingId(m.id); setEditText(m.body || ''); };
+  const cancelEdit = () => { setEditingId(null); setEditText(''); };
   const saveEdit = async (m) => {
     const body = editText.trim();
     await axios.patch(`${API}/api/messages/${m.id}`, { body }, { withCredentials: true });
@@ -198,11 +179,7 @@ export default function ChatThread() {
     if (m.attachment_type?.startsWith?.('image/')) {
       return (
         <div className="mt-8">
-          <img
-            src={href}
-            alt={m.attachment_name || ''}
-            className="attachment-img"
-          />
+          <img src={href} alt={m.attachment_name || ''} className="attachment-img" />
         </div>
       );
     }
@@ -228,156 +205,136 @@ export default function ChatThread() {
     );
   };
 
+  const items = msgs || [];
+  const fmtTime = (d) => new Date(d).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const fmtDay  = (d) => new Date(d).toLocaleDateString('uk-UA', { weekday: 'short', day: 'numeric', month: 'long' });
+
   return (
-    <div className="profile-page">
-      <h2 className="mb-12">{t('chat.thread') || 'Диалог'}</h2>
+    <div className="dialog-page chats-page">
+      <div className="dialog-header">
+        <a className="dialog-back" href="/chats">
+          <img src={BackArrow} alt="Назад" />
+          <span>
+            Чат з {(other?.firstName || other?.username || 'користувачем') + (other?.lastName ? ' ' + other.lastName : '')}
+          </span>
+        </a>
+      </div>
 
-      <div className="card chat-card">
-        {/* header (sticky) */}
-        <div className="chat-header row-center gap-12">
-          <div className="row-center gap-12">
-            <AvatarCircle
-              src={other?.avatarUrl}
-              firstName={other?.firstName}
-              lastName={other?.lastName}
-              username={other?.username}
-              email={other?.contactEmail}
-              size={40}
-              showDot
-              online={!!other?.online}
-            />
-            <div>
-              <div className="fw-700">
-                {(other?.firstName || '') + ' ' + (other?.lastName || '')}
-              </div>
-              <div className="muted-12">
-                {typing
-                  ? (t('chat.typing') || 'печатает…')
-                  : (other?.online ? (t('chat.online') || 'в сети') : (t('chat.offline') || 'не в сети'))}
-              </div>
-            </div>
-          </div>
+      <div className="dialog-card">
+        <div ref={boxRef} className="dialog-box">
+          {(() => {
+            let prevDay = null;
+            return items.flatMap((m) => {
+              const dayKey = new Date(m.created_at).toDateString();
+              const sep = (prevDay !== dayKey)
+                ? <div key={`sep-${m.id}`} className="day-sep">{fmtDay(m.created_at)}</div>
+                : null;
+              prevDay = dayKey;
 
-          {/* icon buttons */}
-          <div className="row gap-6">
-            <button className="ghost-btn" onClick={toggleMute} title={muted ? 'Размутить' : 'Мут'}>
-              {muted ? '🔊' : '🔇'}
-            </button>
-            <button className="ghost-btn" onClick={toggleArchive} title={archived ? 'Разархивировать' : 'В архив'}>
-              {archived ? '📂' : '🗄️'}
-            </button>
-            <button className="ghost-btn" onClick={toggleBlock} title={blocked ? 'Разблокировать' : 'Заблокировать'}>
-              {blocked ? '🚫' : '⛔'}
-            </button>
-          </div>
-        </div>
+              const mine = m.sender_id === user.id;
+              const isEditing = editingId === m.id;
 
-        {/* messages */}
-        <div ref={boxRef} className="chat-messages">
-          {(msgs || []).map((m) => {
-            const mine = m.sender_id === user.id;
-            const isEditing = editingId === m.id;
-            return (
-              <div
-                key={m.id}
-                className={`message ${mine ? 'me' : 'other'}`}
-              >
-                <div
-                  className="bubble-wrap"
-                >
-                  <div
-                    className={`bubble ${mine ? 'me' : ''}`}
-                  >
-                    {m.deleted_at ? (
-                      <div className="deleted">
-                        {t('chat.deleted') || 'Сообщение удалено'}
-                      </div>
-                    ) : isEditing ? (
-                      <input
-                        autoFocus
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) saveEdit(m);
-                          if (e.key === 'Escape') cancelEdit();
-                        }}
-                        className="edit-input"
+              const timeNode = <div className={`time-inline ${mine ? 'left' : 'right'}`}>{fmtTime(m.created_at)}</div>;
+
+              return [
+                sep,
+                <div key={m.id} className={`message ${mine ? 'me' : 'other'}`}>
+                  {!mine && (
+                    <div className="msg-avatar">
+                      <AvatarCircle
+                        src={other?.avatarUrl}
+                        firstName={other?.firstName}
+                        lastName={other?.lastName}
+                        username={other?.username}
+                        size={28}
                       />
-                    ) : (
-                      <>
-                        {m.body ? <div className="prewrap">{m.body}</div> : null}
-                        {renderAttachment(m)}
-                      </>
-                    )}
+                    </div>
+                  )}
 
-                    <div className="row gap-6">
-                      <div className="time">
-                        {new Date(m.created_at).toLocaleString()}
-                        {m.edited_at && !m.deleted_at ? ' · ' + (t('chat.edited') || 'отредактировано') : ''}
-                      </div>
+                  {mine ? timeNode : null}
+
+                  <div className="bubble-wrap">
+                    <div className={`bubble ${mine ? 'me' : ''}`}>
+                      {m.deleted_at ? (
+                        <div className="deleted">{t('chat.deleted') || 'Сообщение удалено'}</div>
+                      ) : isEditing ? (
+                        <input
+                          autoFocus
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) saveEdit(m);
+                            if (e.key === 'Escape') cancelEdit();
+                          }}
+                          className="edit-input"
+                        />
+                      ) : (
+                        <>
+                          {m.body ? <div className="prewrap">{m.body}</div> : null}
+                          {renderAttachment(m)}
+                        </>
+                      )}
+                    </div>
+
+                    <div className={`hover-actions ${mine ? 'me' : 'other'}`}>
+                      <MsgActions m={m} />
+                      {editingId === m.id && (
+                        <>
+                          <button className="icon-btn" title="Сохранить" onClick={() => saveEdit(m)}>✅</button>
+                          <button className="icon-btn" title="Отмена" onClick={cancelEdit}>✖️</button>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  {/* hover actions */}
-                  <div className={`hover-actions ${mine ? 'me' : 'other'}`}>
-                    <MsgActions m={m} />
-                    {editingId === m.id && (
-                      <>
-                        <button className="icon-btn" title="Сохранить" onClick={() => saveEdit(m)}>✅</button>
-                        <button className="icon-btn" title="Отмена" onClick={cancelEdit}>✖️</button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                  {!mine ? timeNode : null}
+                </div>,
+              ];
+            });
+          })()}
         </div>
 
-        {/* footer (sticky) */}
-        <div className="pm-input-bar row gap-8">
-          {/* attachments preview */}
-          {files.length > 0 && (
-            <div className="attachments-preview">
-              {files.map((f, idx) => (
-                <div key={idx} className="preview-chip">
-                  {f.type.startsWith('image/')
-                    ? <img src={URL.createObjectURL(f)} alt="" className="preview-img" />
-                    : <span>📄 {f.name}</span>}
-                </div>
-              ))}
-              <button className="btn-link" onClick={() => setFiles([])}>Очистить</button>
+        <div className="pm-input-bar">
+          <div className="composer-bar">
+            <div className="composer-field">
+              <textarea
+                ref={taRef}
+                id="msg-input"
+                className={`msg-input ${text ? 'is-filled' : ''}`}
+                placeholder="Повідомлення"
+                aria-label="Повідомлення"
+                rows={1}
+                value={text}
+                onChange={onMsgChange}
+              />
+              <div className="msg-tools">
+                <button
+                  type="button"
+                  className="msg-attach-btn"
+                  aria-label="Прикрепить файл"
+                  onClick={() => document.getElementById('chat-file-input').click()}
+                >
+                  <img className="msg-attach-img" src={AttachIcon} alt="" />
+                </button>
+                <button
+                  type="button"
+                  className="msg-send-btn"
+                  aria-label="Відправити"
+                  onClick={send}
+                >
+                  <img className="msg-send-img" src={SendIcon} alt="" />
+                </button>
+              </div>
+              <input
+                id="chat-file-input"
+                type="file"
+                multiple
+                accept="image/*,.pdf"
+                onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                className="hidden"
+              />
             </div>
-          )}
-
-          <label htmlFor="chat-file-input" className="ghost-btn" title="Вложение">📎</label>
-          <input
-            id="chat-file-input"
-            type="file"
-            multiple
-            accept="image/*,.pdf"
-            onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            className="hidden"
-          />
-
-          <input
-            type="text"
-            value={text}
-            onChange={handleTyping}
-            placeholder={t('chat.placeholder') || 'Напишите сообщение...'}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-            className="input-text"
-            disabled={blocked}
-          />
-
-          <button
-            onClick={send}
-            disabled={blocked}
-            className="primary-btn"
-            title={blocked ? 'Вы заблокировали пользователя' : undefined}
-          >
-            {blocked ? (t('chat.blocked') || 'Заблокировано') : (t('chat.send') || 'Отправить')}
-          </button>
+          </div>
         </div>
       </div>
     </div>
