@@ -1,0 +1,60 @@
+/* UserProducts — специфичные стили компонента */
+
+/* статусы */
+.text-muted  { color: #6b7280; }
+.text-danger { color: #b00020; }
+
+/* список */
+.up-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* элемент списка */
+.up-item {
+  margin-bottom: 12px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* описание товара */
+.up-desc {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* панель действий */
+.up-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* кнопки */
+.btn-edit {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #35C65E;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-edit:disabled { opacity: .6; cursor: default; }
+
+.btn-delete {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #e53935;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-delete:disabled { opacity: .6; cursor: default; }
+
+/* утилита, если где-то не подключены глобальные */
+.mt-6 { margin-top: 6px; }

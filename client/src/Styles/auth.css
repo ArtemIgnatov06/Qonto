@@ -1,0 +1,445 @@
+/* =========================================================
+   AUTH (логин/регистрация) — пикс-точно как в макете
+   — фиксированная раскладка 500 + 500 + gap
+   — общий фон-блок за картами
+   — центрирование без абсолютов
+   ========================================================= */
+
+:root{
+  --page-bg: #EDF2F5;   /* фон страницы */
+  --panel-bg:#FFFFFF;   /* фон карточек */
+  --stage-bg:#ffffff;   /* светлый фон под обе карты (как на макете) */
+  --stroke:#ECECEC;     /* бордеры */
+  --accent:#35C65E;     /* зелёный */
+  --text:#363535;
+  --muted:#828181;
+
+  /* размеры из фигмы */
+  --card-w: 500px;
+  --gap: 48px;
+}
+
+body{ background: var(--page-bg); }
+
+/* сцена больше НЕ фиксированной ширины, просто центрируется */
+/* сцена: авто-ширина, центр, 2 колонки по 600px и gap 48px */
+.auth-stage{
+  position: relative;
+  width: auto;
+  max-width: 948px;                 /* 600 + 600 + 48 */
+  margin: 56px auto 180px;
+  display: grid;
+  grid-template-columns: 450px 450px; /* фикс ширины колонок */
+  gap: 48px;
+  align-items: start;
+  justify-content: center;
+  z-index: 0;
+}
+/* подложка тянется по фактической ширине контента */
+.auth-stage::before{
+  content:"";
+  position: absolute;
+  inset: -18px -24px;
+  border-radius: 12px;
+  background: #ffffff;                /* было var(--stage-bg) */
+  z-index: -1;
+}
+
+
+/* сами карточки теперь опираются только на свою переменную ширины */
+.auth-box{
+  box-sizing: border-box;
+  width: 450px;
+  min-height: 539px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFFFFF;
+  padding: 28px 24px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.04);
+  
+}
+
+/* заголовки */
+.auth-left-title,
+.r-auth-title{
+  margin: 0 0 18px 0;
+  font: 400 25px/36px 'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--accent);
+  text-align: center;
+}
+
+/* мини-табы способа входа */
+.login-switch{
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  max-width: 392px;
+  margin: 0 auto 14px;
+  flex-wrap: wrap;
+}
+.login-switch button{
+  border: 1.5px solid var(--stroke);
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: #fff;
+  font: 600 12px/14px 'Ubuntu', sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, color .2s ease;
+}
+.login-switch button.is-active{
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* поля (ровно по центру карточки и одной ширины) */
+.auth-input-wrap,
+.r-auth-input-wrap{
+  position: relative;
+  width: 100%;
+  max-width: 392px;
+  margin: 0 auto 12px;
+  display: block;
+}
+.auth-input,
+.r-auth-input{
+  box-sizing: border-box;
+  width: 100%;
+  height: 55px;
+  border: 2px solid var(--stroke);
+  border-radius: 10px;
+  background: #fff;
+  color: #000;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color .2s ease;
+}
+.auth-input::placeholder,
+.r-auth-input::placeholder{ color: var(--muted); }
+.auth-input:focus,
+.r-auth-input:focus{ border-color: var(--accent); }
+
+/* глаз у пароля */
+.auth-pass-toggle{
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px; height: 20px;
+  padding: 0; border: 0; background: transparent;
+  cursor: pointer;
+}
+.auth-input-wrap--password .auth-input{ padding-right: 48px; }
+
+/* submit-кнопки */
+.auth-submit,
+.r-auth-submit{
+  width: 100%;
+  max-width: 392px;
+  height: 55px;
+  border-radius: 10px;
+  border: 2px solid var(--stroke);
+  background: #35C65E;
+  color: #ffffff;
+  font: 500 14px/24px 'Ubuntu', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+  margin: 8px auto 0;
+}
+.auth-submit:hover, .auth-submit:focus-visible,
+.r-auth-submit:hover, .r-auth-submit:focus-visible{
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* “або” + Google */
+.auth-divider,
+.r-auth-divider{
+  max-width: 200px;
+  margin: 16px auto 0;
+}
+.auth-divider__text,
+.r-auth-divider__text{
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+}
+.auth-google,
+.r-auth-google{
+  width: 100%;
+  height: 55px;
+  border: 2px solid var(--stroke);
+  border-radius: 10px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease, filter .2s ease;
+}
+.auth-google:hover, .auth-google:focus-visible,
+.r-auth-google:hover, .r-auth-google:focus-visible{
+  background: var(--accent);
+  border-color: var(--accent);
+  outline: none;
+}
+.auth-google:hover img, .r-auth-google:hover img{ filter: brightness(0) invert(1); }
+
+/* точки шага справа */
+.auth-steps{
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 10px auto 4px;
+  max-width: 392px;
+}
+.auth-steps .dot{
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--stroke);
+}
+.auth-steps .dot.is-active{ background: var(--accent); }
+
+/* ошибка */
+.error-block{
+  max-width: 392px;
+  margin: 6px auto 0;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: 600 13px/18px system-ui, sans-serif;
+}
+
+/* =========================
+   Адаптив: на узких одна колонка, центр строго 500px
+   ========================= */
+/* ===== адаптив: пересчёт брейкпоинтов под новую ширину ===== */
+/* две карты в ряд помещаются до ~ (card-w*2 + gap) = 1248px при 600px */
+@media (max-width: 948px){
+  .auth-stage{
+    max-width: 450px;               /* ровно ширина одной карты */
+  }
+  .auth-stage{
+    grid-template-columns: 450px;   /* одна колонка */
+    gap: 32px;
+    margin: 32px auto 140px;
+  }
+  .auth-stage::before{ inset: -14px -24px; }
+}
+
+/* совсем узкие — тянем на 100% */
+@media (max-width: 560px){
+  .auth-stage{ width: 100%; padding: 0 12px; max-width: 100%; }
+  .auth-box{ width: 100%; }
+  .auth-input-wrap,
+  .r-auth-input-wrap,
+  .auth-submit,
+  .r-auth-submit,
+  .auth-divider,
+  .r-auth-divider,
+  .auth-steps{ max-width: 100%; }
+}
+
+/* ——— прячем старые мини-табы наверху ——— */
+.login-switch { display: none !important; }
+
+/* ——— серые маленькие тексты под колонкой (переключают режимы) ——— */
+.login-hints{
+  max-width: 392px;
+  margin: 12px auto 0;
+  text-align: center;
+  color: #828181;
+  font-family: Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.login-hints span{
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 2px 4px;
+}
+.login-hints span.is-active{
+  text-decoration: none;
+  cursor: default;
+  color: #363535;
+  font-weight: 500;
+}
+
+/* ——— Забули пароль? ——— */
+.forgot-wrap{
+  max-width: 392px;
+  margin: 4px auto 0;
+  text-align: right;
+}
+.forgot-link{
+  background: transparent;
+  border: 0;
+  color: #828181;
+  font-family: Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ——— Google блок по фигме ——— */
+.google-section{
+  position: relative;
+  width: 100%;
+  max-width: 392px;
+  margin: 16px auto 0;
+}
+.google-or{
+  text-align: center;
+  color: #828181;                  /* var(--Color-4) */
+  font-family: Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  margin-bottom: 7px;
+}
+.google-btn{
+  position: relative;
+  width: 391px;
+  max-width: 100%;
+  height: 55px;
+  border-radius: 10px;
+  border: 2px solid #ECECEC;      /* var(--Color-3) */
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.google-text{
+  color: #363535;                 /* var(--Color-2) */
+  font-family: Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  pointer-events: none;           /* чтобы клик доставался GoogleSignIn внутри */
+}
+/* зелёная G справа, как в макете */
+.google-icon{
+  position: absolute;
+  right: 18px;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* ховер — зелёный фон как на остальных кнопках */
+.google-btn:hover{
+  background: #35C65E;
+  border-color: #35C65E;
+}
+.google-btn:hover .google-text{ color: #fff; }
+.google-btn:hover .google-icon{ filter: brightness(0) invert(1); }
+
+/* мобильное поведение сохраняем */
+@media (max-width: 560px){
+  .google-btn{ width: 100%; }
+}
+
+
+
+/* ===== Реєстрація: біла кнопка замість зеленої ===== */
+.r-auth-submit--white{
+  background: #FFFFFF !important;
+  color: #363535 !important;     /* текст як у макеті */
+  border: 2px solid #ECECEC !important;
+}
+
+.r-auth-submit--white:hover,
+.r-auth-submit--white:focus-visible{
+  background: #FFFFFF !important;
+  color: #363535 !important;
+  border-color: #35C65E !important;   /* підсвічуємо бордер як у стилі */
+  outline: none;
+  box-shadow: inset 0 0 0 1px #35C65E;
+}
+
+/* піднімаємо “підкладку” ще нижче, щоб привиди були над нею */
+.auth-stage::before{
+  z-index: -2; /* було -1 */
+}
+
+/* підкладка сцени найнижча */
+.auth-stage::before{
+  z-index: -2; /* нижче за все */
+}
+
+/* картки вище за привидів */
+.auth-box{
+  position: relative;
+  z-index: 2;
+}
+
+/* базовое (как у тебя уже есть) */
+.ghost{
+  position: fixed;
+  top: 50vh;
+  transform: translateY(-50%);
+  width: clamp(180px, 18vw, 280px);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.04));
+}
+
+/* края экрана */
+.ghost--left{  left: -56px; top: 64vh; }  /* ЛЕВЫЙ — ниже */
+.ghost--right{ right: -56px; top: 35vh; } /* ПРАВЫЙ — выше */
+
+/* адаптив — на узких скрываем */
+@media (max-width: 948px){
+  .ghost{ display: none; }
+}
+/* галочка под шагом 2 */
+.agree-line{
+  max-width: 392px;
+  margin: 8px auto 4px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--muted);
+  font: 400 14px/20px 'Ubuntu', sans-serif;
+}
+.agree-line input{ width: 18px; height: 18px; }
+
+/* OTP (шаг 3) */
+.otp-caption{
+  max-width:392px;
+  margin: 4px auto 10px;
+  color: var(--muted);
+  text-align:center;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+}
+.otp-row{
+  display:flex; gap:10px; justify-content:center;
+  max-width:392px; margin: 0 auto 8px;
+}
+.otp-box{
+  width:56px; height:55px; border:2px solid var(--stroke);
+  border-radius:10px; text-align:center; font: 500 20px/55px 'Ubuntu',sans-serif;
+}
+.otp-meta{
+  display:flex; justify-content:space-between; max-width:392px; margin: 4px auto 10px;
+  color: var(--accent); font: 400 14px/24px 'Ubuntu', sans-serif;
+}
+.otp-resend.is-disabled{ opacity:.5; pointer-events:none; }

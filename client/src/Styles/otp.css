@@ -1,0 +1,59 @@
+.otp-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.otp-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: min(420px, 90vw);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  position: relative;
+}
+.otp-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+.otp-input {
+  width: 100%;
+  font-size: 24px;
+  letter-spacing: 4px;
+  text-align: center;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+.otp-error {
+  color: #b00020;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.otp-submit {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #35C65E;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.otp-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:9999}
+.otp-modal{background:#fff;border-radius:14px;padding:24px;width:min(420px,90vw);box-shadow:0 10px 30px rgba(0,0,0,.15);position:relative}
+.otp-close{position:absolute;top:8px;right:10px;border:none;background:transparent;font-size:22px;cursor:pointer}
+.otp-input{width:100%;font-size:24px;letter-spacing:4px;text-align:center;padding:10px 12px;border:1px solid #ccc;border-radius:10px;outline:none}
+.otp-error{color:#b00020;margin-top:8px;margin-bottom:8px}
+.otp-submit{margin-top:10px;width:100%;padding:10px 14px;border-radius:10px;border:none;background:#35C65E;color:#fff;font-size:16px;cursor:pointer}

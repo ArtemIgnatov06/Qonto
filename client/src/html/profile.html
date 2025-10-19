@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Qonte — Профіль</title>
+    <link rel="stylesheet" href="profile.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="#" aria-label="Qonte">
+          <span class="logo-text">Qonte</span>
+          <span class="logo-dot" aria-hidden="true"></span>
+        </a>
+        <form class="search" role="search">
+          <input class="search-input" type="search" name="q" placeholder="Пошук" aria-label="Пошук" />
+          <button class="icon-btn" type="submit" aria-label="Пошук">🔍</button>
+        </form>
+        <nav class="header-actions" aria-label="Головна навігація">
+          <button class="btn btn-outline" type="button">AI-Консультант</button>
+
+
+          
+          <!-- КНОПКА КАТАЛОГ -->
+<button class="btn-cat" type="button">
+  <span class="cat-ico" aria-hidden="true">
+    <!-- иконка «меню/каталог» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <rect x="3" y="4" width="7" height="7"/>
+      <rect x="14" y="4" width="7" height="7"/>
+      <rect x="3" y="13" width="7" height="7"/>
+      <rect x="14" y="13" width="7" height="7"/>
+    </svg>
+  </span>
+  <span class="cat-label">Каталог</span>
+</button>
+
+
+
+
+
+          <button class="icon-btn" type="button" aria-label="Мова">🌐</button>
+          <button class="icon-btn" type="button" aria-label="Вподобання">♡</button>
+          <button class="icon-btn" type="button" aria-label="Кошик">🛒</button>
+          <button class="icon-btn avatar" type="button" aria-label="Профіль">👤</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page-grid">
+      <aside class="sidebar" aria-label="Панель профілю">
+        <div class="profile">
+          <div class="avatar-lg" aria-hidden="true">👤</div>
+          <div class="role">Покупець</div>
+          <h1 class="username">Владислав Владивосток</h1>
+          <div class="profile-actions">
+            <button class="btn btn-primary" type="button">Редагувати профіль</button>
+            <button class="btn btn-ghost" type="button">Чати</button>
+          </div>
+        </div>
+
+        <nav class="side-links" aria-label="Швидкі дії">
+          <a href="#" class="side-link underlined">Кошик</a>
+          <a href="#" class="side-link underlined">Список бажань</a>
+          <a href="#" class="side-link">Вийти з профілю</a>
+        </nav>
+
+        <section class="promo" aria-labelledby="promo-title">
+          <h2 id="promo-title" class="promo-title">Відкрийте свій магазин та почніть свої перші продажі!</h2>
+          <div class="promo-illustration" aria-hidden="true"></div>
+          <button class="btn btn-primary promo-btn" type="button">Стати продавцем</button>
+        </section>
+
+        <button class="btn btn-outline chat-cta" type="button" aria-label="Чати">Чати</button>
+      </aside>
+
+      <section class="content">
+        <header class="section-head">
+          <h2 class="section-title">Мої замовлення</h2>
+          <a class="section-link" href="#">Всі замовлення →</a>
+        </header>
+        <div class="card-grid">
+          <article class="order-card order-card--ready">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status ok">Готово</div>
+              <div class="order-sub">8 серпня, Пт</div>
+              <div class="order-note">Можна забирати до 16 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">В дорозі</div>
+              <div class="order-sub">Очікується:</div>
+              <div class="order-note ok">9 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">В дорозі</div>
+              <div class="order-sub">Очікується:</div>
+              <div class="order-note ok">9 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">В дорозі</div>
+              <div class="order-sub">Очікується:</div>
+              <div class="order-note ok">9 серпня, Сб</div>
+            </div>
+          </article>
+        </div>
+
+        <header class="section-head mt-32">
+          <h2 class="section-title">Історія замовлень</h2>
+          <a class="section-link" href="#">Вся історія →</a>
+        </header>
+        <div class="card-grid card-grid--wrap">
+          <!-- 8 history items -->
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+          <article class="order-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="order-meta">
+              <div class="order-status">Доставлено</div>
+              <div class="order-sub">9 серпня, Сб</div>
+              <div class="order-note">Було забрано 10 серпня, Сб</div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+      <div class="container footer-inner">
+        <div class="footer-col">
+          <h3 class="footer-title">Інформація о компанії</h3>
+          <ul class="footer-links">
+            <li><a href="#">Про нас</a></li>
+            <li><a href="#">Умови використання сайту</a></li>
+            <li><a href="#">Вакансії</a></li>
+            <li><a href="#">Контакти</a></li>
+            <li><a href="#">Зворотній зв’язок</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3 class="footer-title">Допомога</h3>
+          <ul class="footer-links">
+            <li><a href="#">Часті питання</a></li>
+            <li><a href="#">Доставка та оплата</a></li>
+            <li><a href="#">Гарантія</a></li>
+            <li><a href="#">Повернення</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3 class="footer-title">Продавцям</h3>
+          <ul class="footer-links">
+            <li><a href="#">Продавати товари</a></li>
+            <li><a href="#">Правила торгівлі</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3 class="footer-title">Ми в соціальних мережах</h3>
+          <div class="socials" aria-label="Соцмережі">
+            <a class="social" href="#" aria-label="Instagram">◎</a>
+            <a class="social" href="#" aria-label="Facebook">●</a>
+            <a class="social" href="#" aria-label="TikTok">♬</a>
+          </div>
+        </div>
+      </div>
+      <div class="container copyright">©2025 Платформа онлайн-торгівлі «Qonto» — використовується на підставі ліцензії правовласника</div>
+    </footer>
+  </body>
+  </html>
+

@@ -1,0 +1,125 @@
+/* =========================
+   Guarantee (Гарантія) — clean & isolated
+   ========================= */
+
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+  --page-max:1120px;
+}
+
+.guarantee-page{ background: transparent; }
+
+.guarantee-container{
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 32px 16px 96px;    /* запас под футер */
+  color: #111;                /* читабельный тёмный текст */
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* если вдруг внутрь попадут чужие .hdr/.ftr — прячем */
+.guarantee-page .hdr,
+.guarantee-page .ftr{ display:none !important; }
+
+/* ——— Санитайзер старых «фигма»-классов и абсолютов ——— */
+.guarantee-container [class^="group-"],
+.guarantee-container .legal-wrap,
+.guarantee-container .about-title,
+.guarantee-container .about-desc,
+.guarantee-container .about-icon,
+.guarantee-container .about-icon__img,
+.guarantee-container .about-icon__vector{
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important; right: auto !important; top: auto !important; bottom: auto !important;
+  transform: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0; padding: 0;
+}
+
+/* ——— Герой-блок ——— */
+.guarantee-hero{
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 4px 0 10px;
+}
+.guarantee-hero__icon{
+  width:44px; height:44px;
+  display:inline-grid; place-items:center;
+  border-radius:8px;
+  color: var(--accent);
+  font-size:26px; line-height:1;
+}
+.guarantee-hero__title{
+  margin:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight:700;
+  font-size:clamp(32px,4.2vw,56px);
+  line-height:1.1;
+  color:#35C65E;
+}
+
+/* ——— Контент ——— */
+.guarantee-content h2{
+  margin:28px 0 12px;
+  font-weight:700;
+  font-size:clamp(22px,2.2vw,28px);
+  color:#111;
+}
+.guarantee-content h3{
+  margin:20px 0 10px;
+  font-weight:600;
+  font-size:clamp(18px,1.8vw,22px);
+  color:#111;
+}
+.guarantee-content p{
+  margin:0 0 12px;
+  line-height:1.65;
+  color:#111;
+}
+.guarantee-content ul,
+.guarantee-content ol{
+  margin:0 0 14px 0;
+  padding-left:1.25rem;
+  color:#111;
+}
+.guarantee-content li{ margin:6px 0; }
+.guarantee-content a{ color:#0b0b0b; text-decoration:underline; }
+.guarantee-content a:hover{ color:#000; }
+
+/* таблицы/медиа */
+.guarantee-content img,
+.guarantee-content video,
+.guarantee-content iframe,
+.guarantee-content table{ max-width:100%; height:auto; }
+.guarantee-content table{
+  width:100%; border-collapse:collapse; margin:10px 0 16px;
+}
+.guarantee-content th,
+.guarantee-content td{
+  border-bottom:1px solid #e5e7eb;
+  padding:8px 10px;
+  text-align:left;
+  color:#111;
+}
+
+/* подстраховка: если в HTML пришёл свой первый h1 — спрячем его */
+.guarantee-content > h1:first-child,
+.guarantee-content > h2:first-child,
+.guarantee-content > .about-title:first-child{
+  display:none !important;
+}
+
+/* на всякий: убираем прозрачности/фильтры у потомков */
+.guarantee-container *{
+  opacity:1 !important;
+  filter:none !important;
+}
