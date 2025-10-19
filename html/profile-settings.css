@@ -1,0 +1,833 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 900px; /* временно, чтобы не мешал просмотру страницы */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+/* БАЗА ДЛЯ ИНЛАЙН-ПОЛЯ */
+.inline-field{
+  position:absolute;                 /* страница у тебя на абсолюте */
+  width:391px; height:55px;          /* базовый размер для этих двух полей */
+  font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#363535;
+  box-sizing:border-box;
+}
+
+/* Позиции по макету */
+.field-city{ left:80px; top:251px; }
+.field-name{ left:80px; top:316px; }
+
+/* Рамка */
+.inline-field__frame{
+  position:absolute; inset:0;
+  border:2px solid #ECECEC;
+  border-radius:10px;
+  box-sizing:border-box;
+}
+
+/* Отображаемое значение — слева, по ВЫСОТЕ центр 55px */
+.inline-field__value{
+  position:absolute; left:24px; right:60px; top:0; height:55px;
+  display:flex; align-items:center;      /* вертикальный центр */
+  font:400 14px/24px 'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Поле ввода — тоже по ВЫСОТЕ центр, горизонтально слева */
+.inline-field__input{
+  position:absolute; left:20px; right:60px; top:50%;
+  transform:translateY(-50%);
+  height:32px; padding:0 8px;
+  font:400 14px/32px 'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#363535; background:#fff;
+  border:1.5px solid #ECECEC; border-radius:7px; box-sizing:border-box;
+  text-align:left;
+}
+.inline-field__input:focus{ outline:none; box-shadow:none; border-color:#ECECEC; }
+.inline-field__input::placeholder{ color:#828181; }
+
+/* Иконка редактирования: 29×29 @ (421,264/329) ⇒ offset 341,13 внутри поля */
+.inline-field__edit{
+  position:absolute; left:341px; top:13px;
+  width:29px; height:29px;
+  padding:0; border:0; background:transparent; cursor:pointer; z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform 120ms ease, filter 120ms ease;
+}
+.inline-field__edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.inline-field__edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+.inline-field__edit img{ width:29px; height:29px; display:block; object-fit:contain; }
+
+  .visually-hidden{position:absolute !important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;}
+
+  /* Геометрия блока по макету */
+  .cards{
+    position:absolute; left:568.33px; top:567px; width:343px; height:205px; /* 55 + 7 + 55 + 7 + 55 + 10? + зона кнопки */
+    font-family:'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+    color:#363535;
+  }
+
+  /* Список строк (две позиции из макета: 0 и 65px) */
+  .cards__list{ position:absolute; left:0; top:0; width:343px; height:auto; }
+
+  /* Одна строка карты: 343×55 */
+  .card-row{
+    position:absolute; left:0; width:343px; height:55px;
+    display:block;
+  }
+  .card-row[data-index="0"]{ top:0px; }     /* соответствует top:567 */
+  .card-row[data-index="1"]{ top:65px; }    /* соответствует top:632 */
+  .card-row[data-index="2"]{ top:130px; }   /* третья позиция */
+  .card-row.is-error .card-row__field, .card-row.is-error .card-row__input{ border-color:#FF4D4F !important; }
+
+  /* Левая плашка “Карта N” (Group 193) 97×55 @ x=0 */
+  .card-row__label{
+    position:absolute; left:0; top:0; width:97px; height:55px;
+    border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box;
+  }
+  .card-row__label-text{
+    position:absolute; left:25px; top:50%; transform:translateY(-50%);
+    font:400 14px/24px 'Ubuntu';
+    color:#35C65E; display:flex; align-items:center; height:24px;
+  }
+
+  /* Правая плашка с номером (Group 192) 189×55 @ x=107 */
+  .card-row__field{
+    position:absolute; left:107px; top:0; width:189px; height:55px;
+    border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box;
+  }
+  /* отображаемое значение (в режиме просмотра) */
+  .card-row__value{
+    position:absolute; left:132px; top:50%; transform:translateY(-50%);
+    width:164px; height:24px; display:flex; align-items:center;
+    font:400 14px/24px 'Ubuntu'; color:#363535; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  /* инпут (в режиме редактирования) */
+  .card-row__input{
+    position:absolute; left:115px; right:47px; top:50%; transform:translateY(-50%); width: 170px;
+    height:32px; border:1.5px solid #ECECEC; border-radius:7px; padding:0 8px; box-sizing:border-box;
+    font:400 14px/32px 'Ubuntu'; color:#363535; background:#fff;
+  }
+  .card-row__input:focus{ outline:none; border-color:#ECECEC; }
+  .card-row__input[hidden]{ display:none; }
+
+  /* Кнопка редактирования (tabler:edit) 29×29 @ x=314, top ~ центр */
+  .card-row__edit{
+    position:absolute; left:314px; top:13px; width:29px; height:29px;
+    border:0; background:transparent; padding:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .card-row__edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+  .card-row__edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .card-row__edit img{ width:29px; height:29px; display:block; object-fit:contain; }
+
+  /* Кнопка “Додати карту” (Group 270) 198×55 @ top:150 */
+  .cards__add{
+    position:absolute; left:0; top:90px; width:198px; height:55px;
+    border-radius:10px; border:2px solid #35C65E; background:#35C65E; color:#fff;
+    display:flex; align-items:center; gap:12px; padding-left:30px; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease; user-select:none;
+  }
+  .cards__add:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .cards__add:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .cards__add:disabled{ opacity:.5; cursor:not-allowed; }
+  .cards__add-text{ font:500 14px/24px 'Ubuntu'; }
+  .cards__add-icon{ margin-left:auto; margin-right:14px; display:block; }
+
+    .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;}
+
+  /* Геометрия секции по макету (левый верх 568×251) */
+  .addresses{
+    position:absolute; left:568px; top:251px; width:393px; /* берём ширину второго ряда как максимум */
+    font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+    color:#363535;
+  }
+  .addresses__list{ position:absolute; left:0; top:0; width:393px; }
+
+  /* Строка адреса: высота 55, оффсет 65 между рядами */
+  .addr-row{
+    position:absolute; left:0; width:393px; height:55px;
+  }
+  .addr-row[data-index="0"]{ top:0px;    }
+  .addr-row[data-index="1"]{ top:65px;   }
+
+  /* Левый блок-ярлык: по макету — 77px для 1-го, 93px для 2-го */
+  .addr-row__label{
+    position:absolute; top:0; height:55px; border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box;
+  }
+  .addr-row__label--w77{ left:0; width:77px; }
+  .addr-row__label--w93{ left:0; width:93px; }
+
+  .addr-row__label-text{
+    position:absolute; left:15px; top:50%; transform:translateY(-50%);
+    height:24px; display:flex; align-items:center;
+    font:400 14px/24px 'Ubuntu'; color:#35C65E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    cursor:pointer;
+  }
+
+  /* Правый блок-адрес: по макету 247px (ряд1) и 243px (ряд2) */
+  .addr-row__field{
+    position:absolute; top:0; height:55px; border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box;
+  }
+  .addr-row__field--r1{ left:87px;  width:247px; } /* 568→655 (+87), 247×55 */
+  .addr-row__field--r2{ left:103px; width:243px; } /* 568→671 (+103), 243×55 */
+
+  .addr-row__value{
+    position:absolute; left:112px; right:46px; top:50%; transform:translateY(-50%);
+    height:24px; display:flex; align-items:center;
+    font:400 14px/24px 'Ubuntu'; color:#363535;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    cursor:pointer;
+  }
+
+  /* Инпуты редактирования */
+  .addr-row__input,
+  .addr-row__input-label{
+    position:absolute; top:50%; transform:translateY(-50%);
+    height:32px; border:1.5px solid #ECECEC; border-radius:7px; padding:0 8px; box-sizing:border-box;
+    font:400 14px/32px 'Ubuntu'; color:#363535; background:#fff; width: 225px;
+  }
+  .addr-row__input[hidden],
+  .addr-row__input-label[hidden]{ display:none; }
+  .addr-row__input:focus,
+  .addr-row__input-label:focus{ outline:none; border-color:#ECECEC; }
+
+  /* Позиции инпутов */
+  .addr-row__input-label--w77{ left:10px; width:57px; }  /* внутри 77 */
+  .addr-row__input-label--w93{ left:10px; width:73px; }  /* внутри 93 */
+  .addr-row__input--r1{ left:96px; right:47px; }  /* внутри правого поля первого ряда */
+  .addr-row__input--r2{ left:112px; right:47px; } /* внутри правого поля второго ряда */
+
+  /* Карандаш (29×29) справа */
+  .addr-row__edit{
+    position:absolute; left:362px; top:13px; width:29px; height:29px;
+    border:0; background:transparent; padding:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .addr-row__edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+  .addr-row__edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .addr-row__edit img{ width:29px; height:29px; display:block; object-fit:contain; }
+
+  /* Кнопка “Додати адресу” (206×55) на позиции top:150 */
+  .addresses__add{
+    position:absolute; left:0; top:150px; width:206px; height:55px;
+    border-radius:10px; border:2px solid #35C65E; background:#35C65E; color:#fff;
+    display:flex; align-items:center; gap:12px; padding-left:30px; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease; user-select:none;
+  }
+  .addresses__add:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .addresses__add:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .addresses__add:disabled{ opacity:.5; cursor:not-allowed; }
+  .addresses__add-text{ font:500 14px/24px 'Ubuntu'; }
+  .addresses__add-icon{ margin-left:auto; margin-right:14px; display:block; }
+
+  /* Базовый стиль h4 */
+.h4-green{
+  position:absolute;
+  margin:0;
+  font-family:'Ubuntu', sans-serif;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;      /* 144% */
+  color:#35C65E;
+  display:flex;
+  align-items:center;    /* по высоте по центру */
+  box-sizing:border-box; white-space: nowrap;
+}
+
+/* Точные размеры и координаты */
+.heading--delivery{
+  left:568px; top:185px;
+  width:202px; height:36px;
+}
+.heading--cards{
+  left:568px; top:501px;
+  width:117px; height:36px;
+}
+
+.security-widgets{
+  position: relative;
+  font-family: 'Ubuntu', sans-serif;
+  color:#363535;
+}
+
+/* ===== Кнопка “Змінити пароль” (Group 262) ===== */
+.btn-change-pass{
+  position:absolute; left:80px; top:466px;
+  width:206px; height:55px;
+  box-sizing:border-box;
+  border:2px solid #35C65E; border-radius:10px;
+  background:#35C65E; color:#FFFFFF;
+  display:flex; align-items:center; gap:12px;
+  padding:0 16px 0 30px; cursor:pointer;
+  transition:transform .12s ease, filter .12s ease;
+}
+.btn-change-pass__text{
+  font-weight:500; font-size:14px; line-height:24px;
+  height:24px; display:flex; align-items:center;
+}
+.btn-change-pass__icon{
+  margin-left:auto; margin-right:10px;
+  width:27px; height:27px; display:block; object-fit:contain;
+}
+.btn-change-pass:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+.btn-change-pass:active{ transform:translateY(0);    filter:brightness(0.98); }
+.btn-change-pass:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; background:#2fb357; }
+
+/* ===== Соглашение/переключатель (Group 263) ===== */
+.twofa{
+  position:absolute; left:80px; top:546px;
+  width:226px; height:24px;
+  box-sizing:border-box;
+}
+.twofa__label{
+  position:absolute; left:0; top:0;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#828181; display:flex; align-items:center; height:24px;
+}
+/* Маленькая кликабельная кнопка справа (Rectangle 35, 15×15 @ top≈4.17px) */
+.twofa__toggle{
+  position:absolute; right:0; top:4px;
+  width:15px; height:15px;
+  box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:5px;
+  background:#FFFFFF;
+  cursor:pointer;
+  padding:0;
+  transition:border-color .12s ease, background-color .12s ease, box-shadow .12s ease;
+}
+/* Состояние "включено" — зелёная обводка и заливка */
+.twofa__toggle.is-on{
+  border-color:#35C65E; background:#35C65E;
+}
+/* Галочка рисуется псевдоэлементом, появляется только когда включено */
+.twofa__toggle.is-on::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    linear-gradient(45deg, transparent 58%, #fff 58%) left 3px top 6px/6px 2px no-repeat,
+    linear-gradient(-45deg, transparent 58%, #fff 58%) left 6px top 7px/6px 2px no-repeat;
+}
+/* Ховеры/фокусы */
+.twofa__toggle:hover{ border-color:#bdbdbd; }
+.twofa__toggle:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Контейнер секции: используем абсолютные координаты из макета */
+.promo-banner{
+  position:absolute;
+  left:1056.97px; top:177px;
+  width:463px; height:578px;
+  font-family:'Ubuntu', sans-serif;
+  color:#363535;
+}
+
+/* Внешняя рамка */
+.promo-banner__frame{
+  position:absolute; left:0; top:0;
+  width:463px; height:578px;
+  border:2px solid #ECECEC; border-radius:15px;
+  box-sizing:border-box;
+}
+
+/* Заголовок (383×114 @ 1091.97,222 => внутри секции это left:35px; top:45px) */
+.promo-banner__title{
+  position:absolute; left:35px; top:45px;
+  width:383px; height:114px; margin:0;
+  font-weight:500; font-size:33px; line-height:38px;
+  display:flex; align-items:center; /* как в макете */
+  color:#363535;
+}
+
+/* CTA (222×55 @ 1091.97,361 => внутри секции: left:35px; top:184px) */
+.promo-banner__cta{
+  position:absolute; left:35px; top:184px;
+  width:222px; height:55px;
+  border-radius:10px; border:2px solid #35C65E;
+  background:#35C65E; color:#FFFFFF;
+  display:flex; align-items:center; gap:12px;
+  padding:0 16px 0 16px; cursor:pointer;
+  transition:transform .12s ease, filter .12s ease;
+}
+.promo-banner__cta-text{
+  font-weight:500; font-size:14px; line-height:24px; height:24px; display:flex; align-items:center;
+}
+/* Иконка (Frame 99 @ 1263,377.83) — ставим справа в кнопке; поворот 90° как в макете */
+.promo-banner__cta-icon{
+  margin-left:auto; margin-right:10px;
+  width:22.82px; height:22.13px; display:block; object-fit:contain;
+  filter:brightness(0) invert(1); /* сделать белой при тёмной иконке, можно убрать */
+}
+.promo-banner__cta:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.promo-banner__cta:active{ transform:translateY(0);    filter:brightness(0.98); }
+.promo-banner__cta:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Область арта (364×245 @ 1106.97,466.04 => внутри: left:50px; top:289.04px) */
+.promo-banner__art{
+  position:absolute; left:50px; top:289.04px;
+  width:364px; height:245px;
+  border-radius:10px; overflow:hidden; /* если нужно скругление */
+  /* можно добавить тонкую рамку как в фигме: */
+  /* border:2px solid #ECECEC; box-sizing:border-box; */
+}
+.promo-banner__img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center;
+  display:block;
+}
+
+/* Контейнер (456×36 @ 79.64, 185.01) */
+.order-header{
+  position: absolute;
+  left: 79.64px;
+  top: 185.01px;
+  width: 456px;
+  height: 36px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* Иконка (Frame 139: 30×29 @ 79.64, 189.01) */
+.order-header__icon{
+  position: absolute;
+  left: 0px;      /* 79.64 - 79.64 */
+  top: 4px;       /* 189.01 - 185.01 */
+  width: 30px;
+  height: 29px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(180deg);
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+.order-header__icon img{
+  width: 30px;
+  height: 29px;
+  display: block;
+  object-fit: contain;
+}
+.order-header__icon:hover{ transform: translateY(-1px); filter: brightness(1.03); transform: rotate(180deg);}
+.order-header__icon:active{ transform: translateY(0);    filter: brightness(0.98); transform: rotate(180deg);}
+.order-header__icon:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; transform: rotate(180deg);}
+
+/* Заголовок (h4: 304×36 @ 129.64, 185.01) */
+.order-header__title{
+  position: absolute;
+  left: 50px;     /* 129.64 - 79.64 */
+  top: 0px;       /* 185.01 - 185.01 */
+  width: 400px;
+  height: 36px;
+
+  margin: 0;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Номер (72×24 @ 463.64, 195.01) */
+.order-header__id{
+  position: absolute;
+  left: 384px;    /* 463.64 - 79.64 */
+  top: 10px;      /* 195.01 - 185.01 */
+  width: 72px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* Точка (6×6 @ 445.64, 204.01) */
+.order-header__dot{
+  position: absolute;
+  left: 366px;    /* 445.64 - 79.64 */
+  top: 19px;      /* 204.01 - 185.01 */
+  width: 6px;
+  height: 6px;
+  background: #828181;
+  border-radius: 10px;
+  display: block;
+}

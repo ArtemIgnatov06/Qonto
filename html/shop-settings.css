@@ -1,0 +1,1006 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 800px; /* временно, чтобы не мешал просмотру страницы */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+  z-index: 100;
+}
+
+/* Контейнер (Group 351: 200×65 @ 80, 253) */
+.avatar-settings{
+  position:absolute;
+  left:80px; top:253px;
+  width:200px; height:65px;
+  box-sizing:border-box;
+  font-family:'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535;
+}
+
+/* Кружок-аватар (65×65 @ 80,253) */
+.avatar{
+  position:absolute;
+  left:0px; top:0px;           /* относительно контейнера */
+  width:65px; height:65px;
+  border-radius:50px;
+  background-color:#D9D9D9;    /* дефолт — серый, если нет картинки */
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  overflow:hidden;
+  image-rendering:auto;
+}
+
+/* Иконка-карандаш (29×29 @ 206,265 ⇒ offset внутри контейнера 126,12) */
+.avatar-edit{
+  position:absolute;
+  left:126px; top:12px;
+  width:29px; height:29px;
+  padding:0; border:0; background:transparent;
+  cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:transform 120ms ease, filter 120ms ease;
+}
+.avatar-edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.avatar-edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+.avatar-edit:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+.avatar-edit img{ width:29px; height:29px; display:block; object-fit:contain; }
+
+/* Текст “Змінити аватарку” (116×24 @ 164,294 ⇒ offset 84,41) */
+.avatar-text{
+  position:absolute;
+  left:84px; top:41px;
+  width:150px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px;
+  display:flex; align-items:center;
+  color:#363535;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Скрытый input */
+.avatar-input{ display:none; }
+
+/* Контейнер 366×55 @ 80,337 */
+.inline-field{
+  position:absolute;
+  left:80px; top:337px;
+  width:366px; height:55px;
+  font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#363535;
+  box-sizing:border-box;
+}
+
+/* Рамка */
+.inline-field__frame{
+  position:absolute; inset:0;
+  border:2px solid #ECECEC; border-radius:10px;
+  box-sizing:border-box;
+}
+
+/* Ярлык “*Ім’я” (как в макете — внутри поля) */
+.inline-field__label{
+  position:absolute;
+  left:24px; top:8px;
+  height:24px;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#363535;
+}
+
+/* Значение (просмотр) */
+.inline-field__value{
+  position:absolute;
+  left:24px; top:28px;          /* под лейблом */
+  right:60px; height:24px;
+  display:block;
+  font-weight:400; font-size:14px; line-height:24px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Поле ввода (в тех же координатах, что value) */
+.inline-field__input{
+  position:absolute;
+  left:20px; top:24px;
+  right:60px; height:32px;
+  padding:0 8px;
+  font-weight:400; font-size:14px; line-height:32px;
+  color:#363535; background:#fff;
+  box-sizing:border-box;
+}
+.inline-field__input:focus{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Кнопка-карандаш */
+.inline-field__edit{
+  position:absolute;
+  left:317px; top:13px;          /* 397-80, 350-337 */
+  width:29px; height:29px;
+  padding:0; border:0; background:transparent; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform 120ms ease, filter 120ms ease;
+}
+.inline-field__edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.inline-field__edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+.inline-field__edit:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+.inline-field__edit img{ width:29px; height:29px; object-fit:contain; display:block; }
+
+/* поле редактирования — нейтральная рамка и без зелёного фокуса */
+.inline-field__input{
+  position:absolute;
+  left:20px; top:24px; right:60px; height:32px;
+  padding:0 8px;
+  font: 400 14px/32px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535; background:#fff;
+  border:1.5px solid #ECECEC;    /* было зелёным — теперь серое */
+  box-sizing:border-box;
+}
+.inline-field__input:focus{
+  outline:none;                  /* убираем зелёный фокус */
+  box-shadow:none;
+  border-color:#ECECEC;          /* не меняем цвет на фокусе */
+}
+
+/* просмотрное значение — центр */
+.inline-field__value{
+  position:absolute;
+  left:24px; top:28px; right:60px; height:24px;
+  display:block;
+  font-weight:400; font-size:14px; line-height:24px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  text-align:center;                 /* центрируем */
+}
+
+/* инпут — центр + нейтральная рамка */
+.inline-field__input{
+  position:absolute;
+  left:20px; top:24px; right:60px; height:32px;
+  padding:0 8px;
+  font: 400 14px/32px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535; background:#fff;
+  text-align:center;                 /* центрируем ввод */
+}
+.inline-field__input::placeholder{ color:#828181; }
+.inline-field__input:focus{ outline:none; box-shadow:none; border-color:#ECECEC; }
+
+/* Текстовое значение — ВЕРТИКАЛЬНО по центру всего поля (55px), слева как было */
+.inline-field__value{
+  position: absolute;
+  left: 24px;
+  right: 60px;
+  top: 0;                 /* растягиваем по всей высоте */
+  height: 55px;           /* высота контейнера */
+  display: flex;          /* вертикальное центрирование */
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;      /* для нормального межстрочного */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* убираем text-align:center, чтобы осталась левая привязка */
+}
+
+/* Инпут редактирования — тоже ВЕРТИКАЛЬНО по центру */
+.inline-field__input{
+  position: absolute;
+  left: 20px;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);  /* центр по высоте */
+  height: 32px;
+  padding: 0 8px;
+  font: 400 14px/32px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color: #363535;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: left;             /* горизонтально — слева */
+}
+.inline-field__input::placeholder{ color:#828181; }
+.inline-field__input:focus{ outline:none; box-shadow:none; border-color:#ECECEC; }
+
+.inline-field__value{
+  position:absolute;
+  left:24px; right:60px;
+  top:0; height:55px;             /* высота контейнера */
+  display:flex; align-items:center;/* вертикальный центр */
+  font: 400 14px/24px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  
+}
+
+/* инпут: слева, по ВЫСОТЕ центр */
+.inline-field__input{
+  position:absolute;
+  left:20px; right:60px;
+  top:50%; transform:translateY(-50%);
+  height:32px; padding:0 8px;
+  font: 400 14px/32px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535; background:#fff;
+  text-align:left;
+  z-index: 1000;
+}
+.inline-field__input::placeholder{ color:#828181; }
+.inline-field__input:focus{ outline:none; box-shadow:none; border-color:#ECECEC; }
+
+/* базовая геометрия контейнеров — все они абсолютные по инлайн-стилям */
+.inline-field{
+  position:absolute;
+  font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#363535;
+  box-sizing:border-box;
+}
+
+/* рамка */
+.inline-field__frame{
+  position:absolute; inset:0;
+  border:2px solid #ECECEC; border-radius:10px;
+  box-sizing:border-box;
+}
+
+/* значение — слева, по ВЫСОТЕ центр 55px */
+.inline-field__value{
+  position:absolute; left:24px; right:60px; top:0; height:55px;
+  display:flex; align-items:center;
+  font:400 14px/24px 'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* инпут — слева, по ВЫСОТЕ центр */
+.inline-field__input{
+  position:absolute; left:20px; right:60px; top:50%; transform:translateY(-50%);
+  height:32px; padding:0 8px;
+  font:400 14px/32px 'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#363535; background:#fff;
+  border:1.5px solid #ECECEC; border-radius:7px; box-sizing:border-box;
+  text-align:left;
+}
+.inline-field__input::placeholder{ color:#828181; }
+.inline-field__input:focus{ outline:none; box-shadow:none; border-color:#ECECEC; }
+
+/* кнопка-карандаш — координаты заданы инлайн-стилями под конкретное поле */
+.inline-field__edit{
+  position:absolute; width:29px; height:29px;
+  padding:0; border:0; background:transparent; cursor:pointer; z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform 120ms ease, filter 120ms ease;
+}
+.inline-field__edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.inline-field__edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+.inline-field__edit img{ width:29px; height:29px; display:block; object-fit:contain; }
+
+/* подпись над 3-м полем */
+.inline-note{
+  position:absolute;
+  font:400 14px/24px 'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#828181; display:flex; align-items:center; white-space: nowrap;
+}
+
+.inline-field.is-error .inline-field__frame,
+.inline-field.is-error .inline-field__input{
+  border-color:#FF4D4F !important;
+}
+
+  .docs{
+    position:absolute; left:568px; top:377px; width:367px; height:183px;
+    font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  }
+  .docs__title{
+    position:absolute; left:0; top:0; width:133px; height:36px;
+    margin:0; font-weight:400; font-size:25px; line-height:36px;
+    color:#35C65E; display:flex; align-items:center;
+  }
+  .docs__list{
+    position:absolute; left:0; top:66px; /* 443 - 377 = 66 */
+    width:367px; height:117px;
+  }
+
+  /* ===== Одна “кнопка” загрузки ===== */
+  .doc-upload{
+    position:absolute; left:0; width:367px; height:55px;
+  }
+  /* Позиции двух строк (точно по макету): */
+  .doc-upload[data-doc="registry"]{ top:0px; }   /* 443 */
+  .doc-upload[data-doc="ipn"]     { top:62px; }  /* 505 (505-443 = 62) */
+
+  /* Вид кнопки: прямоугольник 367×55 с серой рамкой, закругление 10px */
+  .doc-upload__btn{
+    position:absolute; inset:0;
+    display:flex; align-items:center; gap:10px;
+    padding-left:56px; /* место под иконку слева */
+    border:2px solid #ECECEC; border-radius:10px; background:#fff;
+    cursor:pointer; user-select:none;
+    transition:border-color 150ms ease, filter 120ms ease, transform 120ms ease;
+    outline:none;
+  }
+  .doc-upload__btn:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .doc-upload__btn:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .doc-upload__btn:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+  /* Зелёная рамка, когда файл загружен */
+  .doc-upload.is-filled .doc-upload__btn{
+    border-color:#35C65E;
+  }
+
+  /* Иконка загрузки: 26.23×26.23 @ (585.59,457.39) → смещение внутри 367×55:
+     относительно левого края кнопки: 585.59 - 568 = 17.59px;
+     относительно верхнего края кнопки: 457.39 - 443 = 14.39px.
+     Для второй строки: top ≈ 519.75 → смещение 519.75 - 505 = 14.75px.
+     Делаем единые аккуратные отступы ~18 / ~14 px. */
+  .doc-upload__icon{
+    position:absolute; left:18px; top:14px;
+    width:26.23px; height:26.23px; object-fit:contain; display:block;
+    pointer-events:none; /* чтобы клик шёл по label */
+  }
+
+  /* Текст (base 14/24, центр по высоте строки) */
+  .doc-upload__text{
+    font-weight:400; font-size:14px; line-height:24px; color:#363535;
+    display:flex; align-items:center;
+  }
+
+    .access{
+    position:absolute; left:1057px; top:316px; width:462px; height:94px;
+    font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  }
+  .access__hint{
+    position:absolute; left:0; top:0; width:184px; height:24px;
+    display:flex; align-items:center;
+    font:400 14px/24px 'Ubuntu'; color:#828181; white-space: nowrap;
+  }
+  /* Кнопка 1: 236×55 @ top:39px (355-316) */
+  .access__btn--partial{
+    position:absolute; left:0; top:39px; width:236px; height:55px;
+    border-radius:10px; border:2px solid #35C65E; background:#35C65E;
+    display:flex; align-items:center; justify-content:flex-start; gap:12px;
+    padding-left:30px; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease; white-space: nowrap;
+  }
+  .access__btn--partial:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .access__btn--partial:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .access__btn-text{
+    font:500 14px/24px 'Ubuntu'; color:#fff; display:flex; align-items:center; white-space: nowrap;
+  }
+  .access__btn-icon{ margin-left:auto; margin-right:30px; display:block; }
+
+  /* Кнопка 2: 216×55 @ x≈(236+10)=? По макету это calc(...) — ставим правее на 246px */
+  .access__btn--full{
+    position:absolute; left:246px; top:39px; width:216px; height:55px;
+    border-radius:10px; border:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:flex-start; gap:12px;
+    padding-left:30px; transition:transform .12s ease, filter .12s ease; white-space: nowrap; border: 2px solid #35C65E;
+  }
+  .access__btn--full:hover{ transform:translateY(-1px); filter:brightness(1.01); }
+  .access__btn--full:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .access__btn-text--gray{ color:#828181; }
+
+  /* ====== Оверлей + модалка (по макету: 412×403 по центру) ====== */
+  .access-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.25);
+    opacity:0; visibility:hidden; transition:.15s ease;
+  }
+  .access-modal{
+    position:fixed; left:50%; top:50%; width:412px; height:403px;
+    transform:translate(-50%,-50%) scale(.98);
+    background:#ECECEC; border-radius:20px; box-sizing:border-box;
+    padding:20px 30px; opacity:0; visibility:hidden; transition:.15s ease;
+    display:flex; flex-direction:column; gap:16px; font-family:'Ubuntu',sans-serif; z-index: 1000;
+  }
+  .access-overlay[aria-hidden="false"],
+  .access-modal[aria-hidden="false"]{ opacity:1; visibility:visible; }
+  .access-modal[aria-hidden="false"]{ transform:translate(-50%,-50%) scale(1); }
+
+  /* Верхний баннер для копирования */
+  .copy-banner{
+    display:flex; align-items:center; gap:12px;
+    width:100%; height:40px; border-radius:10px;
+    background:#fff; border:2px dashed #35C65E; cursor:pointer;
+    padding:0 12px; text-align:left;
+    transition:filter .12s ease;
+  }
+  .copy-banner:hover{ filter:brightness(1.02); }
+  .copy-banner__text{ font:400 14px/24px 'Ubuntu'; color:#363535; }
+  .copy-banner.copied{ border-style:solid; background:#E8F7ED; }
+  .copy-banner.copied .copy-banner__text{ color:#2a8b49; }
+  .copy-banner.copied .copy-banner__icon{ filter:none; }
+
+  /* Notices */
+  .notice{ position:relative; display:flex; gap:12px; }
+  .notice__icon{ width:24px; height:24px; flex:0 0 24px; margin-top:2px; }
+  .notice__text{ margin:0; font:400 14px/24px 'Ubuntu'; color:#363535; text-align:justify; }
+
+  /* Кнопка "Зрозуміло" (352×43 по центру) */
+  .access-ok{
+    margin-top:auto; align-self:center;
+    width:352px; height:43px; border-radius:10px;
+    background:#35C65E; color:#ECECEC; border:0; cursor:pointer;
+    font:400 18px/24px 'Ubuntu'; transition:transform .12s ease, filter .12s ease;
+  }
+  .access-ok:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .access-ok:active{ transform:translateY(0);    filter:brightness(0.98); }
+
+    .visually-hidden{position:absolute !important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;}
+
+  /* ===== Геометрия списка по макету ===== */
+  .userlist{
+    position:absolute; left:1057px; top:251px; width:463px;
+    font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  }
+
+  /* Вьюпорт: высоту делаем 50px → уже со вторым айтемом появится скролл */
+  .userlist__viewport{
+    position:relative; width:463px; height:50px;  /* 2×25 = 50 */
+    overflow-y:auto; overflow-x:hidden;
+  }
+  /* тонкий скролл */
+  .userlist__viewport::-webkit-scrollbar{ width:8px; }
+  .userlist__viewport::-webkit-scrollbar-thumb{ background:#cfd6cf; border-radius:6px; }
+  .userlist__viewport{ scrollbar-width:thin; scrollbar-color:#cfd6cf transparent; }
+
+  /* Одна строка 25px */
+  .userrow{
+    position:relative; width:100%; height:25px;
+    display:flex; align-items:center;
+  }
+  .userrow + .userrow{ margin-top:4px; } /* небольшой зазор между строками */
+
+  .userrow__avatar{
+    width:25px; height:25px; border-radius:50%; object-fit:cover; display:block;
+    flex:0 0 25px;
+  }
+
+  .userrow__name{
+    margin-left:12px; margin-right:auto;
+    border:0; background:none; padding:0; cursor:pointer;
+    font:400 14px/24px 'Ubuntu'; color:#363535; display:flex; align-items:center;
+    text-align:left;
+  }
+  .userrow__name:hover{ text-decoration:underline; }
+
+  .userrow__badge{
+    margin-left:12px; font:400 14px/24px 'Ubuntu';
+  }
+  .userrow__badge--owner{ color:#35C65E; }
+
+  .userrow__since{
+    margin-left:12px; font:400 14px/24px 'Ubuntu'; color:#828181; text-align:right;
+  }
+
+  /* ===== Оверлей + модалка (313px высота по макету) ===== */
+  .usr-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.25); opacity:0; visibility:hidden; transition:.15s ease;
+  }
+  .usr-modal{
+    position:fixed; left:50%; top:50%; width:412px; height:313px;
+    transform:translate(-50%,-50%) scale(.98);
+    background:#FFF; border-radius:20px; box-sizing:border-box;
+    padding:20px 24px; opacity:0; visibility:hidden; transition:.15s ease;
+    display:flex; flex-direction:column; gap:16px;
+    font-family:'Ubuntu',sans-serif; color:#363535;
+  }
+  .usr-overlay[aria-hidden="false"],
+  .usr-modal[aria-hidden="false"]{ opacity:1; visibility:visible; }
+  .usr-modal[aria-hidden="false"]{ transform:translate(-50%,-50%) scale(1); }
+
+  .usr-head{ display:flex; align-items:center; gap:10px; }
+  .usr-head__avatar{ width:25px; height:25px; border-radius:50%; object-fit:cover; }
+  .usr-head__name{ font:400 18px/24px 'Ubuntu'; }
+
+  /* Перемикач доступу: контейнер + бегунок */
+  .usr-access{
+    position:relative; width:352px; height:55px; align-self:center;
+    border:2px solid #828181; border-radius:10px; display:flex; gap:0; overflow:hidden;
+  }
+  .usr-access__opt{
+    position:relative; z-index:1; flex:1 1 50%; height:100%;
+    background:transparent; border:0; cursor:pointer;
+    font:500 14px/24px 'Ubuntu'; display:flex; align-items:center; justify-content:center;
+    color:#828181;
+  }
+  .usr-access__active{
+    position:absolute; left:0; top:0; width:176px; height:100%;
+    background:#35C65E; border:2px solid #35C65E; border-radius:10px;
+    transition:left .18s ease;
+  }
+  /* подписи поверх бегунка сменяем цветом */
+  .usr-access__opt[data-val="partial"].is-active,
+  .usr-access__opt[data-val="full"].is-active{ color:#FFFFFF; }
+
+  /* Кнопка удаления — зелёная рамка 352×55 */
+  .usr-delete{
+    align-self:center; width:352px; height:55px;
+    background:#fff; border:2px solid #35C65E; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    cursor:pointer; transition:transform .12s ease, filter .12s ease;
+  }
+  .usr-delete:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .usr-delete:active{ transform:translateY(0);    filter:brightness(0.98); }
+  .usr-delete span{ font:400 14px/24px 'Ubuntu'; color:#363535; }
+
+  /* Кнопка сохранить — как в макете с серой обводкой 352×43 */
+  .usr-save{
+    align-self:center; width:352px; height:43px; border-radius:10px;
+    background:#fff; border:2px solid #828181; color:#828181;
+    font:400 18px/24px 'Ubuntu'; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .usr-save:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+  .usr-save:active{ transform:translateY(0);    filter:brightness(0.98); }
+
+  .h4-green{
+  position:absolute;
+  margin:0;
+  font-family:'Ubuntu', sans-serif;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;      /* 144% как в фигме */
+  color:#35C65E;
+  display:flex;
+  align-items:center;    /* по высоте по центру */
+  box-sizing:border-box;
+}
+
+/* Точные размеры и координаты */
+.heading--addresses{
+  left:80px;  top:462px;
+  width:175px; height:36px; white-space: nowrap;
+}
+.heading--requisites{
+  left:568px; top:186px;
+  width:117px; height:36px; white-space: nowrap;
+}
+.heading--access{
+  left:1057px; top:185px;
+  width:84px; height:36px; white-space: nowrap;
+}
+
+/* Контейнер (456×36 @ 79.64, 185.01) */
+.order-header{
+  position: absolute;
+  left: 79.64px;
+  top: 185.01px;
+  width: 456px;
+  height: 36px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* Иконка (Frame 139: 30×29 @ 79.64, 189.01) */
+.order-header__icon{
+  position: absolute;
+  left: 0px;      /* 79.64 - 79.64 */
+  top: 4px;       /* 189.01 - 185.01 */
+  width: 30px;
+  height: 29px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(180deg);
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+.order-header__icon img{
+  width: 30px;
+  height: 29px;
+  display: block;
+  object-fit: contain;
+}
+.order-header__icon:hover{ transform: translateY(-1px); filter: brightness(1.03); transform: rotate(180deg);}
+.order-header__icon:active{ transform: translateY(0);    filter: brightness(0.98); transform: rotate(180deg);}
+.order-header__icon:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; transform: rotate(180deg);}
+
+/* Заголовок (h4: 304×36 @ 129.64, 185.01) */
+.order-header__title{
+  position: absolute;
+  left: 50px;     /* 129.64 - 79.64 */
+  top: 0px;       /* 185.01 - 185.01 */
+  width: 400px;
+  height: 36px;
+
+  margin: 0;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Номер (72×24 @ 463.64, 195.01) */
+.order-header__id{
+  position: absolute;
+  left: 384px;    /* 463.64 - 79.64 */
+  top: 10px;      /* 195.01 - 185.01 */
+  width: 72px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* Точка (6×6 @ 445.64, 204.01) */
+.order-header__dot{
+  position: absolute;
+  left: 366px;    /* 445.64 - 79.64 */
+  top: 19px;      /* 204.01 - 185.01 */
+  width: 6px;
+  height: 6px;
+  background: #828181;
+  border-radius: 10px;
+  display: block;
+}
+

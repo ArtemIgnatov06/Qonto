@@ -1,0 +1,884 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 800px; /* временно, чтобы не мешал просмотру страницы */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+.box-schedule, .box-social{
+  position: absolute;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color: #363535;
+  box-sizing: border-box;
+}
+
+/* === БОКС 1 === */
+.box-schedule{
+  left: 80px;
+  top: 286px;
+  width: 341px;
+  height: 138px;
+}
+.box-schedule__frame{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 341px;
+  height: 138px;
+  border: 2px solid #ECECEC;
+  border-radius: 23px;
+  box-sizing: border-box;
+}
+
+/* Иконка редактирования: 30×30 @ (349,305) */
+.box-schedule__edit{
+  position: absolute;
+  left: 269px; /* 349 - 80 */
+  top: 19px;   /* 305 - 286 */
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+.box-schedule__edit img{
+  width: 30px;
+  height: 30px;
+  display: block;
+  object-fit: contain;
+}
+.box-schedule__edit:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+.box-schedule__edit:active{ transform: translateY(0);    filter: brightness(0.98); }
+.box-schedule__edit:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; }
+
+/* Текст: "Графік роботи" @ (116,308) и "Не має…" @ (116,350) */
+.box-schedule__title{
+  position: absolute;
+  left: 36px;  /* 116 - 80 */
+  top: 22px;   /* 308 - 286 */
+  width: 183px;
+  height: 27.46px;
+
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.box-schedule__text{
+  position: absolute;
+  left: 36px;  /* 116 - 80 */
+  top: 64px;   /* 350 - 286 */
+  width: 201.08px;
+  height: 24px;
+
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* === БОКС 2 === */
+.box-social{
+  left: 80px;
+  top: 441px;
+  width: 341px;
+  height: 67px;
+}
+.box-social__frame{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 341px;
+  height: 67px;
+  border: 2px solid #ECECEC;
+  border-radius: 23px;
+  box-sizing: border-box;
+}
+
+/* Иконка редактирования: 30×30 @ (349,460) */
+.box-social__edit{
+  position: absolute;
+  left: 269px; /* 349 - 80 */
+  top: 19px;   /* 460 - 441 */
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+.box-social__edit img{
+  width: 30px;
+  height: 30px;
+  display: block;
+  object-fit: contain;
+}
+.box-social__edit:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+.box-social__edit:active{ transform: translateY(0);    filter: brightness(0.98); }
+.box-social__edit:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; }
+
+/* Заголовок: "Соціальні мережі продавця" @ (116,463) */
+.box-social__title{
+  position: absolute;
+  left: 36px;  /* 116 - 80 */
+  top: 22px;   /* 463 - 441 */
+  width: 200px;
+  height: 27.46px;
+
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* === Overlay (фон) === */
+.workdays-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  z-index: 999;
+}
+
+/* === Modal (Group 1291) === */
+.workdays-modal{
+  position: absolute;
+  left: 597px;           /* из макета */
+  top: 237px;            /* из макета */
+  width: 412px;
+  height: 296px;
+  display: none;
+  z-index: 1000;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color: #363535;
+}
+.workdays-modal[aria-hidden="false"],
+.workdays-overlay[aria-hidden="false"]{
+  display: block;
+}
+
+/* Каркас (Rectangle 192) */
+.workdays-modal__frame{
+  position: absolute;
+  left: 0; top: 0;
+  width: 412px; height: 296px;
+  background: #FFFFFF;
+  border: 2px solid #ECECEC;
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+
+/* Заголовок "Виберіть робочі дні" @ (left:633->36, top:270->33) */
+.workdays-modal__title{
+  position: absolute;
+  left: 36px;
+  top: 33px;
+  width: 130px; height: 24px;
+  font-weight: 400; font-size: 14px; line-height: 24px;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* Кнопки днів (Frame 1207..1213) — базовий стиль */
+.wd-day{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 13px;
+  gap: 10px;
+  background: #ECECEC;
+  border-radius: 7px;
+  border: 0;
+  cursor: pointer;
+
+  font-weight: 400; font-size: 14px; line-height: 24px;
+  color: #363535;
+
+  transition: transform 120ms ease, filter 120ms ease, background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.wd-day:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+.wd-day:active{ transform: translateY(0);    filter: brightness(0.98); }
+.wd-day:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; }
+
+/* Вибраний день (як у прикладі: зелений фон) */
+.wd-day.is-selected{
+  background: #35C65E;
+  color: #FFFFFF;
+}
+
+/* Підпис "Впишіть робочі години" */
+.workdays-modal__hours-label{
+  position: absolute;
+  width: 153px; height: 24px;
+  font-weight: 400; font-size: 14px; line-height: 24px;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* Двоє полів часу (Rectangle 227/229) */
+.wd-time{
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid #ECECEC;
+  border-radius: 7px;
+  padding: 0 6px;
+  font-weight: 400; font-size: 14px; line-height: 31px;
+  color: #363535;
+  background: #fff;
+  text-align: center;
+}
+.wd-time:focus{
+  outline: 2px solid #35C65E;
+  outline-offset: 2px;
+}
+
+/* Двоеточие (":") @ (left:92, top:175) */
+.wd-time-colon{
+  position: absolute;
+  width: 4px; height: 24px;
+  font-weight: 400; font-size: 14px; line-height: 24px;
+  color: #363535;
+}
+
+/* Кнопка "Зберегти" (Frame 1214 @ left:36, top:228, w:340, h:45) */
+.workdays-save{
+  position: absolute;
+  left: 36px;
+  top: 228px;
+  width: 340px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  border: 2px solid #828181;
+  border-radius: 7px;
+  background: #FFFFFF;
+
+  font-weight: 400; font-size: 14px; line-height: 24px;
+  color: #828181;
+  cursor: pointer;
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.workdays-save:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+.workdays-save:active{ transform: translateY(0);    filter: brightness(0.98); }
+.workdays-save:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; }
+
+/* Активная (как во втором макете — зелёная) */
+.workdays-save.is-ready{
+  background: #35C65E;
+  color: #FFFFFF;
+  border-color: #35C65E;
+}
+
+/* было .box-schedule__text { height:24px; } — теперь авто-высота и перенос */
+.box-schedule__text{
+  position: absolute;
+  left: 36px;               /* как было */
+  top: 64px;                /* как было */
+  width: 201.08px;
+  /* height убираем, чтобы влезло 2 строки */
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  white-space: normal;      /* разрешаем перенос */
+  word-break: break-word;   /* на всякий */
+}
+
+/* первая строка уже есть у тебя (top: 64px) */
+.box-schedule__text{
+  position: absolute;
+  left: 36px;
+  top: 64px;
+  width: 201.08px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1; /* поверх рамки */
+}
+
+/* ВТОРАЯ строка — вихідні */
+.box-schedule__text-off{
+  position: absolute;
+  left: 36px;
+  top: 88px;              /* 64px + 24px */
+  width: 201.08px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1;
+}
+
+/* сам бокс — чтобы дети позиционировались от него */
+.box-schedule{
+  position: absolute;           /* у тебя уже так, но на всякий оставлю */
+  left: 80px; top: 286px;
+  width: 341px; height: 138px;
+}
+
+/* заголовок */
+.box-schedule__title{
+  position: absolute;
+  left: 36px; top: 22px;        /* как в макете */
+}
+
+/* 1-я строка: рабочие дни + часы */
+.box-schedule__text{
+  position: absolute;
+  left: 36px;
+  top: 64px;                    /* ПЕРВАЯ строка */
+  width: 201.08px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1;
+}
+
+/* 2-я строка: выходные */
+.box-schedule__text-off{
+  position: absolute;
+  left: 36px;
+  top: 88px;                    /* СТРОГО НИЖЕ первой (64 + 24) */
+  width: 201.08px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #363535;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1;
+}
+
+/* === БОКС 2 === */
+.box-social{
+  position: absolute;
+  left: 80px; top: 441px;
+  width: 341px; height: 138px;              /* расширенная высота как в примере после сохранения */
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535;
+}
+.box-social__frame{
+  position:absolute; left:0; top:0; width:341px; height:138px;
+  border:2px solid #ECECEC; border-radius:23px; box-sizing:border-box;
+}
+.box-social__edit{
+  position:absolute; left:269px; top:19px; width:30px; height:30px;
+  padding:0; border:0; background:transparent; cursor:pointer;
+  transition:transform 120ms ease, filter 120ms ease;
+}
+.box-social__edit:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.box-social__edit:active{ transform:translateY(0);    filter:brightness(0.98); }
+.box-social__edit:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+.box-social__title{
+  position:absolute; left:36px; top:22px; width:183px; height:27.46px;
+  font-weight:400; font-size:14px; line-height:24px; color:#363535;
+}
+
+/* Контейнер иконок в боксе (после сохранения) */
+.box-social__icons{
+  position:absolute;
+  left:36px; top:69px; height:46px; width:269px;
+}
+.box-social__icons img{
+  position:absolute; top:0; width:42.96px; height:42.96px; object-fit:contain; display:block;
+}
+/* слоты под 1..6 иконок (точно по пикселям с шагом ≈ 68px) */
+.box-social__icons img[data-slot="0"]{ left:  0px; }
+.box-social__icons img[data-slot="1"]{ left: 68px; }
+.box-social__icons img[data-slot="2"]{ left:136px; }
+.box-social__icons img[data-slot="3"]{ left:204px; }
+.box-social__icons img[data-slot="4"]{ left:272px; } /* если выйдет за ширину — увеличь width контейнера */
+.box-social__icons img[data-slot="5"]{ left:340px; }
+
+/* === Overlay + Modal === */
+.soc-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,0.35); display:none; z-index:999;
+}
+.soc-modal{
+  position:absolute; left:597px; top:237px; width:412px; height:291px;
+  display:none; z-index:1000; font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+}
+.soc-overlay[aria-hidden="false"], .soc-modal[aria-hidden="false"]{ display:block; }
+
+.soc-modal__frame{
+  position:absolute; left:0; top:0; width:412px; height:291px;
+  background:#FFFFFF; border:2px solid #ECECEC; border-radius:20px; box-sizing:border-box;
+}
+.soc-modal__title{
+  position:absolute; left:35px; top:34px; width:114px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px; color:#828181; white-space:nowrap;
+}
+
+/* Кнопки-иконки соцсетей (позиции выше в style=) */
+.soc-icon{
+  position:absolute; padding:0; border:0; background:transparent; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform 120ms ease, filter 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  border-radius:7px;
+}
+.soc-icon img{ width:100%; height:100%; object-fit:contain; display:block; }
+.soc-icon:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.soc-icon:active{ transform:translateY(0);    filter:brightness(0.98); }
+.soc-icon:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Подсветка найденной платформы:
+   - если твои SVG используют currentColor, добавь .soc-icon { color:#828181 } и здесь покрасим */
+.soc-icon.is-active{
+  background:#35C65E22;            /* мягкая подсветка */
+  box-shadow: inset 0 0 0 2px #35C65E;
+}
+
+/* Поле ввода (Rectangle 227/Group 1207) */
+.soc-input{
+  position:absolute; left:35px; top:150px; width:340px; height:44px;
+  border:1.5px solid #ECECEC; border-radius:7px; box-sizing:border-box;
+  padding:0 10px; font-size:14px; line-height:44px; color:#363535;
+}
+.soc-input:focus{ outline:2px solid #35C65E; outline-offset:2px; }
+.soc-input-label{
+  position:absolute; left:52px; top:160px; height:24px;
+  font-weight:400; font-size:14px; line-height:24px; color:#828181;
+}
+
+/* Кнопка Сохранить (Frame 1214) */
+.soc-save{
+  position:absolute; left:36px; top:219px; width:340px; height:45px;
+  display:flex; align-items:center; justify-content:center;
+  border:2px solid #828181; border-radius:7px; background:#FFFFFF; color:#828181;
+  font-weight:400; font-size:14px; line-height:24px; cursor:pointer;
+  transition:transform 120ms ease, filter 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.soc-save:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.soc-save:active{ transform:translateY(0);    filter:brightness(0.98); }
+.soc-save:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Готово к сохранению */
+.soc-save.is-ready{ background:#35C65E; color:#FFFFFF; border-color:#35C65E; }
+
+.soc-icon.is-active{
+  background: transparent;
+  box-shadow: inset 0 0 0 2px #35C65E;
+}
+
+/* базовый слот */
+.box-social__icons .icon{
+  position: absolute;
+  top: 0;
+  width: 42.96px;
+  height: 42.96px;
+  border-radius: 7px;                 /* только для визуального выравнивания */
+  overflow: hidden;                   /* чтобы твой <img> не выходил за рамки */
+  display: block;
+}
+
+/* размещение слотов по пикселям */
+.box-social__icons .icon[data-slot="0"]{ left:  0px; }
+.box-social__icons .icon[data-slot="1"]{ left: 68px; }
+.box-social__icons .icon[data-slot="2"]{ left:136px; }
+.box-social__icons .icon[data-slot="3"]{ left:204px; }
+.box-social__icons .icon[data-slot="4"]{ left:272px; }
+.box-social__icons .icon[data-slot="5"]{ left:340px; }
+
+/* твои изображения внутри слотов (когда вставишь) */
+.box-social__icons .icon img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}

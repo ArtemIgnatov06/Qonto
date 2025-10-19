@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="shop-settings.css" />
+  <!-- ШРИФТЫ -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+  <title>Shop settings</title>
+</head>
+<body>
+                       <header class="hdr">
+  <!-- фоновый прямоугольник -->
+  <div class="hdr-bg"></div>
+
+  <!-- LOGO -->
+  <a class="logo" href="#">
+    <span class="logo-text">Qonte</span>
+    <span class="logo-dot" aria-hidden="true"></span>
+  </a>
+
+  <!-- SEARCH GROUP -->
+  <form class="search-wrap" action="#" role="search">
+  <input class="search-input" type="text" placeholder="Пошук..." aria-label="Пошук">
+  <button class="search-btn" type="submit" aria-label="Найти">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" fill="none" stroke="#7AD293" stroke-width="1.5"/>
+      <rect x="16" y="16" width="6" height="6" rx="1.2" fill="#7AD293"/>
+    </svg>
+  </button>
+</form>
+
+  <!-- КНОПКА AI -->
+<button class="btn-ai" type="button">
+  <span class="ai-ico" aria-hidden="true">
+    <!-- иконка «робот/ИИ» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <circle cx="9" cy="10" r="1"/>
+      <circle cx="15" cy="10" r="1"/>
+      <path d="M8 15c1.5 1 3.5 1 5 0"/>
+    </svg>
+  </span>
+  <span class="ai-label">AI-Консультант</span>
+</button>
+
+<!-- КНОПКА КАТАЛОГ -->
+<button class="btn-cat" type="button">
+  <span class="cat-ico" aria-hidden="true">
+    <!-- иконка «меню/каталог» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <rect x="3" y="4" width="7" height="7"/>
+      <rect x="14" y="4" width="7" height="7"/>
+      <rect x="3" y="13" width="7" height="7"/>
+      <rect x="14" y="13" width="7" height="7"/>
+    </svg>
+  </span>
+  <span class="cat-label">Каталог</span>
+</button>
+
+  <!-- ИКОНКИ 3–6 -->
+  <button class="ico ico-lang" type="button" aria-label="Выбор языка">
+    <!-- Иконка "язык" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-heart" type="button" aria-label="Избранное">
+    <!-- Иконка "сердце" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 21s-6-4.3-9-8.6C1 9.3 3.5 5 7.5 5c2.1 0 3.5 1.1 4.5 2.5C13 6.1 14.4 5 16.5 5 20.5 5 23 9.3 21 12.4c-3 4.3-9 8.6-9 8.6z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-cart" type="button" aria-label="Корзина">
+    <!-- Иконка "корзина" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-user" type="button" aria-label="Аккаунт">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#7AD293" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+    </svg>
+  </button>
+</header>
+
+
+
+
+
+
+<!-- GROUP 351 -->
+<div class="avatar-settings">
+  <!-- Скрытый инпут: ВАЖНО — id="avatar-input" -->
+  <input id="avatar-input" type="file" accept="image/*" hidden>
+
+  <!-- Кружок-аватар (кликабелен через label) -->
+  <label for="avatar-input" class="avatar" id="avatar"></label>
+
+  <!-- Иконка-карандаш — тоже label, чтобы открывать выбор файла -->
+  <label for="avatar-input" class="avatar-edit" aria-label="Змінити аватар">
+    <img src="edit.png" alt="" width="29" height="29" draggable="false">
+  </label>
+
+  <!-- Текст -->
+  <div class="avatar-text">Змінити аватарку</div>
+</div>
+
+
+
+
+
+
+
+
+
+<!-- Group 259 / Group 192 (366×55 @ 80, 337) -->
+<div class="inline-field" data-field="name">
+  <!-- рамка (Rectangle 57) -->
+  <div class="inline-field__frame"></div>
+
+  <!-- ярлык “*Ім’я” -->
+
+  <!-- текущее значение (просмотр) -->
+  <span class="inline-field__value" id="nameValue">—</span>
+
+  <!-- поле редактирования (поверх value, скрыто) -->
+  <input class="inline-field__input" id="nameInput" type="text" hidden>
+
+  <!-- иконка редактирования (29×29 @ 397,350 ⇒ offset: 317,13) -->
+  <button class="inline-field__edit" type="button" aria-label="Редагувати">
+    <img src="edit.png" alt="" width="29" height="29" draggable="false">
+  </button>
+</div>
+
+
+<!-- ===== 1) Поле (Group 1191) 367×55 @ (568,252) ===== -->
+<div class="inline-field inline-field--card" data-field="card" data-maxlen="16" style="left:568px; top:252px; width:367px; height:55px;">
+  <div class="inline-field__frame"></div>
+  <span class="inline-field__value">8347820975496723</span> <!-- можно без пробелов -->
+  <input class="inline-field__input" type="text" hidden maxlength="16" inputmode="numeric" autocomplete="cc-number">
+  <button class="inline-field__edit" type="button" aria-label="Редагувати" style="left:317px; top:13px;">
+    <img src="edit.png" alt="" width="29" height="29" draggable="false">
+  </button>
+</div>
+
+<!-- ===== 2) Поле (Group 1190) 366×55 @ (80,528) ===== -->
+<div class="inline-field inline-field--addr" data-field="address" data-maxlen="30" style="left:80px; top:528px; width:366px; height:55px;">
+  <div class="inline-field__frame"></div>
+  <span class="inline-field__value">м. Суми, вул. Вулиця, буд. 121</span>
+  <input class="inline-field__input" type="text" hidden maxlength="30">
+  <button class="inline-field__edit" type="button" aria-label="Редагувати" style="left:317px; top:13px;">
+    <img src="edit.png" alt="" width="29" height="29" draggable="false">
+  </button>
+</div>
+
+<!-- ===== Текст над 3-м полем (Пароль...) @ (1057,440) ===== -->
+<div class="inline-note" style="left:1057px; top:440px; width:277px; height:24px;">
+  Пароль доступу до керування магазином:
+</div>
+
+<!-- ===== 3) Поле (Group 1192) 463×55 @ (1057,479) ===== -->
+<div class="inline-field inline-field--login" data-field="login" data-maxlen="30" style="left:1057px; top:479px; width:463px; height:55px;">
+  <div class="inline-field__frame"></div>
+  <span class="inline-field__value">nonAmestore123</span>
+  <input class="inline-field__input" type="text" hidden maxlength="30">
+  <button class="inline-field__edit" type="button" aria-label="Редагувати" style="left:414px; top:13px;">
+    <img src="edit.png" alt="" width="29" height="29" draggable="false">
+  </button>
+</div>
+
+
+<section class="docs" aria-labelledby="docs-title">
+  <h2 class="docs__title" id="docs-title">Документи</h2>
+
+  <!-- ===== Контейнер двух кнопок (Group 856) 367×117 @ (568,443) ===== -->
+  <div class="docs__list">
+
+    <!-- === Кнопка 1: Виписка з реєстру (Group 853) 367×55 @ (568,443) === -->
+    <div class="doc-upload" data-doc="registry">
+      <!-- скрытый input + label как “кнопка” -->
+      <input id="doc-registry" class="doc-upload__file" type="file" accept="image/*" hidden>
+      <label for="doc-registry" class="doc-upload__btn" tabindex="0" aria-label="Завантажити виписку з реєстру">
+        <!-- слева иконка (заменишь src) -->
+        <img class="doc-upload__icon" src="upload.png" alt="" width="26" height="26" draggable="false">
+        <!-- текст -->
+        <span class="doc-upload__text">Виписка з реєстру</span>
+      </label>
+    </div>
+
+    <!-- === Кнопка 2: ІПН (Group 854) 367×55 @ (568,505) === -->
+    <div class="doc-upload" data-doc="ipn">
+      <input id="doc-ipn" class="doc-upload__file" type="file" accept="image/*" hidden>
+      <label for="doc-ipn" class="doc-upload__btn" tabindex="0" aria-label="Завантажити ІПН">
+        <img class="doc-upload__icon" src="upload.png" alt="" width="26" height="26" draggable="false">
+        <span class="doc-upload__text">ІПН</span>
+      </label>
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+
+
+<section class="access" aria-labelledby="access-title">
+  <div id="access-title" class="access__hint">Надати доступ до магазину:</div>
+
+  <!-- Кнопка: Частковий доступ (Component 124) -->
+  <button class="access__btn access__btn--partial" data-access="partial" type="button">
+    <span class="access__btn-text">Частковий доступ</span>
+    <img class="access__btn-icon" src="linkw.png" alt="" width="34" height="34">
+  </button>
+
+  <!-- Кнопка: Повний доступ (Component 125) -->
+  <button class="access__btn access__btn--full" data-access="full" type="button">
+    <span class="access__btn-text access__btn-text--gray">Повний доступ</span>
+    <img class="access__btn-icon" src="linkg.png" alt="" width="34" height="34">
+  </button>
+</section>
+
+<!-- ====== МОДАЛЬНОЕ ОКНО (Group 1037) ====== -->
+<div class="access-overlay" aria-hidden="true"></div>
+<div class="access-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <!-- Верхний кликабельный баннер для копирования -->
+  <button class="copy-banner" type="button" aria-label="Скопіювати посилання">
+    <img class="copy-banner__icon" src="linkg.png" alt="" width="24" height="24">
+    <span class="copy-banner__text">Натисніть, щоб скопіювати посилання</span>
+  </button>
+
+  <!-- Блоки предупреждений -->
+  <div class="notice">
+    <img class="notice__icon notice__icon--warn" src="warning-red.png" alt="" width="24" height="24">
+    <p class="notice__text">
+      Увага! Одержувач посилання повинен буде ввести пароль доступу до керування магазином.
+      Після цього він буде мати <span class="js-access-kind">частковий</span> доступ до керування магазином.
+      Він включає відсліджування і керування замовленнями та доступ до чатів магазину.
+    </p>
+  </div>
+
+  <div class="notice">
+    <img class="notice__icon notice__icon--info" src="warning-grey.png" alt="" width="24" height="24">
+    <p class="notice__text">
+      Це посилання одноразове. Для кожного нового співробітника необхідно знову копіювати посилання.
+    </p>
+  </div>
+
+  <!-- Кнопка закрыть -->
+  <button class="access-ok" type="button">Зрозуміло</button>
+</div>
+
+
+
+
+
+
+<section class="userlist" aria-labelledby="userlist-title">
+  <!-- Заголовок не нужен — в макете только сам список; id держим для a11y -->
+  <h2 id="userlist-title" class="visually-hidden">Користувачі</h2>
+
+  <!-- Вьюпорт: делает скролл, когда появляется второй элемент -->
+  <div class="userlist__viewport">
+    <!-- Один елемент списку (можешь дублювати) -->
+    <div class="userrow"
+         data-user-id="u1"
+         data-role="owner"
+         data-since="10.09.2025"
+         data-icon-full="full-permission.png"
+         data-icon-partial="partical-permission.png"> 
+
+      <!-- Левая иконка (25×25) — заменишь src своими -->
+      <img class="userrow__avatar" src="full-permission.png" alt="" width="25" height="25" draggable="false">
+
+      <!-- Имя (кликабельно, открывает модалку) -->
+      <button class="userrow__name" type="button" title="Налаштувати доступ">
+        Іван Франковській
+      </button>
+
+      <!-- Правый бейдж роли -->
+      <span class="userrow__badge userrow__badge--owner">Власник</span>
+      <!-- или для рядового співробітника (дата найму): -->
+      <!-- <span class="userrow__since">Працівник з 10.09.2025</span> -->
+    </div>
+
+    <!-- Пример второго пользователя (для проверки скролла) -->
+    <div class="userrow"
+         data-user-id="u2"
+         data-role="partial"
+         data-since="01.10.2025"
+         data-icon-full="staff-full.png"
+         data-icon-partial="staff-partial.png">
+      <img class="userrow__avatar" src="partical-permission.png" alt="" width="25" height="25" draggable="false">
+      <button class="userrow__name" type="button" title="Налаштувати доступ">
+        Анастасія Птічка
+      </button>
+      <span class="userrow__since">Працівник з 01.10.2025</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====== ОВЕРЛЕЙ + МОДАЛКА РЕДАГУВАННЯ КОРИСТУВАЧА (Group 1197…) ====== -->
+<div class="usr-overlay" aria-hidden="true"></div>
+<div class="usr-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <!-- Шапка модалки: аватар + имя -->
+  <div class="usr-head">
+    <img class="usr-head__avatar" src="" alt="" width="25" height="25">
+    <div class="usr-head__name">—</div>
+  </div>
+
+  <!-- Перемикач доступу (дві половинки) -->
+  <div class="usr-access">
+    <button class="usr-access__opt usr-access__opt--partial" data-val="partial" type="button">Частковий доступ</button>
+    <button class="usr-access__opt usr-access__opt--full"    data-val="full"    type="button">Повний доступ</button>
+    <div class="usr-access__active"></div>
+  </div>
+
+  <!-- Кнопка «Видалити працівника» (зелёная рамка) -->
+  <button class="usr-delete" type="button">
+    <img src="trash.png" alt="" width="24" height="24" draggable="false">
+    <span>Видалити працівника</span>
+  </button>
+
+  <!-- Кнопка «Застосувати зміни» (серая, как в макете) -->
+  <button class="usr-save" type="button">Застосувати зміни</button>
+</div>
+
+
+
+
+
+
+
+<h2 class="h4-green heading--addresses">Адреси складу</h2>
+
+<h2 class="h4-green heading--requisites">Реквізити</h2>
+
+<h2 class="h4-green heading--access">Доступ</h2>
+
+<div class="order-header">
+  <!-- Кликабельная иконка слева -->
+  <button class="order-header__icon" type="button" aria-label="Дія">
+    <img src="planex.png" alt="" width="30" height="29" draggable="false">
+  </button>
+
+  <!-- Заголовок -->
+  <h4 class="order-header__title">Редагування магазину</h4>
+</div>
+
+
+<footer class="ftr" role="contentinfo">
+  <div class="ftr-bg"></div>
+
+  <!-- Колонки -->
+  <h4 class="ftr-h4 ftr-h4--info">Інформація о компанії</h4>
+  <ul class="ftr-list ftr-list--info">
+    <li><a href="#">Про нас</a></li>
+    <li><a href="#">Умови використання сайту</a></li>
+    <li><a href="#">Вакансії</a></li>
+    <li><a href="#">Контакти</a></li>
+    <li><a href="#">Зворотній зв’язок</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--help">Допомога</h4>
+  <ul class="ftr-list ftr-list--help">
+    <li><a href="#">Часті питання</a></li>
+    <li><a href="#">Доставка та оплата</a></li>
+    <li><a href="#">Гарантія</a></li>
+    <li><a href="#">Повернення</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--sellers">Продавцям</h4>
+  <ul class="ftr-list ftr-list--sellers">
+    <li><a href="#">Продавати товари</a></li>
+    <li><a href="#">Правила торгівлі</a></li>
+  </ul>
+
+  <!-- Соцсети -->
+  <h4 class="ftr-h4 ftr-h4--social">Ми в соціальних мережах</h4>
+  <a class="ftr-soc ftr-soc--ig" href="#" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1" fill="#ECECEC"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--fb" href="#" aria-label="Facebook">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M13.5 21v-7h2.3l.4-3H13.5V9.1c0-.9.3-1.5 1.7-1.5H16V5.1c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 3.9V11H7v3h2.6v7h3.9z"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--tt" href="#" aria-label="TikTok">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M15 3c.6 1.8 2 3.2 3.8 3.7v3.1c-1.5-.1-2.9-.6-4-1.5v5.9a5.6 5.6 0 1 1-5.6-5.6c.5 0 1 .1 1.4.2v3a2.5 2.5 0 1 0 2.2 2.5V3h2.2z"/>
+    </svg>
+  </a>
+
+  <!-- Декоративная фигура справа -->
+  <img class="ftr-mascot" src="maskotfooter.png" alt="Маскот Qonto">
+
+  <!-- Копирайт -->
+  <p class="ftr-copy">©2025 Платформа онлайн-торгівлі «Qonto» — використовується на підставі ліцензії правовласника</p>
+</footer>
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const inputEl  = document.getElementById('avatar-input');
+  const avatarEl = document.getElementById('avatar');
+  if (!inputEl || !avatarEl) return;
+
+  const LS_KEY = 'avatarDataURL';
+
+  function setAvatar(src){
+    avatarEl.style.backgroundImage = src ? `url("${src}")` : 'none';
+  }
+
+  // восстановить сохранённый аватар (если есть)
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) setAvatar(saved);
+  } catch(_) {}
+
+  // выбор файла => превью + сохранение
+  inputEl.addEventListener('change', () => {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+
+    if (!file.type || !file.type.startsWith('image/')) {
+      alert('Будь ласка, оберіть файл зображення.');
+      inputEl.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || '');
+      setAvatar(dataUrl);
+      try { localStorage.setItem(LS_KEY, dataUrl); } catch(_) {}
+      inputEl.value = ''; // чтобы можно выбрать тот же файл снова
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.inline-field').forEach(initInlineField);
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.inline-field__edit');
+    if (!btn) return;
+    const root = btn.closest('.inline-field');
+    if (root) enterEdit(root);
+  });
+
+  function initInlineField(root){
+    const valueEl = root.querySelector('.inline-field__value');
+    const inputEl = root.querySelector('.inline-field__input');
+    if (!valueEl || !inputEl) return;
+
+    const MAX_LEN = parseInt(root.dataset.maxlen || '30', 10);
+    inputEl.setAttribute('maxlength', String(MAX_LEN));
+
+    function setValue(text){
+      const t = String(text || '').trim().slice(0, MAX_LEN);
+      valueEl.textContent = t;
+      valueEl.dataset.raw = t;
+      root.classList.remove('is-error'); // сбрасываем ошибку при установке значения
+    }
+    root.__inline_setValue = setValue;
+    setValue(valueEl.textContent || '');
+
+    // ====== СПЕЦИФИКА ДЛЯ КАРТЫ ======
+    const isCard = (root.dataset.field || '') === 'card';
+
+    // Фильтр ввода
+    inputEl.addEventListener('input', () => {
+      if (isCard) {
+        // оставляем только цифры и не более 16
+        inputEl.value = inputEl.value.replace(/\D/g, '').slice(0, 16);
+      } else {
+        if (inputEl.value.length > MAX_LEN) inputEl.value = inputEl.value.slice(0, MAX_LEN);
+      }
+      // снимаем красную рамку как только юзер правит
+      root.classList.remove('is-error');
+    });
+
+    // подавление blur после Enter
+    let suppressBlur = false;
+
+    inputEl.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter'){
+        e.preventDefault();
+        suppressBlur = true;
+        exitEdit(root, true);
+        setTimeout(()=>{ suppressBlur = false; }, 0);
+      } else if (e.key === 'Escape'){
+        e.preventDefault();
+        exitEdit(root, false);
+      }
+    });
+
+    inputEl.addEventListener('blur', ()=>{
+      // если номер карты невалидный — не закрываем редактирование
+      if (root.classList.contains('is-error')) {
+        inputEl.focus();
+        return;
+      }
+      if (suppressBlur) return;
+      exitEdit(root, false);
+    });
+  }
+
+  function enterEdit(root){
+    const valueEl = root.querySelector('.inline-field__value');
+    const inputEl = root.querySelector('.inline-field__input');
+    if (!valueEl || !inputEl) return;
+
+    const prev = valueEl.dataset.raw || '';
+    inputEl.placeholder = prev;
+    inputEl.value = '';            // ввод с нуля
+    inputEl.dataset.prev = prev;
+
+    root.classList.remove('is-error');
+    valueEl.style.display = 'none';
+    inputEl.hidden = false;
+    inputEl.focus();
+  }
+
+  function exitEdit(root, save){
+    const valueEl = root.querySelector('.inline-field__value');
+    const inputEl = root.querySelector('.inline-field__input');
+    if (!valueEl || !inputEl) return;
+
+    const prev = inputEl.dataset.prev || '';
+    const field = root.dataset.field || '';
+    const max   = parseInt(root.dataset.maxlen || '30', 10);
+
+    if (save){
+      let next = inputEl.value.trim();
+      if (field === 'card') {
+        // только цифры, строго 16
+        next = next.replace(/\D/g,'').slice(0,16);
+        if (!isValidLuhn(next)) {
+          // показать ошибку и остаться в режиме редактирования
+          root.classList.add('is-error');
+          inputEl.focus();
+          return;
+        }
+      } else {
+        next = next.slice(0, max);
+      }
+
+      const finalValue = next.length ? next : prev;
+      root.__inline_setValue?.(finalValue);
+
+      // уведомление для бэка
+      window.dispatchEvent(new CustomEvent('inlineField:save', {
+        detail: { field, value: finalValue }
+      }));
+    } else {
+      root.__inline_setValue?.(prev); // откат
+    }
+
+    inputEl.hidden = true;
+    valueEl.style.display = '';
+  }
+
+  // Алгоритм Луна
+  function isValidLuhn(numStr){
+    if (!/^\d{16}$/.test(numStr)) return false;
+    let sum = 0;
+    for (let i = 0; i < 16; i++){
+      let d = parseInt(numStr[15 - i], 10); // справа налево
+      if (i % 2 === 1) { // каждую вторую (считая с 0) удваиваем
+        d *= 2;
+        if (d > 9) d -= 9;
+      }
+      sum += d;
+    }
+    return sum % 10 === 0;
+  }
+});
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.doc-upload').forEach((wrap) => {
+      const input = wrap.querySelector('.doc-upload__file');
+      if (!input) return;
+
+      input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        // (опционально) проверим тип: только изображения
+        if (!file.type || !file.type.startsWith('image/')) {
+          alert('Будь ласка, оберіть файл зображення.');
+          input.value = '';
+          wrap.classList.remove('is-filled');
+          return;
+        }
+
+        // отмечаем, что файл загружен — рамка станет зелёной
+        wrap.classList.add('is-filled');
+
+        // Если нужно снимать зелёную рамку при очистке:
+        // input.addEventListener('click', () => { input.value = ''; wrap.classList.remove('is-filled'); }, { once:false });
+
+        // Если нужно показывать превью/название — скажи, добавлю.
+      });
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+  const overlay   = document.querySelector('.access-overlay');
+  const modal     = document.querySelector('.access-modal');
+  const copyBar   = document.querySelector('.copy-banner');
+  const okBtn     = document.querySelector('.access-ok');
+  const accessKindSpan = document.querySelector('.js-access-kind');
+
+  let currentLink = '';   // сюда пишем сгенерированную ссылку
+  let copyTimer = null;
+
+  // открытие модалки
+  function openModal(kind /* 'partial' | 'full' */){
+    // сгенерировать ссылку под конкретный тип
+    currentLink = generateAccessLink(kind);
+
+    // подставить текст: "частковий/повний"
+    if (accessKindSpan){
+      accessKindSpan.textContent = (kind === 'full') ? 'повний' : 'частковий';
+    }
+
+    // сброс состояния баннера
+    copyBar.classList.remove('copied');
+    copyBar.querySelector('.copy-banner__text').textContent =
+      'Натисніть, щоб скопіювати посилання';
+
+    overlay.setAttribute('aria-hidden','false');
+    modal.setAttribute('aria-hidden','false');
+
+    // фокус на баннер
+    setTimeout(()=> copyBar.focus?.(), 0);
+  }
+
+  function closeModal(){
+    overlay.setAttribute('aria-hidden','true');
+    modal.setAttribute('aria-hidden','true');
+    if (copyTimer){ clearTimeout(copyTimer); copyTimer = null; }
+  }
+
+  // генерация случайной ссылки (одноразовый токен)
+  function generateAccessLink(kind){
+    const base = (kind === 'full')
+      ? 'https://qonte.com.ua/invite/full/'
+      : 'https://qonte.com.ua/invite/partial/';
+    const token = randomToken(24);
+    return base + token;
+  }
+
+  function randomToken(len){
+    // крипто-стойкая генерация
+    const bytes = new Uint8Array(len);
+    (window.crypto || window.msCrypto).getRandomValues(bytes);
+    const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let out = '';
+    for (let b of bytes){ out += alphabet[b % alphabet.length]; }
+    return out;
+  }
+
+  // копирование в буфер
+  async function copyLink(){
+    try{
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(currentLink);
+      } else {
+        // фоллбек
+        const ta = document.createElement('textarea');
+        ta.value = currentLink; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      // показать "Посилання скопійовано"
+      copyBar.classList.add('copied');
+      copyBar.querySelector('.copy-banner__text').textContent = 'Посилання скопійовано';
+      if (copyTimer) clearTimeout(copyTimer);
+      copyTimer = setTimeout(()=>{
+        copyBar.classList.remove('copied');
+        copyBar.querySelector('.copy-banner__text').textContent =
+          'Натисніть, щоб скопіювати посилання';
+      }, 2500);
+    } catch(e){
+      alert('Не вдалося скопіювати. Спробуйте вручну.');
+    }
+  }
+
+  // события
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.access__btn');
+    if (btn){
+      const kind = btn.dataset.access === 'full' ? 'full' : 'partial';
+      openModal(kind);
+    }
+  });
+  overlay.addEventListener('click', closeModal);
+  okBtn.addEventListener('click', closeModal);
+  copyBar.addEventListener('click', copyLink);
+
+  // ESC закрывает
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false'){
+      closeModal();
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const vp      = document.querySelector('.userlist__viewport');
+  const overlay = document.querySelector('.usr-overlay');
+  const modal   = document.querySelector('.usr-modal');
+
+  const headAvatar = modal.querySelector('.usr-head__avatar');
+  const headName   = modal.querySelector('.usr-head__name');
+
+  const optPartial = modal.querySelector('.usr-access__opt--partial');
+  const optFull    = modal.querySelector('.usr-access__opt--full');
+  const slider     = modal.querySelector('.usr-access__active');
+
+  const delBtn     = modal.querySelector('.usr-delete');
+  const saveBtn    = modal.querySelector('.usr-save');
+
+  /** Текущее редактируемое */
+  let currentRow = null;          // DOM .userrow
+  let currentRole = 'full';       // 'full' | 'partial'
+
+  // Открыть модалку для конкретной строки
+  function openModal(row){
+    currentRow = row;
+
+    // Заполняем шапку
+    const img = row.querySelector('.userrow__avatar');
+    headAvatar.src = img?.getAttribute('src') || '';
+    headName.textContent = row.querySelector('.userrow__name')?.textContent.trim() || '';
+
+    // Текущая роль
+    const role = row.dataset.role || 'full';
+    setAccess(role);
+
+    overlay.setAttribute('aria-hidden','false');
+    modal.setAttribute('aria-hidden','false');
+    setTimeout(()=> optFull.focus(), 0);
+  }
+
+  function closeModal(){
+    overlay.setAttribute('aria-hidden','true');
+    modal.setAttribute('aria-hidden','true');
+    currentRow = null;
+  }
+
+  // Установить состояние переключателя
+  function setAccess(val){
+    currentRole = (val === 'partial') ? 'partial' : 'full';
+    // активные классы
+    optPartial.classList.toggle('is-active', currentRole === 'partial');
+    optFull.classList.toggle('is-active',    currentRole === 'full');
+    // позиция слайдера (176px половина контейнера)
+    slider.style.left = (currentRole === 'partial') ? '0px' : '176px';
+  }
+
+  // Применить изменения в строке
+  function applyChanges(){
+    if (!currentRow) return;
+    currentRow.dataset.role = currentRole;
+
+    const badge = currentRow.querySelector('.userrow__badge, .userrow__since');
+    const name  = currentRow.querySelector('.userrow__name');
+    const avatar= currentRow.querySelector('.userrow__avatar');
+
+    if (currentRole === 'full'){
+      // Полный доступ: показываем "Власник" (зелёный) или просто снимаем "Працівник…"
+      // Если этот не власник — ставим серый текст "Працівник з …"
+      const since = currentRow.dataset.since || '';
+      // Если это прям владелец — зелёный бейдж:
+      if (badge && badge.classList.contains('userrow__badge')){
+        badge.textContent = 'Власник';
+        badge.classList.add('userrow__badge--owner');
+      } else {
+        // иначе показываем «Працівник з …»
+        if (badge) badge.remove();
+        const el = document.createElement('span');
+        el.className = 'userrow__since';
+        el.textContent = since ? `Працівник з ${since}` : '';
+        name.after(el);
+      }
+      // смена иконки на полную
+      const fullSrc = currentRow.dataset.iconFull || avatar?.src || '';
+      if (avatar && fullSrc) avatar.src = fullSrc;
+    } else {
+      // Частичный доступ: скрываем "Власник", ставим «Працівник з …»
+      const since = currentRow.dataset.since || '';
+      const existBadge = currentRow.querySelector('.userrow__badge');
+      if (existBadge) existBadge.remove();
+      let sinceEl = currentRow.querySelector('.userrow__since');
+      if (!sinceEl){
+        sinceEl = document.createElement('span');
+        sinceEl.className = 'userrow__since';
+        name.after(sinceEl);
+      }
+      sinceEl.textContent = since ? `Працівник з ${since}` : '';
+
+      // смена иконки на «partial»
+      const partSrc = currentRow.dataset.iconPartial;
+      if (avatar && partSrc) avatar.src = partSrc;
+    }
+  }
+
+  // Удаление строки
+  function deleteCurrent(){
+    if (!currentRow) return;
+    currentRow.remove();
+    closeModal();
+  }
+
+  // Слушатели
+  vp.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.userrow__name');
+    if (!btn) return;
+    const row = btn.closest('.userrow');
+    if (row) openModal(row);
+  });
+
+  overlay.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false'){
+      closeModal();
+    }
+  });
+
+  optPartial.addEventListener('click', ()=> setAccess('partial'));
+  optFull.addEventListener('click',    ()=> setAccess('full'));
+
+  delBtn.addEventListener('click', deleteCurrent);
+  saveBtn.addEventListener('click', ()=>{ applyChanges(); closeModal(); });
+});
+</script>
+
+
+</body>
+</html>

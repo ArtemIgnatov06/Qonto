@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="shop-contacts.css" />
+  <!-- ШРИФТЫ -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+  <title>Shop contacts</title>
+</head>
+<body>
+                   <header class="hdr">
+  <!-- фоновый прямоугольник -->
+  <div class="hdr-bg"></div>
+
+  <!-- LOGO -->
+  <a class="logo" href="#">
+    <span class="logo-text">Qonte</span>
+    <span class="logo-dot" aria-hidden="true"></span>
+  </a>
+
+  <!-- SEARCH GROUP -->
+  <form class="search-wrap" action="#" role="search">
+  <input class="search-input" type="text" placeholder="Пошук..." aria-label="Пошук">
+  <button class="search-btn" type="submit" aria-label="Найти">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" fill="none" stroke="#7AD293" stroke-width="1.5"/>
+      <rect x="16" y="16" width="6" height="6" rx="1.2" fill="#7AD293"/>
+    </svg>
+  </button>
+</form>
+
+  <!-- КНОПКА AI -->
+<button class="btn-ai" type="button">
+  <span class="ai-ico" aria-hidden="true">
+    <!-- иконка «робот/ИИ» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <circle cx="9" cy="10" r="1"/>
+      <circle cx="15" cy="10" r="1"/>
+      <path d="M8 15c1.5 1 3.5 1 5 0"/>
+    </svg>
+  </span>
+  <span class="ai-label">AI-Консультант</span>
+</button>
+
+<!-- КНОПКА КАТАЛОГ -->
+<button class="btn-cat" type="button">
+  <span class="cat-ico" aria-hidden="true">
+    <!-- иконка «меню/каталог» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <rect x="3" y="4" width="7" height="7"/>
+      <rect x="14" y="4" width="7" height="7"/>
+      <rect x="3" y="13" width="7" height="7"/>
+      <rect x="14" y="13" width="7" height="7"/>
+    </svg>
+  </span>
+  <span class="cat-label">Каталог</span>
+</button>
+
+  <!-- ИКОНКИ 3–6 -->
+  <button class="ico ico-lang" type="button" aria-label="Выбор языка">
+    <!-- Иконка "язык" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-heart" type="button" aria-label="Избранное">
+    <!-- Иконка "сердце" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 21s-6-4.3-9-8.6C1 9.3 3.5 5 7.5 5c2.1 0 3.5 1.1 4.5 2.5C13 6.1 14.4 5 16.5 5 20.5 5 23 9.3 21 12.4c-3 4.3-9 8.6-9 8.6z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-cart" type="button" aria-label="Корзина">
+    <!-- Иконка "корзина" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-user" type="button" aria-label="Аккаунт">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#7AD293" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+    </svg>
+  </button>
+</header>
+
+
+<!-- БОКС 1: Графік роботи (Group 1289 / Rectangle 224) -->
+<div class="box-schedule">
+  <!-- рамка бокса -->
+  <div class="box-schedule__frame"></div>
+
+  <!-- иконка-редактирование (кликабельная) -->
+  <button class="box-schedule__edit" type="button" aria-label="Редагувати графік">
+    <img src="edit.png" alt="" width="30" height="30" draggable="false">
+  </button>
+
+  <!-- заголовок -->
+  <div class="box-schedule__title">Графік роботи</div>
+
+  <!-- подзаголовок -->
+  <div class="box-schedule__text">Не має графіка роботи</div>
+<div class="box-schedule__text-off" hidden></div>
+</div>
+
+<!-- БОКС 2: Соцмережі продавця (замени свой .box-social на этот или дополни) -->
+<div class="box-social">
+  <div class="box-social__frame"></div>
+
+  <!-- кликабельная иконка-редактирование -->
+  <button class="box-social__edit" type="button" aria-label="Редагувати соцмережі">
+    <img src="edit.png" alt="" width="30" height="30" draggable="false">
+  </button>
+
+  <div class="box-social__title">Соціальні мережі продавця</div>
+
+  <!-- сюда после сохранения появятся иконки подключенных приложений -->
+  <div class="box-social__icons" aria-live="polite"></div>
+</div>
+
+
+<!-- OVERLAY -->
+<div class="workdays-overlay" aria-hidden="true"></div>
+
+<!-- MODAL (Group 1291) -->
+<div class="workdays-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <!-- Каркас (Rectangle 192) -->
+  <div class="workdays-modal__frame"></div>
+
+  <!-- Заголовок -->
+  <div class="workdays-modal__title">Виберіть робочі дні</div>
+
+  <!-- Кнопки днів: Пн-Нд (Frame 1207..1213) -->
+  <button class="wd-day" data-day="0" style="left:36px;top:69px;width:41px;height:41px;">Пн</button>
+  <button class="wd-day" data-day="1" style="left:86px;top:69px;width:41px;height:41px;">Вт</button>
+  <button class="wd-day" data-day="2" style="left:136px;top:69px;width:41px;height:41px;">Ср</button>
+  <button class="wd-day" data-day="3" style="left:185px;top:69px;width:42px;height:41px;">Чт</button>
+  <button class="wd-day" data-day="4" style="left:235px;top:69px;width:41px;height:41px;">Пт</button>
+  <button class="wd-day" data-day="5" style="left:285px;top:69px;width:41px;height:41px;">Сб</button>
+  <button class="wd-day" data-day="6" style="left:335px;top:69px;width:41px;height:41px;">Нд</button>
+
+  <!-- Підпис "Впишіть робочі години" -->
+  <div class="workdays-modal__hours-label" style="left:36px;top:138px;">Впишіть робочі години</div>
+
+  <!-- Поля часу (Rectangle 227/229) -->
+  <input class="wd-time wd-time--from" type="text" inputmode="numeric" placeholder="09.00" style="left:36px;top:172px;width:49px;height:31px;">
+  <div class="wd-time-colon" style="left:92px;top:175px;">:</div>
+  <input class="wd-time wd-time--to"   type="text" inputmode="numeric" placeholder="19.00" style="left:101px;top:172px;width:49px;height:31px;">
+
+  <!-- Кнопка Зберегти (Frame 1214) -->
+  <button class="workdays-save" type="button">
+    Зберегти
+  </button>
+</div>
+
+
+
+<!-- ⤵ МОДАЛКА СОЦСЕТЕЙ (Group 1210). Размести в конце <body> -->
+<div class="soc-overlay" aria-hidden="true"></div>
+<div class="soc-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="soc-modal__frame"></div>
+  <div class="soc-modal__title">Виберіть соц-мережу</div>
+
+  <!-- Ряд логотипов (позиции из макета, 628..932 / 314..315) -->
+  <button class="soc-icon" data-platform="facebook"  style="left:31px; top:78px; width:40px; height:40px;">
+    <img src="cri_facebook-fill.png" alt="Facebook" width="40" height="40">
+  </button>
+  <button class="soc-icon" data-platform="instagram" style="left:88px; top:77px; width:42.96px; height:42.96px;">
+    <img src="ciconoir_instagram.png" alt="Instagram" width="42" height="42">
+  </button>
+  <button class="soc-icon" data-platform="telegram"  style="left:147.96px; top:77px; width:42px; height:42px;">
+    <img src="cmingcute_telegram-fill.png" alt="Telegram" width="42" height="42">
+  </button>
+  <button class="soc-icon" data-platform="whatsapp"  style="left:206.96px; top:77px; width:42px; height:42px;">
+    <img src="cic_outline-whatsapp.png" alt="WhatsApp" width="42" height="42">
+  </button>
+  <button class="soc-icon" data-platform="linkedin"  style="left:265.96px; top:77px; width:42px; height:42px;">
+    <img src="cmdi_linkedin.png" alt="LinkedIn" width="42" height="42">
+  </button>
+  <button class="soc-icon" data-platform="tiktok"    style="left:324.96px; top:77px; width:42.96px; height:42.96px;">
+    <img src="cic_outline-tiktok.png" alt="TikTok" width="42" height="42">
+  </button>
+
+  <!-- Поле ввода (Rectangle 227, Group 1207) -->
+  <label class="soc-input-label" for="soc-input">*https-посилання на профіль</label>
+  <input id="soc-input" class="soc-input" type="text" placeholder="https://..." inputmode="url">
+
+  <!-- Кнопка "Зберегти" (Frame 1214) -->
+  <button class="soc-save" type="button">Зберегти</button>
+</div>
+
+
+
+
+
+<footer class="ftr" role="contentinfo">
+  <div class="ftr-bg"></div>
+
+  <!-- Колонки -->
+  <h4 class="ftr-h4 ftr-h4--info">Інформація о компанії</h4>
+  <ul class="ftr-list ftr-list--info">
+    <li><a href="#">Про нас</a></li>
+    <li><a href="#">Умови використання сайту</a></li>
+    <li><a href="#">Вакансії</a></li>
+    <li><a href="#">Контакти</a></li>
+    <li><a href="#">Зворотній зв’язок</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--help">Допомога</h4>
+  <ul class="ftr-list ftr-list--help">
+    <li><a href="#">Часті питання</a></li>
+    <li><a href="#">Доставка та оплата</a></li>
+    <li><a href="#">Гарантія</a></li>
+    <li><a href="#">Повернення</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--sellers">Продавцям</h4>
+  <ul class="ftr-list ftr-list--sellers">
+    <li><a href="#">Продавати товари</a></li>
+    <li><a href="#">Правила торгівлі</a></li>
+  </ul>
+
+  <!-- Соцсети -->
+  <h4 class="ftr-h4 ftr-h4--social">Ми в соціальних мережах</h4>
+  <a class="ftr-soc ftr-soc--ig" href="#" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1" fill="#ECECEC"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--fb" href="#" aria-label="Facebook">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M13.5 21v-7h2.3l.4-3H13.5V9.1c0-.9.3-1.5 1.7-1.5H16V5.1c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 3.9V11H7v3h2.6v7h3.9z"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--tt" href="#" aria-label="TikTok">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M15 3c.6 1.8 2 3.2 3.8 3.7v3.1c-1.5-.1-2.9-.6-4-1.5v5.9a5.6 5.6 0 1 1-5.6-5.6c.5 0 1 .1 1.4.2v3a2.5 2.5 0 1 0 2.2 2.5V3h2.2z"/>
+    </svg>
+  </a>
+
+  <!-- Декоративная фигура справа -->
+  <img class="ftr-mascot" src="maskotfooter.png" alt="Маскот Qonto">
+
+  <!-- Копирайт -->
+  <p class="ftr-copy">©2025 Платформа онлайн-торгівлі «Qonto» — використовується на підставі ліцензії правовласника</p>
+</footer>
+
+<script>
+(function(){
+  // Селекторы
+  const editBtn = document.querySelector('.box-schedule__edit');          // иконка в верхнем боксе
+  const boxText = document.querySelector('.box-schedule__text');          // текст под "Графік роботи"
+
+  const overlay = document.querySelector('.workdays-overlay');
+  const modal   = document.querySelector('.workdays-modal');
+  const dayBtns = Array.from(document.querySelectorAll('.workdays-modal .wd-day'));
+  const tFrom   = document.querySelector('.workdays-modal .wd-time--from');
+  const tTo     = document.querySelector('.workdays-modal .wd-time--to');
+  const saveBtn = document.querySelector('.workdays-modal .workdays-save');
+
+  if (!editBtn || !overlay || !modal || !saveBtn) return;
+
+  // Состояние
+  const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  let selected = [false,false,false,false,false,false,false];
+  let hours = { from: '09.00', to: '19.00' };
+
+  // Инициализация: берём текущее значение из бокса (если уже есть)
+  function parseExisting(){
+    const txt = (boxText?.textContent || '').trim();
+    const m = txt.match(/(\d{1,2}[.:]\d{2})\s*-\s*(\d{1,2}[.:]\d{2})/);
+    if (m) {
+      hours.from = normalizeTime(m[1]);
+      hours.to   = normalizeTime(m[2]);
+    }
+    if (/Пн\s*-\s*Пт/.test(txt)) {
+      selected = [true,true,true,true,true,false,false];
+    }
+    if (/Сб\s*-\s*Нд/.test(txt) && /вихідн/i.test(txt)) {
+      selected[5] = false; selected[6] = false;
+    }
+  }
+
+  // Helpers
+  function open(){
+    dayBtns.forEach((btn,i)=>btn.classList.toggle('is-selected', selected[i]));
+    tFrom.value = hours.from; 
+    tTo.value   = hours.to;
+    toggleSaveState();
+
+    overlay.setAttribute('aria-hidden','false');
+    modal.setAttribute('aria-hidden','false');
+    setTimeout(()=> dayBtns[0]?.focus(), 0);
+  }
+  function close(){
+    overlay.setAttribute('aria-hidden','true');
+    modal.setAttribute('aria-hidden','true');
+  }
+  function normalizeTime(v){
+    if (!v) return '';
+    v = v.replace(',', '.').replace(/:/g,'.').trim();
+    const m = v.match(/^(\d{1,2})(?:\.(\d{2}))?$/);
+    if (!m) return v;
+    const hh = String(Math.min(23, parseInt(m[1],10))).padStart(2,'0');
+    const mm = String(Math.min(59, parseInt(m[2]||'00',10))).padStart(2,'0');
+    return `${hh}.${mm}`;
+  }
+  function anyDaySelected(){ return selected.some(Boolean); }
+  function hoursValid(){
+    const f = normalizeTime(tFrom.value || hours.from);
+    const t = normalizeTime(tTo.value   || hours.to);
+    return /^\d{2}\.\d{2}$/.test(f) && /^\d{2}\.\d{2}$/.test(t);
+  }
+  function toggleSaveState(){
+    if (anyDaySelected() && hoursValid()) saveBtn.classList.add('is-ready');
+    else saveBtn.classList.remove('is-ready');
+  }
+
+  function compressRanges(flags){
+    function rangesOf(value){
+      const out = []; let i = 0;
+      while(i < 7){
+        if (flags[i] === value){
+          const start = i;
+          while(i+1<7 && flags[i+1]===value) i++;
+          const end = i;
+          out.push(start===end ? DAYS[start] : `${DAYS[start]}-${DAYS[end]}`);
+        }
+        i++;
+      }
+      return out;
+    }
+    return { on: rangesOf(true), off: rangesOf(false) };
+  }
+
+  function updateBoxText(){
+    if (!boxText) return;
+    const offEl = document.querySelector('.box-schedule__text-off');
+
+    if (!anyDaySelected()){
+      boxText.textContent = 'Не має графіка роботи';
+      if (offEl) { offEl.textContent = ''; offEl.hidden = true; }
+      return;
+    }
+
+    const f = normalizeTime(tFrom.value || hours.from);
+    const t = normalizeTime(tTo.value   || hours.to);
+    hours.from = f; hours.to = t;
+
+    const { on, off } = compressRanges(selected);
+
+    const workLine = on.join(', ') + ` ${f}-${t}`;
+    boxText.textContent = workLine;
+
+    if (off && off.length){
+      const offLine = (off.length === 1 && off[0] === 'Сб-Нд')
+        ? 'Сб-Нд вихідні'
+        : off.join(', ') + ' вихідні';
+      if (offEl) { offEl.textContent = offLine; offEl.hidden = false; }
+    } else {
+      if (offEl) { offEl.textContent = ''; offEl.hidden = true; }
+    }
+  }
+
+  // Слушатели
+  editBtn.addEventListener('click', () => { parseExisting(); open(); });
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && modal.getAttribute('aria-hidden')==='false') close(); });
+
+  dayBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const d = parseInt(btn.getAttribute('data-day'),10);
+      selected[d] = !selected[d];
+      btn.classList.toggle('is-selected', selected[d]);
+      toggleSaveState();
+    });
+  });
+
+  tFrom.addEventListener('input', ()=>{ tFrom.value = tFrom.value.replace(/[^0-9.:,]/g,''); toggleSaveState(); });
+  tTo  .addEventListener('input', ()=>{ tTo.value   = tTo.value.replace(/[^0-9.:,]/g,''); toggleSaveState(); });
+
+  saveBtn.addEventListener('click', ()=>{
+    if (!anyDaySelected()){ 
+      boxText.textContent = 'Не має графіка роботи';
+      close();
+      return;
+    }
+    tFrom.value = normalizeTime(tFrom.value || hours.from);
+    tTo.value   = normalizeTime(tTo.value   || hours.to);
+
+    updateBoxText();
+    close();
+  });
+})();
+
+(function(){
+  // Кнопка-карандаш во 2-м боксе
+  const editBtn   = document.querySelector('.box-social__edit');
+  const iconsWrap = document.querySelector('.box-social__icons');
+
+  // Модалка
+  const overlay = document.querySelector('.soc-overlay');
+  const modal   = document.querySelector('.soc-modal');
+  const input   = document.getElementById('soc-input');
+  const saveBtn = document.querySelector('.soc-save');
+  const socBtns = Array.from(document.querySelectorAll('.soc-icon'));
+
+  // === ПУТИ К КАРТИНКАМ ДЛЯ БОКСА: поменяй на свои файлы ===
+  const PLATFORM_ICON_SRC = {
+    facebook:  'cri_facebook-fill.png',
+    instagram: 'ciconoir_instagram.png',
+    telegram:  'cmingcute_telegram-fill.png',
+    whatsapp:  'cic_outline-whatsapp.png',
+    linkedin:  'cmdi_linkedin.png',
+    tiktok:    'cic_outline-tiktok.png'
+  };
+
+  // Маппинг платформ и хостов
+  const PLATFORM_PATTERNS = [
+    { key:'facebook',  hosts:[/facebook\.com$/i, /fb\.com$/i] },
+    { key:'instagram', hosts:[/instagram\.com$/i] },
+    { key:'telegram',  hosts:[/t\.me$/i, /telegram\.me$/i, /telegram\.org$/i] },
+    { key:'whatsapp',  hosts:[/wa\.me$/i, /whatsapp\.com$/i] },
+    { key:'linkedin',  hosts:[/linkedin\.com$/i] },
+    { key:'tiktok',    hosts:[/tiktok\.com$/i] }
+  ];
+
+  // Текущее определение
+  let detected = null;  // { key, url }
+  // Список выбранных (накапливаем)
+  let connected = [];   // [{key, url}]
+
+  // Открыть/закрыть
+  function openModal(){
+    input.value = '';
+    detected = null;
+    socBtns.forEach(b => b.classList.remove('is-active'));
+    saveBtn.classList.remove('is-ready');
+
+    overlay.setAttribute('aria-hidden','false');
+    modal.setAttribute('aria-hidden','false');
+    setTimeout(()=> input.focus(), 0);
+  }
+  function closeModal(){
+    overlay.setAttribute('aria-hidden','true');
+    modal.setAttribute('aria-hidden','true');
+  }
+
+  function normalizeUrl(raw){
+    if (!raw) return null;
+    let v = raw.trim();
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    try { return new URL(v); } catch(e){ return null; }
+  }
+
+  function detectPlatformFromUrl(raw){
+    const url = normalizeUrl(raw);
+    if (!url) return null;
+    const host = url.hostname.replace(/^www\./i,'');
+    for (const p of PLATFORM_PATTERNS){
+      if (p.hosts.some(rx => rx.test(host))){
+        return { key:p.key, url: url.href };
+      }
+    }
+    return null;
+  }
+
+  function highlightPlatform(key){
+    socBtns.forEach(b => b.classList.toggle('is-active', b.dataset.platform === key));
+  }
+
+  function updateSaveState(){
+    if (detected) saveBtn.classList.add('is-ready');
+    else saveBtn.classList.remove('is-ready');
+  }
+
+  // — Слушатели —
+  editBtn?.addEventListener('click', openModal);
+  overlay?.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && modal.getAttribute('aria-hidden')==='false') closeModal(); });
+
+  socBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.platform;
+      detected = { key, url: input.value.trim() || '' };
+      highlightPlatform(key);
+      updateSaveState();
+    });
+  });
+
+  input?.addEventListener('input', ()=>{
+    detected = detectPlatformFromUrl(input.value);
+    highlightPlatform(detected?.key || '');
+    updateSaveState();
+  });
+
+  saveBtn?.addEventListener('click', ()=>{
+    if (!detected) return;
+
+    // уже есть такая платформа? заменим URL
+    const idx = connected.findIndex(x => x.key === detected.key);
+    if (idx >= 0){
+      connected[idx].url = detected.url;
+    } else {
+      connected.push({ key: detected.key, url: detected.url });
+    }
+
+    renderConnected();
+    closeModal();
+  });
+
+  // === Готовый HTML после рендера: <span class="icon"><img ...></span> ===
+  function renderConnected(){
+    const html = connected.map((item, i) => {
+      const key = item.key;
+      // приоритет: мапа → src из кнопки модалки → пусто
+      const srcFromMap   = PLATFORM_ICON_SRC[key] || '';
+      const srcFromModal = document.querySelector(`.soc-icon[data-platform="${key}"] img`)?.getAttribute('src') || '';
+      const src = srcFromMap || srcFromModal;
+
+      const alt = key.charAt(0).toUpperCase() + key.slice(1);
+      return `
+        <span class="icon" data-slot="${i}" data-platform="${key}">
+          ${src ? `<img src="${src}" alt="${alt}">` : ''}
+        </span>
+      `;
+    }).join('');
+
+    iconsWrap.innerHTML = html;
+  }
+})();
+</script>
+
+</body>
+</html>

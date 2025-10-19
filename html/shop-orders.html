@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="shop-orders.css" />
+  <!-- ШРИФТЫ -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+  <title>Shop orders</title>
+</head>
+<body>
+       <header class="hdr">
+  <!-- фоновый прямоугольник -->
+  <div class="hdr-bg"></div>
+
+  <!-- LOGO -->
+  <a class="logo" href="#">
+    <span class="logo-text">Qonte</span>
+    <span class="logo-dot" aria-hidden="true"></span>
+  </a>
+
+  <!-- SEARCH GROUP -->
+  <form class="search-wrap" action="#" role="search">
+  <input class="search-input" type="text" placeholder="Пошук..." aria-label="Пошук">
+  <button class="search-btn" type="submit" aria-label="Найти">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" fill="none" stroke="#7AD293" stroke-width="1.5"/>
+      <rect x="16" y="16" width="6" height="6" rx="1.2" fill="#7AD293"/>
+    </svg>
+  </button>
+</form>
+
+  <!-- КНОПКА AI -->
+<button class="btn-ai" type="button">
+  <span class="ai-ico" aria-hidden="true">
+    <!-- иконка «робот/ИИ» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <circle cx="9" cy="10" r="1"/>
+      <circle cx="15" cy="10" r="1"/>
+      <path d="M8 15c1.5 1 3.5 1 5 0"/>
+    </svg>
+  </span>
+  <span class="ai-label">AI-Консультант</span>
+</button>
+
+<!-- КНОПКА КАТАЛОГ -->
+<button class="btn-cat" type="button">
+  <span class="cat-ico" aria-hidden="true">
+    <!-- иконка «меню/каталог» -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7AD293" stroke-width="2">
+      <rect x="3" y="4" width="7" height="7"/>
+      <rect x="14" y="4" width="7" height="7"/>
+      <rect x="3" y="13" width="7" height="7"/>
+      <rect x="14" y="13" width="7" height="7"/>
+    </svg>
+  </span>
+  <span class="cat-label">Каталог</span>
+</button>
+
+  <!-- ИКОНКИ 3–6 -->
+  <button class="ico ico-lang" type="button" aria-label="Выбор языка">
+    <!-- Иконка "язык" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-heart" type="button" aria-label="Избранное">
+    <!-- Иконка "сердце" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M12 21s-6-4.3-9-8.6C1 9.3 3.5 5 7.5 5c2.1 0 3.5 1.1 4.5 2.5C13 6.1 14.4 5 16.5 5 20.5 5 23 9.3 21 12.4c-3 4.3-9 8.6-9 8.6z"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-cart" type="button" aria-label="Корзина">
+    <!-- Иконка "корзина" -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#ECECEC" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  </button>
+
+  <button class="ico ico-user" type="button" aria-label="Аккаунт">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#7AD293" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+    </svg>
+  </button>
+</header>
+
+
+
+<footer class="ftr" role="contentinfo">
+  <div class="ftr-bg"></div>
+
+  <!-- Колонки -->
+  <h4 class="ftr-h4 ftr-h4--info">Інформація о компанії</h4>
+  <ul class="ftr-list ftr-list--info">
+    <li><a href="#">Про нас</a></li>
+    <li><a href="#">Умови використання сайту</a></li>
+    <li><a href="#">Вакансії</a></li>
+    <li><a href="#">Контакти</a></li>
+    <li><a href="#">Зворотній зв’язок</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--help">Допомога</h4>
+  <ul class="ftr-list ftr-list--help">
+    <li><a href="#">Часті питання</a></li>
+    <li><a href="#">Доставка та оплата</a></li>
+    <li><a href="#">Гарантія</a></li>
+    <li><a href="#">Повернення</a></li>
+  </ul>
+
+  <h4 class="ftr-h4 ftr-h4--sellers">Продавцям</h4>
+  <ul class="ftr-list ftr-list--sellers">
+    <li><a href="#">Продавати товари</a></li>
+    <li><a href="#">Правила торгівлі</a></li>
+  </ul>
+
+  <!-- Соцсети -->
+  <h4 class="ftr-h4 ftr-h4--social">Ми в соціальних мережах</h4>
+  <a class="ftr-soc ftr-soc--ig" href="#" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" stroke="#ECECEC" stroke-width="2"/>
+      <circle cx="17" cy="7" r="1" fill="#ECECEC"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--fb" href="#" aria-label="Facebook">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M13.5 21v-7h2.3l.4-3H13.5V9.1c0-.9.3-1.5 1.7-1.5H16V5.1c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 3.9V11H7v3h2.6v7h3.9z"/>
+    </svg>
+  </a>
+  <a class="ftr-soc ftr-soc--tt" href="#" aria-label="TikTok">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="#ECECEC">
+      <path d="M15 3c.6 1.8 2 3.2 3.8 3.7v3.1c-1.5-.1-2.9-.6-4-1.5v5.9a5.6 5.6 0 1 1-5.6-5.6c.5 0 1 .1 1.4.2v3a2.5 2.5 0 1 0 2.2 2.5V3h2.2z"/>
+    </svg>
+  </a>
+
+  <!-- Декоративная фигура справа -->
+  <img class="ftr-mascot" src="maskotfooter.png" alt="Маскот Qonto">
+
+  <!-- Копирайт -->
+  <p class="ftr-copy">©2025 Платформа онлайн-торгівлі «Qonto» — використовується на підставі ліцензії правовласника</p>
+</footer>
+
+
+
+
+
+
+
+
+
+<div class="goods-wrap">
+  <button class="goods-icon" type="button" aria-label="Назад до списку">
+    <img class="goods-icon__img" src="planex.png" alt="">
+  </button>
+  <h3 class="goods-title">Замовлення</h3>
+</div>
+
+
+
+
+<div class="product-card card-75">
+  <!-- Внешняя рамка (Rectangle 14) -->
+  <div class="card-frame"></div>
+
+  <!-- Фото (Mask group) -->
+  <div class="photo-mask">
+    <div class="photo-bg"></div>
+    <img class="photo-img" src="poroshok2.png" alt="">
+    <a class="product-link" href="#"></a>
+  </div>
+
+  <!-- Заголовок (Group 160) -->
+  <div class="title">Пральний порошок, 2 кг</div>
+
+  <!-- Цены и две кнопки справа (Group 161 + Vectors) -->
+  <div class="price-row">
+    <div class="price-now">207 грн</div>
+  </div>
+</div>
+
+
+
+
+<!-- СОРТИРОВКА ТОВАРОВ -->
+<button class="sort-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="sortPopup">
+  <span class="sort-ico-wrap">
+    <!-- ТВОЯ іконка (замість «стрілок» із макета) -->
+    <img class="sort-icon-img" src="firstly-newer.png" alt="">
+  </span>
+  <span class="sort-text">З початку нові</span>
+</button>
+
+<!-- Вікно сортування (Group 584) -->
+<div class="sort-popup" id="sortPopup" role="menu" aria-hidden="true">
+  <div class="sort-box"></div>
+
+  <!-- Пункт 1: З початку старі (Group 271) -->
+  <button class="sort-opt opt-old" type="button" role="menuitem" data-sort="old">
+    <span class="opt-ico-wrap">
+      <img class="opt-icon-img" src="firstly-older.png" alt="">
+    </span>
+    <span class="opt-label">З початку старі</span>
+  </button>
+
+  <!-- Пункт 2: Зростання цін (Group 272) -->
+  <button class="sort-opt opt-price-asc" type="button" role="menuitem" data-sort="price-asc">
+    <span class="opt-ico-wrap">
+      <img class="opt-icon-img" src="higher.png" alt="">
+    </span>
+    <span class="opt-label">Зростання цін</span>
+  </button>
+
+  <!-- Пункт 3: Спадання цін (Group 273) -->
+  <button class="sort-opt opt-price-desc" type="button" role="menuitem" data-sort="price-desc">
+    <span class="opt-ico-wrap">
+      <img class="opt-icon-img" src="lower.png" alt="">
+    </span>
+    <span class="opt-label">Спадання цін</span>
+  </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+(function(){
+  /* ============================
+     ПРАВАЯ ПАНЕЛЬ ФИЛЬТРОВ (toggle)
+     ============================ */
+
+  const openers = Array.from(document.querySelectorAll('.link-more, .filter-btn'));
+  const panel    = document.getElementById('sidePanelLocal');
+  const closeBtn = panel?.querySelector('.panel-close');
+
+  let lastOpener = null;
+
+  const HIDE_SELECTORS = [
+    '.popular-title',
+    '.sale-title',
+    '.link-all',
+    '.link-more',
+    '.catalog-btn',
+    '.catalog-btn-sm'
+  ];
+
+  const toHide = () =>
+    Array.from(document.querySelectorAll(HIDE_SELECTORS.join(',')))
+      .filter(el => !el.closest('#sidePanelLocal'));
+
+  function fadeOutElements(els){
+    els.forEach(el => {
+      if (el.classList.contains('is-hidden')) return;
+      el.classList.add('is-vanished');
+      const onEnd = (e)=>{
+        if (e.propertyName !== 'opacity') return;
+        el.classList.add('is-hidden');
+        el.removeEventListener('transitionend', onEnd);
+      };
+      el.addEventListener('transitionend', onEnd);
+      setTimeout(()=> el.classList.add('is-hidden'), 260);
+    });
+  }
+  function fadeInElements(els){
+    els.forEach(el => {
+      if (!el.classList.contains('is-hidden')) return;
+      el.classList.remove('is-hidden');
+      el.classList.add('is-vanished');
+      void el.offsetWidth;
+      el.classList.remove('is-vanished');
+    });
+  }
+
+  function isPanelOpen(){ return panel?.classList.contains('is-open'); }
+
+  function openPanel(e){
+    if (!panel || !closeBtn) return;
+    e && e.preventDefault();
+    lastOpener = e?.currentTarget || lastOpener;
+
+    fadeOutElements(toHide());
+    document.documentElement.classList.add('panel-open');
+
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden','false');
+    openers.forEach(btn => btn.setAttribute('aria-expanded','true'));
+
+    closeSortPopup();
+
+    initPanelCheckboxes();
+    initPanelPromoRadios();
+    initPanelStars();
+    initCategoryList();
+    initPrice();
+
+    closeBtn.focus();
+  }
+
+  function closePanel(e){
+    if (!panel || !closeBtn) return;
+    e && e.preventDefault();
+
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden','true');
+    openers.forEach(btn => btn.setAttribute('aria-expanded','false'));
+
+    fadeInElements(toHide());
+    document.documentElement.classList.remove('panel-open');
+
+    (lastOpener || openers[0])?.focus();
+  }
+
+  function togglePanel(e){ isPanelOpen() ? closePanel(e) : openPanel(e); }
+
+  if (openers.length && panel && closeBtn){
+    openers.forEach(btn => btn.addEventListener('click', togglePanel));
+    closeBtn.addEventListener('click', closePanel);
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape' && isPanelOpen()) closePanel(e);
+    });
+  }
+
+  /* ============================
+     ЧЕКБОКСЫ
+     ============================ */
+  function initPanelCheckboxes(){
+    const pairs = [
+      ['.box-instock',  '.lbl-instock'],
+      ['.box-outstock', '.lbl-outstock'],
+      ['.box-hit',      '.lbl-hit'],
+      ['.box-new',      '.lbl-new'],
+    ];
+    pairs.forEach(([boxSel, lblSel]) => {
+      const box = panel.querySelector(boxSel);
+      const lbl = panel.querySelector(lblSel);
+      if (!box || !lbl || box.dataset.bound === '1') return;
+      box.dataset.bound = '1';
+      const toggle = () => {
+        const state = box.getAttribute('aria-checked') === 'true';
+        const next = !state;
+        box.setAttribute('aria-checked', String(next));
+        box.classList.toggle('is-checked', next);
+      };
+      box.addEventListener('click', toggle);
+      lbl.addEventListener('click', toggle);
+      box.setAttribute('tabindex', box.getAttribute('tabindex') || '0');
+      box.addEventListener('keydown', (e)=>{
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
+      });
+    });
+  }
+
+  /* ============================
+     РАДИО ТАК/НІ
+     ============================ */
+  function initPanelPromoRadios(){
+    const yesBox = panel.querySelector('.box-promo-yes');
+    const noBox  = panel.querySelector('.box-promo-no');
+    const yesLbl = panel.querySelector('.lbl-promo-yes');
+    const noLbl  = panel.querySelector('.lbl-promo-no');
+    if (!yesBox || !noBox || yesBox.dataset.bound === '1' || noBox.dataset.bound === '1') return;
+
+    yesBox.dataset.bound = noBox.dataset.bound = '1';
+
+    const setState = (which) => {
+      const y = (which === 'yes');
+      yesBox.setAttribute('aria-checked', String(y));
+      noBox .setAttribute('aria-checked', String(!y));
+      yesBox.classList.toggle('is-checked', y);
+      noBox .classList.toggle('is-checked', !y);
+    };
+
+    const onYes = ()=> setState('yes');
+    const onNo  = ()=> setState('no');
+
+    yesBox.addEventListener('click', onYes);
+    yesLbl && yesLbl.addEventListener('click', onYes);
+    noBox.addEventListener('click', onNo);
+    noLbl && noLbl.addEventListener('click', onNo);
+
+    [yesBox, noBox].forEach(el=>{
+      el.setAttribute('tabindex', el.getAttribute('tabindex') || '0');
+      el.addEventListener('keydown', (e)=>{
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); (el===yesBox?onYes:onNo)(); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); onYes(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); onNo(); }
+      });
+    });
+
+    setState('no');
+  }
+
+  /* ============================
+     ЗВЁЗДЫ
+     ============================ */
+  function initPanelStars(){
+    const group = panel.querySelector('.stars-group');
+    if (!group || group.dataset.bound === '1') return;
+    group.dataset.bound = '1';
+
+    const stars = Array.from(group.querySelectorAll('.star'));
+    const clamp = (n)=> Math.max(0, Math.min(5, n));
+
+    stars.forEach(btn=>{
+      const img = btn.querySelector('.star-img');
+      const off = img?.dataset.offSrc || img?.getAttribute('data-off-src') || '';
+      if (img && off) img.src = off;
+    });
+
+    const apply = (count) => {
+      const activeCount = clamp(count);
+      stars.forEach((btn, i) => {
+        const img = btn.querySelector('.star-img');
+        const on  = img?.dataset.onSrc  || img?.getAttribute('data-on-src')  || '';
+        const off = img?.dataset.offSrc || img?.getAttribute('data-off-src') || '';
+        const active = i < activeCount;
+        btn.setAttribute('aria-checked', String(active));
+        if (img && (on || off)) img.src = active ? on : off;
+      });
+      group.dataset.rating = String(activeCount);
+    };
+
+    apply(Number(group.dataset.rating || 0));
+
+    stars.forEach((btn, idx) => {
+      const click = ()=> apply(idx + 1);
+      btn.addEventListener('click', click);
+      btn.setAttribute('tabindex', btn.getAttribute('tabindex') || '0');
+      btn.addEventListener('keydown', (e)=>{
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); click(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); apply(clamp(Number(group.dataset.rating||0) + 1)); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); apply(clamp(Number(group.dataset.rating||0) - 1)); }
+      });
+    });
+  }
+
+  /* ============================
+     КАТЕГОРИИ
+     ============================ */
+  function initCategoryList(){
+    const box = panel?.querySelector('.cat-scroll');
+    if (!box || box.dataset.bound === '1') return;
+    box.dataset.bound = '1';
+
+    box.addEventListener('click', (e)=>{
+      const item  = e.target.closest('.cat-item');
+      if (!item) return;
+      const btn = e.target.closest('.cat-check') || item.querySelector('.cat-check');
+      if (!btn) return;
+      const next = !(btn.getAttribute('aria-checked') === 'true');
+      btn.setAttribute('aria-checked', String(next));
+      btn.classList.toggle('is-checked', next);
+    });
+
+    box.querySelectorAll('.cat-check').forEach(btn=>{
+      if (!btn.hasAttribute('tabindex')) btn.setAttribute('tabindex','0');
+      btn.addEventListener('keydown', (e)=>{
+        if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault();
+          const next = !(btn.getAttribute('aria-checked') === 'true');
+          btn.setAttribute('aria-checked', String(next));
+          btn.classList.toggle('is-checked', next);
+        }
+      });
+    });
+  }
+
+  /* ============================
+     ЦЕНА
+     ============================ */
+  function initPrice(){
+    const wrap = panel.querySelector('#priceGroup');
+    if (!wrap || !wrap.dataset.bound) wrap && (wrap.dataset.bound = '0');
+    if (!wrap || wrap.dataset.bound === '1') return;
+    wrap.dataset.bound = '1';
+
+    const minVal = Number(wrap.dataset.min || 0);
+    const maxVal = Number(wrap.dataset.max || 100000);
+
+    const track  = wrap.querySelector('.price-track');
+    const line   = wrap.querySelector('.price-track-line');
+    const active = wrap.querySelector('.price-active');
+    const dotMin = wrap.querySelector('.price-dot--min');
+    const dotMax = wrap.querySelector('.price-dot--max');
+
+    const inFrom = wrap.querySelector('.price-input--from');
+    const inTo   = wrap.querySelector('.price-input--to');
+
+    const clamp = (v,min,max)=> Math.min(max, Math.max(min, v|0));
+    const pct = (v)=> ((v - minVal) / (maxVal - minVal)) * 100;
+
+    function updateDots(){
+      const vFrom = inFrom.value === '' ? null : clamp(Number(inFrom.value), minVal, maxVal);
+      const vTo   = inTo.value   === '' ? null : clamp(Number(inTo.value),   minVal, maxVal);
+
+      const lineRect  = line.getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
+      const leftPx  = lineRect.left - trackRect.left;
+      const widthPx = lineRect.width;
+
+      if (vFrom !== null){
+        dotMin.hidden = false;
+        dotMin.style.left = `${leftPx + (pct(vFrom)/100) * widthPx}px`;
+      } else { dotMin.hidden = true; }
+
+      if (vTo !== null){
+        dotMax.hidden = false;
+        dotMax.style.left = `${leftPx + (pct(vTo)/100) * widthPx}px`;
+      } else { dotMax.hidden = true; }
+
+      const haveFrom = vFrom !== null;
+      const haveTo   = vTo   !== null;
+
+      if (!haveFrom && !haveTo){ active.hidden = true; return; }
+
+      active.hidden = false;
+
+      const p1 = haveFrom ? pct(vFrom) : null;
+      const p2 = haveTo   ? pct(vTo)   : null;
+
+      let leftPercent, rightPercent;
+      if (haveFrom && haveTo){
+        leftPercent  = Math.min(p1, p2);
+        rightPercent = Math.max(p1, p2);
+      } else if (haveFrom){ leftPercent = p1; rightPercent = p1;
+      } else { leftPercent = p2; rightPercent = p2; }
+
+      const leftPxActive  = leftPx + (leftPercent/100) * widthPx;
+      const rightPxActive = leftPx + (rightPercent/100) * widthPx;
+
+      active.style.left  = `${leftPxActive}px`;
+      active.style.width = `${Math.max(0, rightPxActive - leftPxActive)}px`;
+      active.style.opacity = (leftPxActive === rightPxActive ? 0.85 : 1);
+    }
+
+    inFrom.addEventListener('input', ()=>{ wrap.style.setProperty('--from-focus', '#35C65E'); updateDots(); });
+    inTo  .addEventListener('input', ()=>{ wrap.style.setProperty('--to-focus',   '#35C65E'); updateDots(); });
+    inFrom.addEventListener('blur', ()=> wrap.style.removeProperty('--from-focus'));
+    inTo  .addEventListener('blur', ()=> wrap.style.removeProperty('--to-focus'));
+
+    const ro = new ResizeObserver(updateDots);
+    ro.observe(track);
+    updateDots();
+  }
+
+  /* ============================
+     СОРТИРОВКА (кнопка + попап + СВОП КОНТЕНТА)
+     ============================ */
+  const sortBtn   = document.querySelector('.sort-btn');
+  const sortPopup = document.getElementById('sortPopup');
+  const products  = document.querySelector('.products-strip');
+
+  const DEFAULT_LABELS = {
+    'new':        'З початку нові',
+    'old':        'З початку старі',
+    'price-asc':  'Зростання цін',
+    'price-desc': 'Спадання цін'
+  };
+
+  let currentMode = 'new';
+
+  // Считываем подписи/иконки из DOM (если их нет — используем дефолты)
+  const modeIcon = { new: (sortBtn?.querySelector('.sort-icon-img')?.getAttribute('src') || '') };
+  const modeText = { new: (sortBtn?.querySelector('.sort-text')?.textContent?.trim() || DEFAULT_LABELS.new) };
+
+  if (sortPopup){
+    sortPopup.querySelectorAll('.sort-opt').forEach(opt=>{
+      const m   = opt.getAttribute('data-sort');
+      const img = opt.querySelector('.opt-icon-img');
+      const lbl = opt.querySelector('.opt-label');
+      if (!m) return;
+      modeIcon[m] = modeIcon[m] || (img ? img.getAttribute('src') || '' : '');
+      modeText[m] = modeText[m] || (lbl ? lbl.textContent.trim() : (DEFAULT_LABELS[m]||'' ));
+    });
+  }
+
+  function isSortOpen(){ return sortPopup?.classList.contains('is-open'); }
+  function openSortPopup(){
+    if (!sortPopup || !sortBtn) return;
+    if (isPanelOpen()) closePanel();
+    sortPopup.classList.add('is-open');
+    sortPopup.setAttribute('aria-hidden','false');
+    sortBtn.setAttribute('aria-expanded','true');
+  }
+  function closeSortPopup(){
+    if (!sortPopup || !sortBtn) return;
+    sortPopup.classList.remove('is-open');
+    sortPopup.setAttribute('aria-hidden','true');
+    sortBtn.setAttribute('aria-expanded','false');
+  }
+  function toggleSortPopup(e){
+    e && e.preventDefault();
+    isSortOpen() ? closeSortPopup() : openSortPopup();
+  }
+
+  // чтение атрибутов карточек
+  function readPrice(card){
+    const v = card.getAttribute('data-price');
+    if (v == null || v === '') return null;
+    const n = Number(String(v).replace(/[^\d.-]/g,''));
+    return Number.isFinite(n) ? n : null;
+  }
+  function readDate(card){
+    const v = card.getAttribute('data-date');
+    if (!v) return null;
+    const t = /^\d+$/.test(v) ? Number(v) : Date.parse(v);
+    return Number.isFinite(t) ? t : null;
+  }
+
+  // сортировка карточек
+  function sortCards(mode){
+    if (!products) return;
+    const cards = Array.from(products.querySelectorAll('.product-card'));
+    if (!cards.length) return;
+
+    const withIdx = cards.map((el, i)=>({ el, i, price: readPrice(el), date: readDate(el) }));
+
+    const cmpMap = {
+      'new':        (a,b)=> (b.date??-Infinity) - (a.date??-Infinity) || (a.i - b.i),
+      'old':        (a,b)=> (a.date?? Infinity) - (b.date?? Infinity) || (a.i - b.i),
+      'price-asc':  (a,b)=> (a.price??Infinity) - (b.price??Infinity) || (a.i - b.i),
+      'price-desc': (a,b)=> (b.price??-Infinity) - (a.price??-Infinity) || (a.i - b.i),
+    };
+    const cmp = cmpMap[mode] || ((a,b)=>a.i-b.i);
+
+    const frag = document.createDocumentFragment();
+    withIdx.sort(cmp).forEach(x=> frag.appendChild(x.el));
+    products.appendChild(frag);
+  }
+
+  // своп содержимого: кнопка <-> кликнутый пункт (без изменения DOM-геометрии)
+  function swapButtonWithOption(optBtn){
+    const newMode = optBtn.getAttribute('data-sort');
+    if (!newMode || !sortBtn) return;
+
+    const btnTextEl = sortBtn.querySelector('.sort-text');
+    const btnIconEl = sortBtn.querySelector('.sort-icon-img');
+
+    const optTextEl = optBtn.querySelector('.opt-label');
+    const optIconEl = optBtn.querySelector('.opt-icon-img');
+
+    // запомним текущее содержимое кнопки (как «старый режим»)
+    const prevMode   = currentMode;
+    const prevText   = btnTextEl ? btnTextEl.textContent : '';
+    const prevIcon   = btnIconEl ? btnIconEl.getAttribute('src') || '' : '';
+
+    // 1) заполняем кнопку содержимым выбранного режима
+    const nextText = modeText[newMode] || DEFAULT_LABELS[newMode] || '';
+    const nextIcon = modeIcon[newMode] || '';
+    if (btnTextEl) btnTextEl.textContent = nextText;
+    if (btnIconEl && nextIcon !== null) btnIconEl.setAttribute('src', nextIcon);
+
+    // 2) пункту присваиваем прежнее содержимое кнопки (вставляем «старый режим» на его место)
+    if (optTextEl) optTextEl.textContent = prevText;
+    if (optIconEl && prevIcon !== null) optIconEl.setAttribute('src', prevIcon);
+    optBtn.setAttribute('data-sort', prevMode);
+
+    // 3) применяем сортировку и обновляем текущее состояние
+    currentMode = newMode;
+    sortCards(newMode);
+
+    // закрываем попап и возвращаем фокус
+    closeSortPopup();
+    sortBtn.focus();
+  }
+
+  if (sortBtn && sortPopup){
+    // нормализуем начальную надпись/иконку если нужно
+    const btnTextEl = sortBtn.querySelector('.sort-text');
+    if (btnTextEl && !btnTextEl.textContent.trim()){
+      btnTextEl.textContent = modeText[currentMode] || DEFAULT_LABELS[currentMode];
+    }
+
+    sortBtn.addEventListener('click', toggleSortPopup);
+
+    // клики по существующим пунктам
+    sortPopup.querySelectorAll('.sort-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=> swapButtonWithOption(btn));
+    });
+
+    // закрытие при клике вне
+    document.addEventListener('click', (e)=>{
+      if (!isSortOpen()) return;
+      if (e.target.closest('.sort-popup') || e.target.closest('.sort-btn')) return;
+      closeSortPopup();
+    });
+    // закрытие по ESC
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape' && isSortOpen()) closeSortPopup();
+    });
+      // ПРИМІТКА ДЛЯ БЕКЕНДА:
+  // додайте на кожну .product-card атрибути:
+  //   data-date="2025-10-12T23:59:00Z"  (ISO або timestamp в мілісекундах)
+  //   data-price="207"                  (число, без пробілів; допускається "207 грн")
+  // сортування працюватиме автоматично по цим атрибутам.
+  }
+})();
+</script>
+
+</body>
+</html>

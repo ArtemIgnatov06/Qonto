@@ -1,0 +1,1066 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ХЕДЕР по фигме */
+.hdr{
+  position:absolute;
+  width:1600px;
+  height:105px;
+  left:0.21px;
+  top:0;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.hdr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px; height:105px;
+  background:#363535;
+}
+
+/* LOGO */
+.logo{
+  position:absolute;
+  width:126px; height:47px;
+  left:80px; top:29px;
+  display:block; text-decoration:none;
+}
+.logo-text{
+  position:absolute;
+  left:0; top:0;
+  width:126px; height:47px;
+  font-family:'Montserrat', sans-serif;
+  font-weight:700;
+  font-size:38.6596px;
+  line-height:47px;
+  color:#fff;
+}
+.logo-dot{
+  position:absolute;
+  width:15.11px; height:15.11px;
+  left:8.6px; top:15.94px; /* 88.6-80, 44.94-29 */
+  background:#7AD293;
+  border-radius:2px;
+}
+
+/* SEARCH GROUP */
+.search-wrap{
+  position:absolute;
+  width:714.29px; height:40px;
+  left:251.71px; top:32.5px;
+}
+.search-input{
+  position:absolute;
+  inset:0;
+  padding:0 48px 0 16px;           /* место под кнопку справа */
+  border:2px solid #EBEBEC;
+  border-radius:10px;
+  background:#363535;
+  color:#ECECEC;                    /* читабельный текст на тёмном фоне */
+  font:500 12px/14px 'Ubuntu', sans-serif;
+}
+.search-input::placeholder{ color:#A3A2A3; }
+
+/* (старое) иконка-лупа как span — можно удалить, если используешь .search-btn */
+.search-ico{
+  position:absolute;
+  width:26.74px; height:26px;
+  top:7px; right:7px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.search-ico svg{ width:26px; height:26px; transform:scaleX(-1); }
+
+/* НОВОЕ: кликабельная кнопка лупы */
+.search-btn{
+  position:absolute;
+  top:7px;
+  right:7px;
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:6px;
+  transition: background .2s ease, transform .15s ease;
+}
+.search-btn svg{
+  width:26px;
+  height:26px;
+  transform: scaleX(-1);
+  pointer-events:none;
+}
+.search-btn:hover,
+.search-btn:focus-visible{
+  background: rgba(122,210,147,0.12);
+  outline:none;
+  transform: translateY(-1px);
+}
+.search-btn:active{ transform: translateY(0); }
+
+/* Подсветка рамки поля при фокусе ввода */
+.search-input:focus{
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* КНОПКА AI */
+.btn-ai{
+  position:absolute;
+  left:991px; top:32.5px;
+  width:156px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  display:block;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-ai:hover,
+.btn-ai:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+
+/* ИКОНКИ слева в кнопках (заменены на SVG) */
+.ai-ico,
+.cat-ico{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px; height:20px;
+}
+.ai-ico svg,
+.cat-ico svg{
+  width:20px;
+  height:20px;
+}
+
+/* подписи кнопок */
+.ai-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* КНОПКА КАТАЛОГ */
+.btn-cat{
+  position:absolute;
+  left:1172px; top:32.5px;
+  width:104px; height:40px;
+  border:2px solid var(--stroke);
+  border-radius:9px;
+  background:transparent;
+  color:#ECECEC;
+  cursor:pointer;
+  transition: border-color .2s ease;
+}
+/* зелёная обводка при наведении/фокусе */
+.btn-cat:hover,
+.btn-cat:focus-visible{
+  border-color: var(--accent);
+  outline:none;
+}
+.cat-label{
+  position:absolute;
+  left:42px;
+  top:50%;
+  transform: translateY(-50%);
+  font:700 12px/24px 'Ubuntu', sans-serif;
+  color:#ECECEC;
+}
+
+/* ИКОНКИ 3–5 */
+.ico{
+  position:absolute;
+  width:30px; height:30px;
+  background:#363535;                 /* квадрат с фоном */
+  border:0;
+  padding:0;
+  border-radius:8px;               /* скруглённые края */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;                  /* кликабельность */
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico svg{
+  width:18px; height:18px;         /* фикс размера иконок */
+  display:block;
+}
+.ico:hover,
+.ico:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* позиции иконок по фигме */
+.ico-lang{ left:1315px; top:37.5px; }
+.ico-heart{ left:1370px; top:37.5px; }
+.ico-cart{  left:1425px; top:37.5px; }
+
+/* АККАУНТ */
+.ico-user{
+  position:absolute;
+  left:1480px; top:37.5px;
+  width:30px; height:30px;
+  background:#363535;
+  
+  border:0;
+  padding:0;
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+.ico-user svg{
+  width:24px; height:24px;
+  display:block;
+  fill:#7AD293;                   /* зелёная заливка как в макете */
+}
+.ico-user:hover,
+.ico-user:focus-visible{
+  background:#6a6a6a;
+  transform: translateY(-1px);
+  outline:none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.ico-user:active{
+  transform: translateY(0);
+  box-shadow:none;
+}
+
+/* опционально: белим штрихи/заливки на ховере у мелких иконок */
+.ico:hover svg path,
+.ico:hover svg circle,
+.ico:hover svg rect{
+  stroke:#ffffff;
+  fill:#ffffff;
+}
+
+/* ====== FOOTER: пикс-в-пикс из макета (без адаптации) ====== */
+.ftr{
+  position:absolute;
+  width:1600px;
+  height:388px;
+  left:0.21px;
+  bottom:0.18px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#ECECEC;
+  top: 850px; /* временно, чтобы не мешал просмотру страницы */
+}
+.ftr-bg{
+  position:absolute;
+  left:0; top:0;
+  width:1600px;
+  height:388.01px;
+  background:#363535;
+}
+
+/* Заголовки колонок */
+.ftr-h4{
+  position:absolute;
+  margin:0;
+  font-weight:400;
+  font-size:25px;
+  line-height:36px;
+  display:flex;
+  align-items:center;
+  color:#7AD293;
+}
+.ftr-h4--social{ left:935px; top:60.82px; width:305px; height:36px; }
+.ftr-h4--info{   left:80px;  top:51.1px;  width:324.28px; height:56.46px; }
+.ftr-h4--help{   left:446px; top:51.1px;  width:230.62px; height:56.46px; }
+.ftr-h4--sellers{left:690px; top:51.1px;  width:230.62px; height:56.46px; }
+
+/* Списки */
+.ftr-list{
+  position:absolute;
+  margin:0; padding:0;
+  list-style:none;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  color:#ECECEC;
+}
+.ftr-list--info{    left:80px;  top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--help{    left:446px; top:122.39px; width:238.77px; height:127.91px; }
+.ftr-list--sellers{ left:690px; top:122.39px; width:238.77px; height:127.91px; }
+
+.ftr-list a{
+  color:#ECECEC;
+  text-decoration:none;
+}
+.ftr-list a:hover{ color:#ffffff; }
+
+/* Соц. иконки 35×35, позиции из макета */
+.ftr-soc{
+  position:absolute;
+  width:35px; height:35px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.ftr-soc--ig{ left:935px;  top:117.34px; }
+.ftr-soc--fb{ left:1000px; top:117.34px; }
+.ftr-soc--tt{ left:1065px; top:117.34px; }
+
+.ftr-soc:hover svg path,
+.ftr-soc:hover svg rect,
+.ftr-soc:hover svg circle{
+  filter: brightness(1.15);
+}
+
+/* Копирайт по центру низа */
+.ftr-copy{
+  position:absolute;
+  left:498px;
+  top:320.97px;
+  width:660px; height:24px;
+  margin:0;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex; align-items:center; justify-content:center;
+  color:#ECECEC;
+}
+
+/* Декор справа (старый блок) — скрыт, т.к. используем изображение маскота */
+.ftr-art{
+  position:absolute;
+  left:1242px;
+  top:41.13px;
+  width:409px;
+  height:351px;
+  transform: rotate(-33.75deg);
+  pointer-events:none;
+  display: none !important; /* скрываем декор */
+}
+.ftr-art__bg{ display:none; }
+.ftr-art__bar{ display:none; }
+
+/* МАСКОТ (изображение в правом-нижнем углу футера) */
+.ftr-mascot{
+  position: absolute;
+  right: -160px;           /* отступ от правого края футера */
+  bottom: -160px;          /* отступ от нижнего края футера */
+  width: 500px;          /* квадрат — можно менять размер */
+  height: 500px;
+  object-fit: contain;   /* полностью видна без обрезки */
+  user-select: none;
+  pointer-events: none;  /* сделай pointer-events:auto, если нужна кликабельность */
+}
+
+.list-item{
+  position:absolute;
+  width:463px; height:100px;
+  box-sizing:border-box;
+  font-family:'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* позиции (left/top) трёх инстансов */
+.item-1{ left:79.64px; top:284px; }
+.item-2{ left:79.64px; top:401.07px; }
+.item-3{ left:79.64px; top:518.15px; }
+
+/* Маска (левая превью-зона ~21.6% ширины) */
+.list-item .thumb{
+  position:absolute;
+  left:0%; right:78.4%; top:0%; bottom:0%;
+  overflow:hidden; border-radius:15px;
+}
+.list-item .thumb-bg{
+  position:absolute; inset:0;
+  background:#D9D9D9; border-radius:15px;   /* Rectangle 86 */
+}
+.list-item .thumb-img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center; /* вместо фиксированных оффсетов */
+  display:block;
+}
+
+/* Внешний бордер по всей карточке */
+.list-item .item-border{
+  position:absolute; inset:0;
+  border:2px solid #ECECEC; border-radius:15px; box-sizing:border-box; /* Rectangle 85 */
+}
+
+/* Маленькая квадратная иконка справа (Vector 17.16px @ left: 91.22%) */
+.list-item .btn-ghost{
+  position:absolute;
+  top:28.42px;                    /* как в фигме */
+  left:91.22%; right:4.88%;       /* привязка по процентам */
+  width:17.16px; height:17.16px;
+  border:1.5px solid #363535;
+  background:#fff;
+  border-radius:2px;
+  padding:0; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+.list-item .btn-ghost img{
+  max-width:100%; max-height:100%; display:block;
+}
+
+/* Заголовок (кликабельно) — проценты как в макете */
+.list-item .item-title{
+  position:absolute;
+  left:27.29%; right:26.62%; top:23.3%; bottom:52.7%;
+  display:flex; align-items:center;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#363535; text-decoration:none;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:color 120ms ease, text-decoration-color 120ms ease;
+}
+.list-item .item-title:hover{ color:#2b2b2b; text-decoration:underline; text-decoration-color:#2b2b2b; }
+.list-item .item-title:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; border-radius:6px; }
+
+/* Цены */
+.list-item .price-now{
+  position:absolute;
+  left:27.29%; right:56.9%; top:52.7%; bottom:23.3%;
+  display:flex; align-items:center;
+  font-weight:500; font-size:14px; line-height:24px; color:#35C65E;
+}
+.list-item .price-old{
+  position:absolute;
+  left:43.1%; right:46.77%; top:60.7%; bottom:28.3%;
+  font-weight:400; font-size:10px; line-height:11px;
+  color:#828181; text-decoration:line-through; opacity:.5;
+  display:flex; align-items:center;
+  white-space:nowrap;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .list-item .btn-ghost{ transition:none; }
+}
+/* фото под контуром */
+.list-item .thumb{
+  z-index: 0;          /* ниже всех */
+}
+
+/* контур над фото, клики сквозь него */
+.list-item .item-border{
+  z-index: 1;          
+  pointer-events: none;
+}
+
+/* всё остальное — над контуром */
+.list-item .item-title,
+.list-item .price-now,
+.list-item .price-old{
+  z-index: 2;
+}
+
+/* Обёртка списка: фиксируем размер на высоту трёх карточек и включаем вертикальный скролл слева */
+.list-wrap{
+  position:absolute;
+  left:79.64px;
+  top:284px;
+  width:500px;
+  height:334.15px;          /* видно ровно 3 элемента: 0 → 234.15 + 100 = 334.15 */
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  /* Скролл слева: */
+  direction: rtl;
+  scrollbar-gutter: stable both-edges; /* чтобы контент не дёргался при появлении скролла */
+}
+
+/* Внутренний слой возвращаем к нормальному направлению текста/контента */
+.list-wrap .list-inner{
+  position:relative;
+  min-height: 100%; /* тянется по контенту */
+  direction: ltr;
+}
+
+/* ПЕРЕВЯЗЫВАЕМ позиции карточек относительно обёртки, а не всей страницы */
+.list-wrap .list-item{
+  position:absolute;
+  left:0;                 /* внутри контейнера */
+  width:463px;
+  height:100px;
+}
+
+/* Точные вертикальные оффсеты, как в макете (относительно контейнера) */
+.list-wrap .item-1{ top:0; }
+.list-wrap .item-2{ top:117.07px; }   /* 401.07 - 284 */
+.list-wrap .item-3{ top:234.15px; }   /* 518.15 - 284 */
+
+/* Четвёртый элемент — просто добавь: */
+.list-wrap .item-4{ top:351.22px; }   /* следующий шаг +117.07 */
+
+/* (опционально) стили скроллбара для WebKit/Chromium */
+.list-wrap::-webkit-scrollbar{ width:10px; }
+.list-wrap::-webkit-scrollbar-track{ background:#f2f2f2; }
+.list-wrap::-webkit-scrollbar-thumb{ background:#cfcfcf; border-radius:8px; }
+.list-wrap::-webkit-scrollbar-thumb:hover{ background:#bbb; }
+
+/* Firefox */
+.list-wrap{
+  scrollbar-width: thin;                 /* тоньше стандартного */
+  scrollbar-color: #cfcfcf transparent;  /* бегунок / трек */
+}
+
+/* Chromium/WebKit */
+.list-wrap::-webkit-scrollbar{
+  width: 6px;            /* было 10px → стало 6px */
+}
+.list-wrap::-webkit-scrollbar-track{
+  background: transparent;               /* чтобы не «забирал» пространство визуально */
+}
+.list-wrap::-webkit-scrollbar-thumb{
+  background: #cfcfcf;
+  border-radius: 8px;
+}
+.list-wrap::-webkit-scrollbar-thumb:hover{
+  background: #bdbdbd;
+}
+.list-wrap::-webkit-scrollbar-thumb:active{
+  background: #a9a9a9;
+}
+
+/* (опционально) чуть темнее в тёмной теме */
+@media (prefers-color-scheme: dark){
+  .list-wrap{
+    scrollbar-color: #a3a3a3 transparent;
+  }
+  .list-wrap::-webkit-scrollbar-thumb{ background:#666; }
+  .list-wrap::-webkit-scrollbar-thumb:hover{ background:#5c5c5c; }
+  .list-wrap::-webkit-scrollbar-thumb:active{ background:#4f4f4f; }
+}
+
+/* Контейнер состояний — размеры/позиция как в макете */
+.order-status{
+  position:absolute;
+  left:844px; top:336px;
+  width:180px; height:206px;
+  font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+}
+
+/* Список шагов */
+.order-status .steps{
+  position:absolute; inset:0;
+  list-style:none; margin:0; padding:0;
+}
+
+/* Один шаг (позиционируется по top инлайн как в фигме) */
+.order-status .step{
+  position:absolute; left:-0.47px; height:24px; width:173px;
+}
+
+/* Кружок (Rectangle 88) — 24×24, серый контур по умолчанию */
+.order-status .dot{
+  position:absolute;
+  left: 2px;             /* как в фигме относительно группы */
+  width:15px; height:15px;
+  border:2px solid #ECECEC;
+  border-radius:30px;
+  background: #ECECEC;
+  box-sizing:border-box;
+  top: 5px;
+  z-index: 10;
+}
+
+/* Подпись шага */
+.order-status .label{
+  position:absolute;
+  left:16.4%; right:0; height:24px;
+  display:flex; align-items:center;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#828181;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Вертикальная «рельса» для соединения кружков (серая) */
+.order-status .rail,
+.order-status .rail-done{
+  position:absolute;
+  left:6.93px;              /* центр линии по макету */
+  top:12.81px;              /* отступ как в Vector 57 */
+  width:2px; height:170px;    /* хватает, чтобы соединить все 6 кружков */
+  border-left:5px solid transparent;
+  pointer-events:none;
+}
+.order-status .rail{ border-left-color:#ECECEC; }   /* фоновые коннекторы */
+.order-status .rail-done{ border-left-color:#35C65E; height:0; } /* зелёный прогресс, высота задаётся скриптом */
+
+/* Состояния: завершённый и текущий шаги */
+.order-status .step.completed .dot{ background:#35C65E; border-color:#35C65E; }
+.order-status .step.completed .label{ color:#363535; }
+.order-status .step.current   .label{ color:#363535; }
+
+/* Кнопка «Відмітити» — размеры/позиция как в макете */
+.mark-btn{
+  position:absolute;
+  left:690px; top:330px; /* будет динамически меняться по шагам */
+  width:135px; height:35px;
+  background:#fff;
+  border:2px solid #35C65E;
+  border-radius:7px;
+  font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  font-weight:400; font-size:14px; line-height:24px;
+  color:#363535; cursor:pointer;
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease, top 180ms ease;
+}
+.mark-btn:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+.mark-btn:active{ transform:translateY(0);    filter:brightness(0.98); }
+.mark-btn:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Когда всё завершено — отключим кнопку визуально */
+.mark-btn[disabled]{
+  opacity:.55; cursor:default; filter:none; transform:none;
+}
+
+/* Контейнер всего элемента (Group 396) */
+.info-delivery{
+  position: absolute;
+  left: 1178.64px;
+  top: 284px;
+  width: 300.36px;
+  height: 54px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* Группа заголовка (Group 393) + иконка */
+.info-delivery__icon{
+  position: absolute;
+  left: 0px;           /* 1178.64px в макете — левый край контейнера */
+  top: 3px;            /* 287 - 284 */
+  width: 20px; height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.info-delivery__icon img{
+  width: 20px; height: 20px; display: block; object-fit: contain;
+  border: none; outline: none; /* убираем контуры у картинки */
+}
+
+/* Заголовок “Доставка” (h5) */
+.info-delivery__title{
+  position: absolute;
+  left: 30px;          /* 1208.64 - 1178.64 */
+  top: 0px;            /* 284 - 284 */
+  width: 1000px; height: 24px;
+
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  display: flex; align-items: center;
+  color: #363535;
+  white-space: nowrap;
+}
+
+/* Адрес (base) — Group 394/395/текст */
+.info-delivery__addr{
+  position: absolute;
+  left: 30.36px;       /* 1209 - 1178.64 */
+  top: 30px;           /* 314 - 284 */
+  width: 1000px; height: 24px;
+
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  display: flex; align-items: center;
+  color: #828181;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Контейнер (точно по макету) */
+.summary-rows{
+  position:absolute;
+  left:133.9px;
+  top:700.82px;
+  width:407.74px;
+  height:84px;
+  box-sizing:border-box;
+  font-family:'Ubuntu',system-ui,-apple-system,Arial,sans-serif;
+  color:#828181;
+}
+
+/* Базовая строка */
+.summary-rows .sr-row{
+  position:absolute;
+  left:34.1px;          /* ≈ 8.37% от 407.74px */
+  right:0;
+  height:24px;
+  display:block;
+  font-weight:400;
+  font-size:14px;
+  line-height:24px;
+  display:flex;
+  align-items:center;
+}
+
+/* Чёткие вертикальные позиции, чтобы не было наложения */
+.summary-rows .sr-row--goods    { top:0px;   }   /* первая строка */
+.summary-rows .sr-row--discount { top:28px;  }   /* +24px высота + 4px интервал */
+.summary-rows .sr-row--delivery { top:56px;  }   /* ещё +28px */
+
+/* Лейбл */
+.summary-rows .sr-row__label{
+  color:#828181;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Цена (левая граница по фигме ~30.5% ⇒ ~125px) */
+.summary-rows .sr-row__price{
+  position:absolute;
+  left:125.3px;         /* ≈ 30.73% от 407.74px */
+  color:#828181;
+  white-space:nowrap;
+}
+
+/* Для "Знижка" в макете было 30.48% — если нужно копейка в копейку: */
+.summary-rows .sr-row--discount .sr-row__price{ left:124.0px; }
+
+
+
+/* Контейнер области тот же (407.74×84 @ 133.9×700.82) */
+.summary-total{
+  position: absolute;
+  left: 90.9px;
+  top: 615.82px;
+  width: 407.74px;
+  height: 84px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* Иконка слева — не кликабельная */
+.summary-total .total__icon{
+  position: absolute;
+  left: 33px;       /* было 8.1% от 407.74 */
+  top: 43.2px;      /* было 51.44% от 84 */
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  border: none;
+  outline: none;
+}
+
+/* “Всього” */
+.summary-total .total__label{
+  position: absolute;
+  left: 33px;       /* тот же левый край, что у иконки */
+  top: 43.2px;      /* вертикаль совпадает */
+  height: 36px;
+  display: flex; align-items: center;
+  padding-left: 30px; /* место под иконку */
+  font-weight: 500; font-size: 25px; line-height: 36px;
+  color: #35C65E;
+  white-space: nowrap;
+}
+
+/* “207 грн” */
+.summary-total .total__price{
+  position: absolute;
+  left: 200.35px;   /* было 28.29% от 407.74 */
+  top: 43.2px;      /* было 51.44% от 84 */
+  height: 36px;
+  display: flex; align-items: center;
+  font-weight: 500; font-size: 25px; line-height: 36px;
+  color: #35C65E;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Стрелка-изображение (декор) */
+.summary-arrow-img{
+  position: absolute;
+  left: 110.64px;
+  top: 667px;
+  width: 18px;
+  height: 18px;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  border: none;
+  outline: none;
+  transform: rotate(90deg);
+}
+
+.status-current-box{
+  position: absolute;
+  left: 689.86px;
+  top: 284px;
+  width: 200px;
+  height: 24px;
+}
+.status-current{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 200px;
+  height: 24px;
+
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  color: #363535;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === Правый блок (Group 491) === */
+.status-eta{
+  position: absolute;
+  left: 893.8px;
+  top: 284.02px;
+  width: 130px;
+  height: 32.63px;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* “Очікується:” */
+.status-eta .eta-label{
+  position: absolute;
+  left: 0px;       /* фикс пиксели вместо процентов */
+  top: 7.3px;      /* по высоте строки (≈ 22.43% от 32.63) */
+  height: 18px;
+
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 18px;
+  display: flex;
+  align-items: center;
+  color: #363535;
+}
+
+/* “9 серпня, Сб” (зелёное) */
+.status-eta .eta-date{
+  position: absolute;
+  left: 66px;      /* поставил рядом с лейблом; двинь число если нужно точнее */
+  top: 7.3px;
+  height: 18px;
+
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 18px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+  white-space: nowrap;
+}
+
+/* Контейнер (456×36 @ 79.64, 185.01) */
+.order-header{
+  position: absolute;
+  left: 79.64px;
+  top: 185.01px;
+  width: 456px;
+  height: 36px;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+}
+
+/* Иконка (Frame 139: 30×29 @ 79.64, 189.01) */
+.order-header__icon{
+  position: absolute;
+  left: 0px;      /* 79.64 - 79.64 */
+  top: 4px;       /* 189.01 - 185.01 */
+  width: 30px;
+  height: 29px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(180deg);
+
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+.order-header__icon img{
+  width: 30px;
+  height: 29px;
+  display: block;
+  object-fit: contain;
+}
+.order-header__icon:hover{ transform: translateY(-1px); filter: brightness(1.03); transform: rotate(180deg);}
+.order-header__icon:active{ transform: translateY(0);    filter: brightness(0.98); transform: rotate(180deg);}
+.order-header__icon:focus-visible{ outline: 2px solid #35C65E; outline-offset: 2px; transform: rotate(180deg);}
+
+/* Заголовок (h4: 304×36 @ 129.64, 185.01) */
+.order-header__title{
+  position: absolute;
+  left: 50px;     /* 129.64 - 79.64 */
+  top: 0px;       /* 185.01 - 185.01 */
+  width: 400px;
+  height: 36px;
+
+  margin: 0;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #35C65E;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Номер (72×24 @ 463.64, 195.01) */
+.order-header__id{
+  position: absolute;
+  left: 384px;    /* 463.64 - 79.64 */
+  top: 10px;      /* 195.01 - 185.01 */
+  width: 72px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #828181;
+  white-space: nowrap;
+}
+
+/* Точка (6×6 @ 445.64, 204.01) */
+.order-header__dot{
+  position: absolute;
+  left: 366px;    /* 445.64 - 79.64 */
+  top: 19px;      /* 204.01 - 185.01 */
+  width: 6px;
+  height: 6px;
+  background: #828181;
+  border-radius: 10px;
+  display: block;
+}
+
+.order-actions{ position:relative; font-family:'Ubuntu',sans-serif; }
+
+/* База кнопки */
+.oa-btn{
+  position:absolute; box-sizing:border-box;
+  display:flex; align-items:center; gap:12px; cursor:pointer;
+  border-radius:10px; padding:0 16px 0 16px;
+  transition:transform .12s ease, filter .12s ease, border-color .12s ease, background-color .12s ease;
+  height:55px;
+}
+.oa-btn__text{ font-weight:500; font-size:14px; line-height:24px; display:flex; align-items:center; height:24px; }
+.oa-btn__icon{ margin-left:auto; margin-right:10px; display:block; object-fit:contain; }
+
+/* Позиции и размеры из макета */
+.oa-btn--ask{    left:1179px; top:368px; width:318px; border:2px solid #35C65E; background:#fff; }
+.oa-btn--repeat{ left:1179px; top:463px; width:251px; border:2px solid #35C65E; background:#35C65E; color:#fff; }
+.oa-btn--cancel{ left:1179px; top:533px; width:251px; border:2px solid #828181; background:#fff; }
+
+/* Цвета текста по вариантам */
+.oa-btn--ask   .oa-btn__text{ color:#363535; }
+.oa-btn--repeat .oa-btn__text{ color:#FFFFFF; }
+.oa-btn__text--gray{ color:#828181; }
+
+/* Ховеры/актив/фокус */
+.oa-btn:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+.oa-btn:active{ transform:translateY(0);    filter:brightness(0.98); }
+.oa-btn:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* Мелкие правки под размеры иконок из макета */
+.oa-btn--repeat .oa-btn__icon{ width:21px; height:21px; margin-right:12px; }
+.oa-btn--cancel .oa-btn__icon{ width:37px; height:37px; margin-right:8px; }
+.oa-btn--ask    .oa-btn__icon{ width:27px; height:27px; margin-right:8px; }
+
+/* Кнопка «Видалити замовлення» — поставил в правую колонку ниже остальных */
+.del-order-btn{
+  position:absolute; left:1179px; top:603px; /* перемести при необходимости */
+  width:251px; height:55px; box-sizing:border-box;
+  border:2px solid #FF6B5B; border-radius:10px;
+  background:#fff; color:#FF6B5B; font-family:'Ubuntu',sans-serif;
+  font-weight:500; font-size:14px; line-height:24px;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:transform .12s ease, filter .12s ease, border-color .12s ease, color .12s ease;
+}
+.del-order-btn:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+.del-order-btn:active{ transform:translateY(0);    filter:brightness(0.98); }
+.del-order-btn:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; }
+
+/* ===== Модалка (позиции из твоего макета) ===== */
+.del-order-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.35);
+  opacity:0; pointer-events:none; transition:opacity .12s ease;
+  z-index:1000;
+}
+.del-order-modal{
+  position:absolute; left:597px; top:285px; /* из макета */
+  width:412px; height:153px; z-index:1001;
+  opacity:0; pointer-events:none; transition:opacity .12s ease;
+}
+.del-order-modal[aria-hidden="false"],
+.del-order-overlay[aria-hidden="false"]{
+  opacity:1; pointer-events:auto;
+}
+
+/* Карточка модалки (Rectangle 192) */
+.del-order-modal__card{
+  position:absolute;
+  left:calc(50% - 412px/2 + 3px); top:285px; /* строго по макету */
+  width:412px; height:153px; background:#ECECEC; border-radius:20px;
+  box-sizing:border-box;
+}
+
+/* Текст вопроса */
+.del-order-modal__text{
+  position:absolute;
+  left:calc(50% - 322px/2 + 3px); top:318px; width:322px; height:24px;
+  margin:0; font-family:'Ubuntu',sans-serif; font-weight:400;
+  font-size:14px; line-height:24px; color:#363535;
+}
+
+/* Кнопки Так / Ні — размеры/координаты из макета */
+.del-yes{
+  position:absolute; left:618px; top:370px; width:180px; height:43px;
+  background:#35C65E; color:#ECECEC; border:none; border-radius:8px;
+  font-family:'Ubuntu',sans-serif; font-size:18px; line-height:24px; cursor:pointer;
+}
+.del-no{
+  position:absolute; left:809px; top:370px; width:180px; height:43px;
+  background:#fff; color:#35C65E; border:2px solid #35C65E; border-radius:8px;
+  font-family:'Ubuntu',sans-serif; font-size:18px; line-height:24px; cursor:pointer;
+}
+
+/* ===== Изображение после удаления (позиции из макета Group 1147) ===== */
+.cancelled-illustration{
+  position:absolute; left:697px; top:519px;
+  width:698.62px; height:300px;
+}
+.cancelled-illustration img{
+  width:100%; height:100%; object-fit:contain; display:block;
+}
