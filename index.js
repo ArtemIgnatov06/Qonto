@@ -172,25 +172,28 @@ io.on('connection', (socket) => {
 
 /* ===== MySQL ===== */
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || process.env.MYSQLHOST,
+  port: Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306),
+  user: process.env.DB_USER || process.env.MYSQLUSER,
+  password: process.env.DB_PASS || process.env.MYSQLPASSWORD,
+  database: process.env.DB_NAME || process.env.MYSQLDATABASE,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: Number(process.env.DB_CONN_LIMIT || 10),
   timezone: '+00:00',
+  // Railway внутренний хост mysql.railway.internal обычно без SSL.
+  // Если когда-то пойдёшь через публичный URL — раскомментируй SSL:
+  // ssl: { rejectUnauthorized: false },
 });
 
 (async () => {
   try {
-    const [r] = await db.query(SQL.select_general);
-    console.log('Connected DB =', r[0].db);
+    const [r] = await db.query('SELECT DATABASE() AS db');
+    console.log('✅ Connected DB =', r?.[0]?.db);
   } catch (e) {
-    console.error('DB ping failed:', e.message || e);
+    console.error('❌ DB ping failed:', e?.message || e);
   }
 })();
-
-const DB_NAME = process.env.DB_NAME;
+const DB_NAME = process.env.DB_NAME || process.env.MYSQLDATABASE;
 
 async function ensureUsersExtraSchema() {
   try {
@@ -1731,6 +1734,6 @@ app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res
     res.status(500).json({ error: 'Failed to save avatar' });
   }
 });
-server.listen(PORT, () => {
-  console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Сервер + Socket.IO на :${PORT}`);
 });

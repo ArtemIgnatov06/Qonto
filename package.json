@@ -23,5 +23,8 @@
     "nodemailer": "^7.0.6",
     "socket.io": "^4.8.1",
     "twilio": "^5.10.2"
+  },
+    "scripts": {
+    "start": "node index.js"
   }
 }
