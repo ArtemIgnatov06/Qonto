@@ -1,0 +1,567 @@
+:root{
+  --bg:#363535;
+  --stroke:#ECECEC;
+  --accent:#7AD293;
+}
+
+/* ===== Канва страницы 1600px по центру ===== */
+.creating-root{
+  position: relative;
+  width: 1600px;
+  margin: 0 auto;
+  min-height: 1200px;
+  font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* ДОБАВЛЕНО: запас снизу, чтобы кнопка не упиралась в футер */
+  padding-bottom: 260px;
+}
+
+/* ДОБАВЛЕНО: сдвиг всей «канвы» вверх на фиксированную величину */
+.creating-canvas{
+  position: relative;
+  transform: translateY(-140px); /* при необходимости поменяй -140 на другое значение */
+}
+
+/* ======= «Товари» + иконка ======= */
+.goods-wrap{
+  position: absolute;
+  left: 79.64px;
+  top: 185px;
+  width: 207px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  z-index: 720;
+}
+.goods-title{
+  margin: 0;
+  width: 129px;
+  height: 43px;
+  font-weight: 500;
+  font-size: 37.5px;
+  line-height: 43px;
+  color: #35C65E;
+}
+.goods-icon{
+  width: 42px;
+  height: 41px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transform: scaleX(-1);
+}
+.goods-icon__img{ width:42px; height:41px; object-fit:contain; }
+
+/* ===== Левая панель миниатюр ===== */
+.group-1038 {
+  position: absolute;
+  width: 97px;
+  height: 489px;
+  left: 80.05px;
+  top: 292px;
+
+  border-radius: 15px;
+  overflow: hidden;
+}
+.rectangle-108 {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFF;
+  z-index: 0;
+  pointer-events: none;
+}
+.line-37, .line-36, .line-35, .line-34 {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  height: 0;
+  border-top: 2px solid #ECECEC;
+  z-index: 0;
+  pointer-events: none;
+}
+.line-37 { top: 98px;  }
+.line-36 { top: 197px; }
+.line-35 { top: 294px; }
+.line-34 { top: 392px; }
+
+.thumb-slot {
+  position: absolute;
+  left: 0;
+  width: 97px;
+  height: 97px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  overflow: hidden;
+  border-radius: 0;
+  z-index: 2;
+  padding: 0;
+}
+.thumb-slot[data-slot="0"] { top: 0px;   border-top-left-radius:13px;border-top-right-radius:13px;}
+.thumb-slot[data-slot="1"] { top: 98px;  }
+.thumb-slot[data-slot="2"] { top: 197px; }
+.thumb-slot[data-slot="3"] { top: 294px; }
+.thumb-slot[data-slot="4"] { top: 392px; border-bottom-left-radius:13px;border-bottom-right-radius:13px;}
+
+.thumb-slot .icon-plus {
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1;
+  color: #35C65E;
+  display: none;
+}
+.thumb-slot .thumb-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+.thumb-slot.is-enabled:not(.has-image) { cursor: pointer; }
+.thumb-slot.is-enabled:not(.has-image) .icon-plus { display: block; }
+.thumb-slot.has-image .thumb-preview { display: block; }
+.thumb-slot:disabled { pointer-events: none; }
+
+/* ===== Главное фото ===== */
+.group-1125 {
+  position: absolute;
+  width: 586px;
+  height: 489px;
+  left: 202px;
+  top: 292px;
+}
+.rectangle-107 {
+  box-sizing: border-box;
+  position: absolute;
+  width: 586px;
+  height: 489px;
+  border: 2px solid #ECECEC;
+  border-radius: 15px;
+  background: #FFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.rectangle-107 .icon-plus{
+  font-size:56px; line-height:64px; color:#35C65E;
+}
+.rectangle-107 .hint{
+  font-size:14px; line-height:24px; color:#828181; text-align:center; max-width:80%;
+}
+.rectangle-107 .preview{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none;
+}
+.rectangle-107.has-image .icon-plus,
+.rectangle-107.has-image .hint{ display:none; }
+.rectangle-107.has-image .preview{ display:block; }
+
+/* ===== Назва (поднята выше) ===== */
+.group-1045 { 
+  position: absolute; 
+  width: 550px; 
+  height: 66px; 
+  left: 813px; 
+  top: 292px;  /* ⬅️ было 292px, оставляем на уровне фото */
+}
+.rectangle-199 {
+  box-sizing: border-box;
+  position: absolute;
+  width: 550px;
+  height: 66px;
+  left: 0;  /* ⬅️ было 70px */
+  top: 0;   /* ⬅️ было 85px */
+  border: 2px solid #ECECEC;
+  border-radius: 14px;
+  background: #FFF;
+  overflow: hidden;
+}
+.title-input{
+  position:absolute; inset:0; width:100%; height:100%;
+  padding:15px 20px 15px 27px;
+  border:0; outline:none; background:transparent;
+  font-size:25px; line-height:36px; color:#2A2A2A;
+  white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+  top:50%; transform:translateY(-50%);
+}
+.title-input::placeholder{ color:#828181; }
+
+/* ===== Добавить атрибут (сразу под названием) ===== */
+.attrs-anchor{
+  position: absolute;
+  width: 550px;
+  height: 55px;
+  left: 813px;
+  top: 375px;  /* ⬅️ название на 292, +66 высота +17 отступ = 375 */
+  z-index: 600;
+}
+#attrs-root{
+  position:absolute; left:0; top:0; height:55px; width:100%; z-index:601;
+}
+.attr-chip{
+  position:absolute; top:0; width:82px; height:55px;
+  border:2px solid #ECECEC; border-radius:12px; background:#FFF;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:#363535;
+}
+.attr-add-btn{
+  position:absolute; width:209px; height:55px;
+  border:2px solid #ECECEC; border-radius:12px; background:#FFF;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  color:#828181; cursor:pointer;
+}
+.attr-add-btn .plus{ font-size:37.5px; line-height:43px; color:#35C65E; }
+
+/* ===== Ціна (на уровне фото справа) ===== */
+.group-1047 { 
+  position: absolute; 
+  width: 180px; 
+  height: 55px; 
+  left: 813px; 
+  top: 447px;  /* ⬅️ атрибуты на 375, +55 высота +17 отступ = 447 */
+}
+.rectangle-200{
+  box-sizing:border-box; 
+  position:absolute; 
+  left: 0;  /* ⬅️ было 70px */
+  top: 0;   /* ⬅️ было 85px */
+  border:2px solid #ECECEC; 
+  border-radius:12px; 
+  background:#FFF;
+  width:180px; 
+  height:55px;
+}
+.price-input{
+  position:absolute; inset:0; width:100%; height:100%;
+  border:0; outline:none; background:transparent;
+  line-height:55px; padding:0 56px 0 14px;
+  font-size:18px; color:#2A2A2A;
+}
+.price-input::placeholder{ color:#828181; }
+.suffix-uah{
+  position:absolute; right:18px; top:50%; transform:translateY(-50%);
+  font-size:18px; color:#828181; pointer-events:none;
+}
+
+/* ===== Магазин (выровнен по низу с фото) ===== */
+.shop-label{
+  position: absolute;
+  left: 813px;
+  top: 599px;  /* ⬅️ фото заканчивается на 292+489=781, магазин 155 высота, лейбл 24, итого: 781-155-24-3=599 */
+  width: 73px; 
+  height: 24px;
+  font-size:18px; 
+  color:#35C65E;
+  z-index:700;
+}
+.group-683 {
+  position: absolute;
+  width: 330px;
+  height: 155px;
+  left: 813px;
+  top: 626px;  /* ⬅️ низ должен быть на 781 (292+489), верх: 781-155=626 */
+  border-radius: 10px;
+  overflow: hidden;
+}
+.seller-frame{ 
+  box-sizing:border-box; 
+  position:absolute; 
+  inset:0; 
+  border:2px solid #ECECEC; 
+  border-radius:10px; 
+  z-index:2; 
+  pointer-events:none; 
+}
+.seller-title{ 
+  position:absolute; 
+  left:20px; 
+  top:100px; 
+  font-size:14px; 
+  color:#363535; 
+  z-index:3; 
+  white-space:nowrap; 
+}
+.seller-link{ 
+  position:absolute; 
+  left:20px; 
+  top:124px; 
+  display:flex; 
+  gap:6px; 
+  align-items:center; 
+  z-index:3; 
+}
+.seller-link-text{ 
+  font-size:11px; 
+  color:#35C65E; 
+  text-decoration:none; 
+}
+.seller-link-text:hover{ text-decoration:underline; }
+.seller-link-icon{ width:17px; height:17px; object-fit:contain; }
+
+/* ===== Бренд (рядом с магазином, по низу с фото) ===== */
+.frame-736{ 
+  position:absolute; 
+  width:341px; 
+  height:155px; 
+  left:1156px;  /* ⬅️ магазин 813+330=1143, +13 gap = 1156 */
+  top:626px;    /* ⬅️ на уровне магазина, низ на 781 */
+  z-index:99; 
+}
+.frame-736__btn{
+  box-sizing:border-box; 
+  position:absolute; 
+  left:0; 
+  top:0; 
+  width:341px; 
+  height:155px;
+  border:2px solid #ECECEC; 
+  border-radius:10px; 
+  background:#FFF; 
+  cursor:pointer;
+}
+.frame-736__plus{
+  position:absolute; 
+  left:46.92%; 
+  right:46.63%; 
+  top:22.58%;
+  font-size:37.5px; 
+  color:#35C65E;
+}
+.frame-736__label{
+  position:absolute; 
+  width:179px; 
+  height:24px; 
+  left:81px; 
+  top:78px;
+  font-size:18px; 
+  color:#828181; 
+  white-space:nowrap;
+}
+
+/* Баннер бренда (когда выбран) */
+.frame736-banner{ 
+  position:absolute; 
+  left:0; 
+  top:0; 
+  width:341px; 
+  height:155px; 
+  z-index:302; 
+}
+.frame736-top{ 
+  position:absolute; 
+  left:0; 
+  top:0; 
+  width:341px; 
+  height:90px; 
+  overflow:hidden; 
+  border-radius:10px 10px 0 0; 
+}
+.frame736-top img{ 
+  position:absolute; 
+  inset:0; 
+  width:341px; 
+  height:90px; 
+  object-fit:cover; 
+}
+.frame736-top .ph{ 
+  position:absolute; 
+  inset:0; 
+  background:#CCC; 
+}
+.frame736-border{ 
+  box-sizing:border-box; 
+  position:absolute; 
+  left:0; 
+  top:0; 
+  width:341px; 
+  height:155px; 
+  border:2px solid #ECECEC; 
+  border-radius:10px; 
+  pointer-events:none; 
+}
+.frame736-title{ 
+  position:absolute; 
+  left:20px; 
+  top:100px; 
+  width:301px; 
+  height:24px; 
+  font-size:14px; 
+  color:#363535; 
+  white-space:nowrap; 
+  overflow:hidden; 
+  text-overflow:ellipsis; 
+}
+
+/* ===== Опис (ширина как у блока добавления фото - 586px) ===== */
+.rectangle-201{
+  box-sizing:border-box; 
+  position:absolute; 
+  width:586px;  /* ⬅️ было 783px, теперь как у главного фото */
+  height:218px; 
+  left:202px;   /* ⬅️ было 81px, теперь выровнено с главным фото */
+  top:820px;    /* ⬅️ фото заканчивается на 781, +39 отступ = 820 */
+  border:2px solid #ECECEC; 
+  border-radius:15px; 
+  background:#FFF; 
+  overflow:hidden;
+}
+.desc-input{
+  position:absolute; 
+  inset:0; 
+  width:90%; 
+  height:80%; 
+  padding:30px 20px 16px 34px;
+  border:0; 
+  outline:none; 
+  resize:none; 
+  background:transparent;
+  font-size:14px; 
+  line-height:24px; 
+  color:#2A2A2A;
+  overflow-y:auto; 
+  overflow-x:hidden; 
+  white-space:pre-wrap; 
+  word-wrap:break-word;
+}
+.desc-input::placeholder{ color:#828181; }
+.desc-input::-webkit-scrollbar{ width:8px; }
+.desc-input::-webkit-scrollbar-thumb{ background:#E5E5E5; border-radius:8px; }
+.desc-input{ scrollbar-width:thin; scrollbar-color:#E5E5E5 transparent; }
+
+/* ===== Публикация ===== */
+.publish-btn{
+  all: unset;
+  box-sizing: border-box;
+  position: absolute;
+  left: 635px;
+  top: 1200px;
+  width: 417px;
+  height: 82px;
+  background: #35C65E;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 36px;
+  color: #FFFFFF;
+  cursor: pointer;
+  user-select: none;
+  z-index: 700;
+}
+.publish-btn:hover { filter: brightness(0.95); }
+.publish-btn:active { transform: translateY(1px); }
+.publish-btn:focus-visible { outline: 2px solid #2cab53; outline-offset: 3px; }
+.publish-btn:disabled{ background:#A7E1BB; cursor:not-allowed; transform:none; }
+
+/* ===== Модалка бренда ===== */
+.brand-modal{ position:fixed; inset:0; display:block; z-index:1000; }
+.brand-modal__overlay{ position:absolute; inset:0; background:rgba(0,0,0,.25); }
+.brand-modal__card{
+  position: fixed;
+  width: 412px; 
+  height: 438px;
+  left: calc(50% - 206px + 3px);
+  top: 285px;
+  background: #ECECEC; 
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+.brand-modal__close{
+  position:absolute; 
+  right:10px; 
+  top:6px;
+  width:28px; 
+  height:28px; 
+  border:0; 
+  border-radius:6px; 
+  background:transparent;
+  font-size:22px; 
+  line-height:1; 
+  cursor:pointer; 
+  color:#555;
+}
+.brand-modal__photo{
+  position:absolute; 
+  width:340px; 
+  height:173px; 
+  left:36px; 
+  top:37px;
+  border:2px solid #828181; 
+  border-radius:14px; 
+  background:#FFF;
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  flex-direction:column; 
+  gap:12px; 
+  cursor:pointer; 
+  overflow:hidden;
+}
+.brand-modal__plus{ 
+  font-weight:500; 
+  font-size:37.5px; 
+  color:#35C65E; 
+}
+.brand-modal__photo-label{ 
+  font-size:14px; 
+  color:#363535; 
+}
+.brand-modal__photo-preview{ 
+  position:absolute; 
+  inset:0; 
+  width:100%; 
+  height:100%; 
+  object-fit:cover; 
+}
+.brand-modal__row{
+  position:absolute; 
+  width:340px; 
+  height:49px; 
+  left:36px; 
+  top:224px;
+  border:2px solid #828181; 
+  border-radius:10px; 
+  background:#FFF;
+}
+.brand-modal__input{
+  position:absolute; 
+  inset:0; 
+  width:100%; 
+  height:100%;
+  border:0; 
+  outline:none; 
+  background:transparent; 
+  padding:12px 14px; 
+  font-size:14px; 
+  color:#2A2A2A;
+}
+.brand-modal__submit{
+  position:absolute; 
+  left:36px; 
+  top:360px; 
+  width:340px; 
+  height:49px;
+  border:2px solid #35C65E; 
+  border-radius:10px; 
+  background:#35C65E; 
+  color:#FFF; 
+  cursor:pointer;
+}

@@ -1,11 +1,13 @@
-// pages/ProductNew.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
 import { useTranslation } from 'react-i18next';
-import '../Styles/Profile.css';
-import '../Styles/ProductNew.css';
+
+import '../Styles/CreatingProduct.css';
+
+import icBack from '../assets/planex.png';
+import arrowGreen from '../assets/arrow-green.png';
 
 const API = process.env.REACT_APP_API || '';
 
@@ -26,128 +28,202 @@ function extractAxiosErr(err, t) {
       'Server error';
     return `HTTP ${status} — ${msg}`;
   }
-  if (err?.request) return t('errors.serverUnavailable');
-  return err?.message || t('productNew.errors.saveFailed');
+  if (err?.request) return t('errors.serverUnavailable', { defaultValue: 'Сервер недоступний' });
+  return err?.message || t('productNew.errors.saveFailed', { defaultValue: 'Не вдалось зберегти' });
 }
 
-const ProductNew = () => {
+const MAX_THUMBS = 5;
+
+export default function ProductNew() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    price: '',
-    category: '',
-    qty: 1,
-    preview_image_url: '',
-  });
+  const [title, setTitle] = useState('');
+  const [priceUI, setPriceUI] = useState('');
+  const [description, setDescription] = useState('');
+  const [attrs, setAttrs] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState(null);
+  const [err, setErr] = useState('');
 
-  // категории
-  const [categories, setCategories] = useState([]);
-  const [catLoading, setCatLoading] = useState(true);
-  const [catErr, setCatErr] = useState('');
+  // фото
+  const mainInputRef = useRef(null);
+  const [mainFile, setMainFile] = useState(null);
+  const [mainPreview, setMainPreview] = useState('');
+  const [thumbFiles, setThumbFiles] = useState(Array(MAX_THUMBS).fill(null));
+  const [thumbPreviews, setThumbPreviews] = useState(Array(MAX_THUMBS).fill(''));
+
+  // бренд
+  const [brandOpen, setBrandOpen] = useState(false);
+  const [brandName, setBrandName] = useState('');
+  const [brandUrl, setBrandUrl] = useState('');
+  const [brandDataUrl, setBrandDataUrl] = useState('');
+
+  // категории (используем только для авто-выбора первой)
+  const [category, setCategory] = useState('');
+  const [_categories, _setCategories] = useState([]);
+  const [_catErr, _setCatErr] = useState('');
 
   useEffect(() => {
-    document.title = t('productNew.metaTitle');
+    document.title = t('productNew.metaTitle', { defaultValue: 'Додати товар' });
   }, [t]);
 
-  // загрузка категорий
   useEffect(() => {
-    let cancelled = false;
+    let stop = false;
     (async () => {
-      setCatLoading(true);
-      setCatErr('');
       try {
         const res = await axios.get(`${API}/api/categories`, { withCredentials: true });
         const items = Array.isArray(res.data?.items) ? res.data.items : [];
-        if (!cancelled) setCategories(items);
-      } catch (e) {
-        if (!cancelled) setCatErr('Не удалось загрузить категории');
-      } finally {
-        if (!cancelled) setCatLoading(false);
+        if (!stop) {
+          _setCategories(items);
+          if (items[0]?.name) setCategory(items[0].name);
+        }
+      } catch {
+        if (!stop) _setCatErr('Не вдалося завантажити категорії');
       }
     })();
-    return () => { cancelled = true; };
+    return () => { stop = true; };
   }, []);
 
-  // авто-выбор первой категории после загрузки (чтобы не было плейсхолдера)
-  useEffect(() => {
-    if (!catLoading && !catErr && categories.length && !form.category) {
-      setForm(prev => ({ ...prev, category: categories[0].name }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [catLoading, catErr, categories]);
+  // ==== ХУКИ, которые должны быть ДО любых ранних return ====
+  const priceNumber = useMemo(() => {
+    if (!priceUI) return 0;
+    const normalized = priceUI.replace(/\./g, '').replace(',', '.');
+    const num = Number(normalized);
+    return Number.isFinite(num) ? num : 0;
+  }, [priceUI]);
 
-  if (!user) return <div className="profile-page">{t('auth.required')}</div>;
+  const thumbEnabled = useMemo(() => {
+    const arr = Array(MAX_THUMBS).fill(false);
+    if (!mainPreview) return arr;
+    arr[0] = true;
+    for (let i = 1; i < MAX_THUMBS; i++) {
+      if (thumbPreviews[i - 1]) arr[i] = true;
+    }
+    return arr;
+  }, [mainPreview, thumbPreviews]);
+  // ===========================================================
+
+  if (!user) return <div style={{ padding: 24 }}>Завантаження…</div>;
   if (user.seller_status !== 'approved') {
-    return <div className="profile-page">{t('productNew.waitForApproval')}</div>;
+    return <div style={{ padding: 24 }}>Ваш обліковий запис ще не схвалено модератором.</div>;
   }
 
-  const validImageUrl = (u) =>
-    /^https?:\/\/.+\.(png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(u || '');
+  const onPriceInput = (v) => {
+    v = v.replace(/[^\d,]/g, '');
+    const [ints = '', decRaw = ''] = v.split(',');
+    const dec = decRaw.replace(/,/g, '').slice(0, 2);
+    const out = v.includes(',') ? `${ints},${dec}` : ints;
+    setPriceUI(out.slice(0, 10));
+  };
 
-  const submit = async (e) => {
-    e.preventDefault();
-    setErr(null);
+  const chooseMain = () => {
+    if (mainPreview) return;
+    mainInputRef.current?.click();
+  };
+  const onMainChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!f.type?.startsWith('image/')) return;
+    setMainFile(f);
+    const url = URL.createObjectURL(f);
+    setMainPreview(url);
+  };
 
-    const priceNum = Number(form.price);
-    const qtyNum = Number.isFinite(Number(form.qty))
-      ? Math.max(1, parseInt(form.qty, 10))
-      : 1;
-
-    if (!Number.isFinite(priceNum) || priceNum < 0) {
-      setErr(t('productNew.errors.priceMustBeNonNegative'));
-      return;
-    }
-
-    if (form.preview_image_url && !validImageUrl(form.preview_image_url)) {
-      setErr(t('productNew.hint.supported'));
-      return;
-    }
-
-    const payload = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      category: form.category.trim(),
-      price: priceNum,
-      qty: qtyNum,
-      preview_image_url: form.preview_image_url.trim() || null,
+  const onThumbPick = (idx) => {
+    if (!mainPreview) return;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = () => {
+      const f = input.files?.[0];
+      if (!f || !f.type?.startsWith('image/')) return;
+      const url = URL.createObjectURL(f);
+      setThumbFiles((prev) => { const next = prev.slice(); next[idx] = f; return next; });
+      setThumbPreviews((prev) => { const next = prev.slice(); next[idx] = url; return next; });
     };
+    input.click();
+  };
 
-    setSaving(true);
+  const addAttr = () => {
+    const value = prompt('Введіть атрибут (до 30 символів)')?.trim();
+    if (!value || attrs.length >= 5) return;
+    setAttrs((a) => [...a, value.slice(0, 30)]);
+  };
+
+  const onBrandPickImage = () => {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/*';
+    inp.onchange = () => {
+      const f = inp.files?.[0];
+      if (!f || !f.type?.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = () => setBrandDataUrl(String(reader.result || ''));
+      reader.readAsDataURL(f);
+    };
+    inp.click();
+  };
+
+  const submit = async () => {
     try {
-      let url = `${API}/api/products`;
+      setErr('');
+      if (!title.trim()) { setErr('Вкажіть назву товару'); return; }
+      if (priceNumber < 0) { setErr('Ціна має бути невід’ємною'); return; }
+      if (!category) { setErr('Категорія обов’язкова'); return; }
+
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
+        category: category.trim(),
+        price: priceNumber,
+        qty: 1,
+        attributes: attrs,
+        preview_image_url: null,
+        brand: brandName ? { name: brandName, url: brandUrl || null } : null,
+      };
+
+      setSaving(true);
+
+      let createUrl = `${API}/api/products`;
       let resp;
       try {
-        resp = await axios.post(url, payload, { withCredentials: true });
+        resp = await axios.post(createUrl, payload, { withCredentials: true });
       } catch (e1) {
-        const status = e1?.response?.status;
-        if (status === 404 || status === 405) {
-          url = `${API}/products`;
-          resp = await axios.post(url, payload, { withCredentials: true });
+        const st = e1?.response?.status;
+        if (st === 404 || st === 405) {
+          createUrl = `${API}/products`;
+          resp = await axios.post(createUrl, payload, { withCredentials: true });
         } else {
           throw e1;
         }
       }
 
-      const data = resp?.data || {};
-      if (data?.ok || data?.item || data?.id) {
-        navigate('/');
-        return;
+      const created = resp?.data;
+      const productId = created?.id || created?.item?.id || created?.product?.id;
+      if (!productId) {
+        const fallback =
+          created?.message ||
+          created?.error ||
+          (Array.isArray(created?.errors) && created.errors.filter(Boolean).join(', ')) ||
+          stringifyData(created);
+        throw new Error(fallback || 'Не вдалося створити товар');
       }
 
-      const fallback =
-        data?.message ||
-        data?.error ||
-        (Array.isArray(data?.errors) && data.errors.filter(Boolean).join(', ')) ||
-        stringifyData(data);
-      setErr(fallback || t('productNew.errors.saveFailed'));
+      if (mainFile || thumbFiles.some(Boolean)) {
+        const fd = new FormData();
+        if (mainFile) fd.append('main', mainFile);
+        thumbFiles.forEach((f, i) => f && fd.append(`thumb${i + 1}`, f));
+        try {
+          await axios.post(`${API}/api/products/${productId}/images`, fd, {
+            withCredentials: true,
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+        } catch (_) {}
+      }
+
+      navigate(`/products/${productId}`);
     } catch (e) {
-      console.error('Add product failed:', e);
       setErr(extractAxiosErr(e, t));
     } finally {
       setSaving(false);
@@ -155,131 +231,220 @@ const ProductNew = () => {
   };
 
   return (
-    <div className="profile-page">
-      <h2>{t('productNew.title')}</h2>
-      <form className="card card-narrow" onSubmit={submit}>
-        <div className="form-row">
-          <label htmlFor="pn-title">{t('productNew.fields.name')}</label>
+    <div className="creating-root">
+      {/* ВСЮ канву поднимаем целиком */}
+      <div className="creating-canvas">
+        <div className="goods-wrap">
+          <button className="goods-icon" type="button" onClick={() => navigate(-1)} aria-label="Назад">
+            <img className="goods-icon__img" src={icBack} alt="" />
+          </button>
+          <h3 className="goods-title">Товари</h3>
+        </div>
+
+        <div className="group-1038" aria-label="Додаткові фото товару">
+          <div className="rectangle-108" />
+          <div className="line-37" />
+          <div className="line-36" />
+          <div className="line-35" />
+          <div className="line-34" />
+          {Array.from({ length: MAX_THUMBS }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={
+                'thumb-slot ' +
+                (thumbEnabled[i] ? 'is-enabled ' : '') +
+                (thumbPreviews[i] ? 'has-image ' : '')
+              }
+              data-slot={i}
+              disabled={!thumbEnabled[i]}
+              onClick={() => onThumbPick(i)}
+              aria-label={`Мініатюра ${i + 1}`}
+            >
+              <span className="icon-plus">+</span>
+              {thumbPreviews[i] && <img className="thumb-preview" src={thumbPreviews[i]} alt="" />}
+            </button>
+          ))}
+        </div>
+
+        <div className="group-1125">
+          <button
+            type="button"
+            id="add-photo-btn"
+            className={'rectangle-107 ' + (mainPreview ? 'has-image' : '')}
+            aria-label="Додайте фото товару (до 6 фото)"
+            onClick={chooseMain}
+          >
+            <span className="icon-plus">+</span>
+            <span className="hint">Додайте фото товару (до 6 фото)</span>
+            {mainPreview && <img className="preview" src={mainPreview} alt="Зображення товару" />}
+          </button>
           <input
-            id="pn-title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder={t('productNew.placeholders.name')}
-            required
-            aria-label={t('productNew.fields.name')}
+            ref={mainInputRef}
+            id="product-photo"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={onMainChange}
           />
         </div>
 
-        {/* select категорий из API — без плейсхолдера */}
-        <div className="form-row">
-          <label htmlFor="pn-category">{t('productNew.fields.category')}</label>
+        <div className="group-1045">
+          <div className="rectangle-199">
+            <input
+              type="text"
+              className="title-input"
+              maxLength={40}
+              placeholder="*Назва товару"
+              aria-label="Назва товару"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+        </div>
 
-          {catLoading ? (
-            <div className="text-muted">{t('common.loading')}</div>
-          ) : catErr ? (
-            <div className="msg error" role="alert">{catErr}</div>
+        <div className="group-1047">
+          <div className="rectangle-200">
+            <input
+              type="text"
+              className="price-input"
+              placeholder="*Ціна"
+              aria-label="Ціна"
+              inputMode="decimal"
+              value={priceUI}
+              onChange={(e) => onPriceInput(e.target.value)}
+              onBlur={() => setPriceUI((v) => v.replace(/,$/, ''))}
+            />
+            <span className="suffix-uah">грн</span>
+          </div>
+        </div>
+
+        <div id="attrs-anchor" className="attrs-anchor">
+          <div id="attrs-root">
+            {attrs.map((txt, i) => (
+              <div key={i} className="attr-chip" style={{ left: `${i * (82 + 18)}px` }}>
+                {txt}
+              </div>
+            ))}
+            {attrs.length < 5 && (
+              <button
+                type="button"
+                className="attr-add-btn"
+                style={{ left: `${attrs.length * (82 + 18)}px`, top: '6px' }}
+                onClick={addAttr}
+              >
+                <span className="plus">+</span>
+                <span>Додати атрибут</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="shop-label">Магазин</div>
+
+        <div className="group-683">
+          <div className="seller-frame" />
+          <div className="seller-title">{brandName || 'Super Noname Store'}</div>
+          <div className="seller-link">
+            <button type="button" className="seller-link-text" onClick={() => {}}>
+              Перейти до магазину
+            </button>
+            <img className="seller-link-icon" src={arrowGreen} alt="" />
+          </div>
+        </div>
+
+        <div className="frame-736">
+          {!brandDataUrl && !brandName ? (
+            <button type="button" className="frame-736__btn" onClick={() => setBrandOpen(true)}>
+              <span className="frame-736__plus">+</span>
+              <span className="frame-736__label">Бренд (за бажанням)</span>
+            </button>
           ) : (
-            <select
-              id="pn-category"
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              required
-              aria-label={t('productNew.fields.category')}
-              disabled={!categories.length}
-            >
-              {categories.map(c => (
-                <option key={c.id} value={c.name}>{c.name}</option>
-              ))}
-            </select>
+            <div className="frame736-banner">
+              <div className="frame736-top">
+                {brandDataUrl ? <img src={brandDataUrl} alt="" /> : <div className="ph" />}
+              </div>
+              <div className="frame736-border" />
+              <div className="frame736-title">{brandName}</div>
+            </div>
           )}
         </div>
 
-        <div className="form-row">
-          <label htmlFor="pn-price">{t('productNew.fields.price')}</label>
-          <input
-            id="pn-price"
-            type="number"
-            step="0.01"
-            min="0"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            placeholder="0.00"
-            required
-            aria-label={t('productNew.fields.price')}
-          />
-        </div>
-
-        <div className="form-row">
-          <label htmlFor="pn-qty">{t('productNew.fields.qty')}</label>
-          <input
-            id="pn-qty"
-            type="number"
-            min="1"
-            value={form.qty}
-            onChange={(e) => setForm({ ...form, qty: e.target.value })}
-            placeholder="1"
-            aria-label={t('productNew.fields.qty')}
-          />
-        </div>
-
-        <div className="form-row">
-          <label htmlFor="pn-desc">{t('productNew.fields.description')}</label>
+        <div className="rectangle-201">
           <textarea
-            id="pn-desc"
-            rows={5}
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder={t('productNew.placeholders.description')}
-            aria-label={t('productNew.fields.description')}
+            className="desc-input"
+            aria-label="Опис товару"
+            placeholder="*Про товар"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
-        {/* Превью-картинка по URL */}
-        <div className="form-row">
-          <label htmlFor="pn-img">{t('productNew.fields.previewUrl')}</label>
-          <input
-            id="pn-img"
-            type="url"
-            value={form.preview_image_url}
-            onChange={(e) => setForm({ ...form, preview_image_url: e.target.value })}
-            placeholder="https://example.com/image.jpg"
-            aria-label={t('productNew.fields.previewUrl')}
-          />
-          <small>{t('productNew.hint.supported')}</small>
-        </div>
-
-        {validImageUrl(form.preview_image_url) && (
-          <div className="thumb-preview">
-            <img
-              src={form.preview_image_url}
-              alt={t('productNew.previewAlt')}
-              className="thumb-fixed"
-            />
-          </div>
-        )}
-
-        <div className="profile-actions">
-          <button
-            className="btn-primary"
-            type="submit"
-            disabled={saving || catLoading || !!catErr || !form.category.trim()}
-            aria-busy={saving}
-          >
-            {saving ? t('common.saving') : t('common.save')}
-          </button>
-          <button className="btn-logout" type="button" onClick={() => navigate(-1)}>
-            {t('common.cancel')}
-          </button>
-        </div>
+        <button
+          id="publish-btn"
+          className="publish-btn"
+          type="button"
+          onClick={submit}
+          disabled={saving || !title.trim() || !category || priceNumber < 0}
+        >
+          {saving ? 'Збереження…' : 'Опублікувати товар'}
+        </button>
 
         {err && (
-          <div className="msg error" role="alert">
-            {err}
-          </div>
+          <div style={{ position: 'absolute', left: 635, top: 1295, color: '#d00' }}>{err}</div>
         )}
-      </form>
+      </div>
+
+      {/* модалка фиксированная, не зависит от сдвига канвы */}
+      {brandOpen && (
+        <div className="brand-modal is-open" role="dialog" aria-modal="true">
+          <div className="brand-modal__overlay" onClick={() => setBrandOpen(false)} />
+          <div className="brand-modal__card">
+            <button className="brand-modal__close" aria-label="Закрити" onClick={() => setBrandOpen(false)}>
+              &times;
+            </button>
+
+            <button type="button" className="brand-modal__photo" onClick={onBrandPickImage}>
+              {!brandDataUrl && (
+                <>
+                  <span className="brand-modal__plus">+</span>
+                  <span className="brand-modal__photo-label">Додати фото</span>
+                </>
+              )}
+              {brandDataUrl && <img className="brand-modal__photo-preview" src={brandDataUrl} alt="" />}
+            </button>
+
+            <div className="brand-modal__row">
+              <input
+                type="text"
+                className="brand-modal__input"
+                placeholder="Назва бренду"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+              />
+            </div>
+
+            <div className="brand-modal__row" style={{ top: 285 }}>
+              <input
+                type="text"
+                className="brand-modal__input"
+                placeholder="URL-посилання"
+                value={brandUrl}
+                onChange={(e) => setBrandUrl(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="button"
+              className="brand-modal__submit"
+              style={{ top: 360 }}
+              onClick={() => setBrandOpen(false)}
+            >
+              Додати
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default ProductNew;
+}

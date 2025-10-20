@@ -930,6 +930,15 @@ app.get('/api/chats/my', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'file missing' });
+  // отдай публичный URL до файла (на dev можешь раздавать папку как статику)
+  const url = `/uploads/${req.file.filename}`;
+  res.json({ url });
+});
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 
 // Удалить чат целиком
 app.delete('/api/chats/:id', requireAuth, async (req, res) => {
@@ -1670,6 +1679,75 @@ app.get('/api/proxy-img', async (req, res) => {
   } catch (e) { res.status(502).send('Image fetch failed'); }
 });
 
+// POST /seller/apply/step
+// multipart/form-data (FormData) — по step сохраняем куски + файлы
+app.post('/seller/apply/step', requireAuth, upload.any(), async (req,res) => {
+  const userId = req.user.id;
+  const step = Number(req.body.step || 1);
+
+  // загрузки файлов → верни URL (сохрани в /uploads, s3, что угодно)
+  const byField = Object.fromEntries((req.files||[]).map(f => [f.fieldname, '/uploads/'+f.filename]));
+
+  // собери значения для upsert
+  const vals = {
+    user_id: userId,
+    step,
+    status: 'draft',
+    shop_name: req.body.shop_name || '',
+    country: req.body.country || '',
+    shipping_address: req.body.shipping_address || '',
+    city: req.body.city || '',
+    zip: req.body.zip || '',
+    reg_type: req.body.reg_type || 'company',
+    doc_company_extract_url: byField.doc_company_extract || null,
+    doc_company_itn_url: byField.doc_company_itn || null,
+    doc_individual_passport_url: byField.doc_individual_passport || null,
+    doc_individual_itn_url: byField.doc_individual_itn || null,
+    company_full_name: req.body.company_full_name || '',
+    edrpou: req.body.edrpou || '',
+    iban: req.body.iban || ''
+  };
+
+  await db.exec('upsert_seller_application_step', [
+    vals.user_id, vals.step, vals.status, vals.shop_name,
+    vals.country, vals.shipping_address, vals.city, vals.zip, vals.reg_type,
+    vals.doc_company_extract_url, vals.doc_company_itn_url,
+    vals.doc_individual_passport_url, vals.doc_individual_itn_url,
+    vals.company_full_name, vals.edrpou, vals.iban
+  ]);
+
+  // step 5: карта (разбираем и сохраняем safe поля)
+  if (step === 5) {
+    const raw = String(req.body.card_number||'').replace(/\s+/g,'');
+    const brand = raw.startsWith('4') ? 'visa' :
+                  raw.startsWith('5') ? 'mastercard' : 'card';
+    const last4 = raw.slice(-4);
+    const [mm,yy] = String(req.body.card_exp||'').split('/');
+    const holder = String(req.body.card_holder||'').trim();
+
+    // тут можешь токенизировать у провайдера и получить token
+    const token = null;
+    await db.exec('insert_user_card', [
+      userId, brand, last4, Number(mm||0), Number('20'+(yy||'00')),
+      holder, token, userId // последний параметр для подзапроса is_default
+    ]);
+  }
+
+  // step 6: пароль (если надо — проверь и обнови users.password_hash),
+  // у тебя уже есть SQL на апдейт пароля; можешь сравнить/валидировать.
+
+  res.json({ ok: true });
+});
+
+// POST /seller/apply/submit
+app.post('/seller/apply/submit', requireAuth, async (req,res) => {
+  const userId = req.user.id;
+  await db.exec('update_seller_application_submit', [userId]);
+  // статус юзера → pending
+  await db.execRaw('UPDATE users SET seller_status="pending" WHERE id=?', [userId]);
+  res.json({ ok: true });
+});
+
 /* ===== Chat (OpenRouter proxy) ===== */
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body.message;
@@ -1728,6 +1806,259 @@ app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res
 });
 server.listen(PORT, () => {
   console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
+});
+/* ===== Seller application ===== */
+(async () => {
+  try {
+    // Новая таблица с полями для 6 шагов и статусами pending/approved/rejected
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS seller_applications (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT UNSIGNED NOT NULL UNIQUE,
+        -- прогресс мастера
+        step TINYINT NOT NULL DEFAULT 1,
+        status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+
+        -- step 1
+        shop_name VARCHAR(255) NULL,
+
+        -- step 2
+        country VARCHAR(100) NULL,
+        shipping_address VARCHAR(255) NULL,
+        city VARCHAR(120) NULL,
+        zip VARCHAR(20) NULL,
+
+        -- step 3
+        reg_type ENUM('company','individual') DEFAULT 'company',
+        doc_company_extract_url VARCHAR(512) NULL,
+        doc_company_itn_url VARCHAR(512) NULL,
+        doc_individual_passport_url VARCHAR(512) NULL,
+        doc_individual_itn_url VARCHAR(512) NULL,
+
+        -- step 4
+        company_full_name VARCHAR(255) NULL,
+        edrpou VARCHAR(32) NULL,
+        iban VARCHAR(64) NULL,
+
+        -- step 5
+        payout_card_id INT NULL,
+
+        -- аудит
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+        PRIMARY KEY (id),
+        CONSTRAINT fk_seller_app_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY uq_seller_app_shop (shop_name)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log('✅ seller_applications ready (multi-step, pending/approved/rejected)');
+  } catch (e) {
+    console.error('ensure seller_applications error:', e?.message || e);
+  }
+})();
+
+// Старый одношаговый эндпоинт (если где-то ещё вызывается) — оставляем как есть
+app.post('/seller/apply', requireAuth, async (req, res) => {
+  try {
+    let { company_name, tax_id, price_list_url, comment } = req.body || {};
+    company_name = String(company_name || '').trim();
+    tax_id       = String(tax_id || '').trim();
+    price_list_url = String(price_list_url || '').trim() || null;
+    comment        = String(comment || '').trim() || null;
+
+    if (!company_name || !tax_id) {
+      return res.status(400).json({ message: 'company_name и tax_id обязательны' });
+    }
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      await conn.query(
+        `
+        INSERT INTO seller_applications (user_id, status, company_full_name, edrpou, price_list_url)
+        VALUES (?, 'pending', ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          status='pending',
+          company_full_name=VALUES(company_full_name),
+          edrpou=VALUES(edrpou),
+          price_list_url=VALUES(price_list_url),
+          updated_at=NOW()
+        `,
+        [req.user.id, company_name, tax_id, price_list_url]
+      );
+
+      // статус пользователя -> pending (как у тебя было)
+      await conn.query(
+        `UPDATE users SET seller_status='pending', updated_at=NOW() WHERE id=?`,
+        [req.user.id]
+      );
+
+      await conn.commit();
+      return res.status(201).json({ ok: true });
+    } catch (e) {
+      await conn.rollback();
+      throw e;
+    } finally {
+      conn.release();
+    }
+  } catch (e) {
+    console.error('POST /seller/apply error:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* ===== Seller Apply: helpers ===== */
+function luhn(n){let s=0,d=false;for(let i=n.length-1;i>=0;i--){let x=+n[i];if(d){x*=2;if(x>9)x-=9} s+=x; d=!d;} return s%10===0;}
+function detectBrand(n){ if(/^4/.test(n))return 'visa'; if(/^5[1-5]/.test(n)||/^2(2[2-9]|[3-6]|7[01])/.test(n))return 'mastercard'; if(/^3[47]/.test(n))return 'amex'; if(/^6(?:011|5)/.test(n))return 'discover'; return 'card'; }
+
+/* 1) Проверка уникальности названия */
+app.post('/api/seller/apply/validate-name', requireAuth, async (req,res)=>{
+  try{
+    const name = String(req.body?.shop_name||'').trim();
+    if(!name) return res.status(400).json({message:'shop_name required'});
+    const [r] = await db.query(`SELECT 1 FROM seller_applications WHERE shop_name=? LIMIT 1`, [name]);
+    if(r.length) return res.status(409).json({message:'Назва зайнята'});
+    return res.json({ok:true});
+  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+});
+
+/* 2) Сохранение шага (upsert) — НЕ трогаем status вообще */
+app.post('/api/seller/apply/save-step', requireAuth, async (req,res)=>{
+  try{
+    const p = req.body||{};
+    const values = {
+      user_id: req.user.id,
+      step: Math.max(1, Math.min(5, parseInt(p.step||'1',10))),
+      shop_name: (p.shop_name||null),
+      country: (p.country||null),
+      shipping_address: (p.shipping_address||null),
+      city: (p.city||null),
+      zip: (p.zip||null),
+      reg_type: (p.reg_type==='individual'?'individual':'company'),
+      doc_company_extract_url: p.doc_company_extract_url||null,
+      doc_company_itn_url: p.doc_company_itn_url||null,
+      doc_individual_passport_url: p.doc_individual_passport_url||null,
+      doc_individual_itn_url: p.doc_individual_itn_url||null,
+      company_full_name: p.company_full_name||null,
+      edrpou: p.edrpou||null,
+      iban: p.iban||null,
+      payout_card_id: p.payout_card_id||null
+    };
+
+    await db.query(`
+      INSERT INTO seller_applications
+        (user_id, step, shop_name,
+         country, shipping_address, city, zip, reg_type,
+         doc_company_extract_url, doc_company_itn_url,
+         doc_individual_passport_url, doc_individual_itn_url,
+         company_full_name, edrpou, iban, payout_card_id)
+      VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        step=VALUES(step),
+        shop_name=COALESCE(VALUES(shop_name), shop_name),
+        country=COALESCE(VALUES(country), country),
+        shipping_address=COALESCE(VALUES(shipping_address), shipping_address),
+        city=COALESCE(VALUES(city), city),
+        zip=COALESCE(VALUES(zip), zip),
+        reg_type=COALESCE(VALUES(reg_type), reg_type),
+        doc_company_extract_url=COALESCE(VALUES(doc_company_extract_url), doc_company_extract_url),
+        doc_company_itn_url=COALESCE(VALUES(doc_company_itn_url), doc_company_itn_url),
+        doc_individual_passport_url=COALESCE(VALUES(doc_individual_passport_url), doc_individual_passport_url),
+        doc_individual_itn_url=COALESCE(VALUES(doc_individual_itn_url), doc_individual_itn_url),
+        company_full_name=COALESCE(VALUES(company_full_name), company_full_name),
+        edrpou=COALESCE(VALUES(edrpou), edrpou),
+        iban=COALESCE(VALUES(iban), iban),
+        payout_card_id=COALESCE(VALUES(payout_card_id), payout_card_id),
+        updated_at=NOW()
+    `, [
+      values.user_id, values.step, values.shop_name,
+      values.country, values.shipping_address, values.city, values.zip, values.reg_type,
+      values.doc_company_extract_url, values.doc_company_itn_url,
+      values.doc_individual_passport_url, values.doc_individual_itn_url,
+      values.company_full_name, values.edrpou, values.iban, values.payout_card_id
+    ]);
+
+    res.json({ok:true});
+  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+});
+
+/* 3) Сабмит — ставим 'pending' (он есть в твоём ENUM) */
+app.post('/api/seller/apply/submit', requireAuth, async (req,res)=>{
+  const conn = await db.getConnection();
+  try{
+    const payout_card_id = req.body?.payout_card_id ?? null;
+    await conn.beginTransaction();
+
+    const [[row]] = await conn.query(`SELECT * FROM seller_applications WHERE user_id=? LIMIT 1`, [req.user.id]);
+    if(!row) { await conn.rollback(); return res.status(400).json({message:'Чернетки не знайдено'}); }
+    if(!row.shop_name || !row.country || !row.shipping_address || !row.city || !row.zip ||
+       !row.company_full_name || !row.edrpou || !row.iban) {
+      await conn.rollback(); return res.status(400).json({message:'Заповніть усі обовʼязкові поля'}); }
+
+    if(payout_card_id!=null){
+      const [[c]] = await conn.query(`SELECT id FROM user_cards WHERE id=? AND user_id=?`, [payout_card_id, req.user.id]);
+      if(!c){ await conn.rollback(); return res.status(400).json({message:'Картка не знайдена'}); }
+    }
+
+    // ВАЖНО: 'pending' вместо 'submitted'
+    await conn.query(
+      `UPDATE seller_applications
+         SET status='pending', step=5, payout_card_id=?, updated_at=NOW()
+       WHERE user_id=?`,
+      [payout_card_id, req.user.id]
+    );
+
+    await conn.query(`UPDATE users SET seller_status='pending', updated_at=NOW() WHERE id=?`, [req.user.id]);
+
+    await conn.commit();
+    res.json({ok:true});
+  }catch(e){ await conn.rollback(); console.error(e); res.status(500).json({message:'Server error'}); }
+  finally{ conn.release(); }
+});
+
+/* 4) Картки користувача */
+app.get('/api/me/cards', requireAuth, async (req,res)=>{
+  try{
+    const [rows] = await db.query(
+      `SELECT id,brand,last4,exp_month,exp_year,holder_name
+         FROM user_cards
+        WHERE user_id=?
+        ORDER BY id DESC`,
+      [req.user.id]
+    );
+    res.json({items: rows});
+  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+});
+
+app.post('/api/me/cards', requireAuth, async (req,res)=>{
+  try{
+    const [cnt] = await db.query(`SELECT COUNT(*) c FROM user_cards WHERE user_id=?`, [req.user.id]);
+    if((cnt?.[0]?.c||0) >= 2) return res.status(400).json({message:'Максимум 2 картки'});
+
+    const number = String(req.body?.number||'').replace(/\s+/g,'');
+    const exp = String(req.body?.exp||'');
+    const cvc = String(req.body?.cvc||'');
+    const holder = String(req.body?.holder_name||'').trim();
+
+    if(!/^\d{12,19}$/.test(number) || !luhn(number)) return res.status(400).json({message:'Некоректний номер картки'});
+    if(!/^\d{2}\/\d{2}$/.test(exp)) return res.status(400).json({message:'Некоректний термін'});
+    if(!/^\d{3,4}$/.test(cvc)) return res.status(400).json({message:'Некоректний CVC'});
+    if(!holder) return res.status(400).json({message:'Вкажіть власника'});
+
+    const [mm, yy] = exp.split('/').map(x=>parseInt(x,10));
+    const brand = detectBrand(number);
+    const last4 = number.slice(-4);
+
+    await db.query(
+      `INSERT INTO user_cards (user_id,brand,last4,exp_month,exp_year,holder_name,token)
+       VALUES (?,?,?,?,?,?,NULL)`,
+      [req.user.id, brand, last4, mm, 2000 + yy, holder]
+    );
+    res.status(201).json({ok:true});
+  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
 });
 
 /* ===== Ensure wishlist schema ===== */

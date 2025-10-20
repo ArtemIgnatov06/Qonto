@@ -1,69 +1,384 @@
-/* утилиты — как в проекте */
-.card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; }
-.fw-700 { font-weight: 700; }
-.gap-10 { gap: 10px; }
-.gap-12 { gap: 12px; }
-.gap-16 { gap: 16px; }
-.gap-6 { gap: 6px; }
-.gap-8 { gap: 8px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
-.hidden { display: none; }
-.mb-10 { margin-bottom: 10px; }
-.mb-12 { margin-bottom: 12px; }
-.mb-16 { margin-bottom: 16px; }
-.mb-20 { margin-bottom: 20px; }
-.mb-24 { margin-bottom: 24px; }
-.mb-6 { margin-bottom: 6px; }
-.mb-8 { margin-bottom: 8px; }
-.mt-10 { margin-top: 10px; }
-.mt-12 { margin-top: 12px; }
-.mt-16 { margin-top: 16px; }
-.mt-20 { margin-top: 20px; }
-.mt-24 { margin-top: 24px; }
-.mt-6 { margin-top: 6px; }
-.mt-8 { margin-top: 8px; }
-.muted { color: #6b7280; }
-.muted-12 { font-size: 12px; color: #6b7280; }
-.muted-555 { color: #555; }
-.pad-16 { padding: 16px; }
-.pad-24 { padding: 24px; }
-.pad-24-16 { padding: 24px 16px; }
-.pad-8 { padding: 8px; }
-.page-container { padding: 24px 16px; max-width: 1000px; margin: 0 auto; }
-.prewrap { white-space: pre-wrap; }
-.row { display: flex; }
-.row-center { display: flex; align-items: center; }
-.ta-center { text-align: center; }
-.w-60 { width: 60px; }
-.w-full { width: 100%; }
+/* =========================================================
+   БАЗОВЫЕ УТИЛИТЫ (общие)
+   ======================================================= */
+.card { background:#fff; border:1px solid #eee; border-radius:10px; padding:12px; }
+.fw-700{font-weight:700;}
+.gap-12{gap:12px;} .gap-16{gap:16px;} .gap-8{gap:8px;}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.hidden{display:none;}
+.mb-12{margin-bottom:12px;} .mb-16{margin-bottom:16px;} .mb-8{margin-bottom:8px;} .mb-20{margin-bottom:20px;}
+.mt-8{margin-top:8px;} .mt-12{margin-top:12px;}
+.muted{color:#6b7280;} .muted-12{font-size:12px; color:#6b7280;} .muted-555{color:#555;}
+.row{display:flex; align-items:center;} .ta-center{text-align:center;}
+.w-full{width:100%;}
+.input{width:100%; height:48px; padding:10px 14px; border:1px solid #e5e7eb; border-radius:12px; background:#fff; font-size:14px;}
+.input:focus{outline:none; border-color:#16a34a33; box-shadow:0 0 0 4px rgba(22,163,74,.12);} 
+.label-12{font-size:12px; color:#374151; display:block; margin-bottom:6px;}
+.btn-primary{background:#22c55e; color:#fff; border:none; height:44px; padding:0 18px; border-radius:12px; font-weight:600;}
+.btn-primary:hover{background:#16a34a;}
+.btn-primary:disabled{opacity:.6; cursor:not-allowed;}
+.btn-login{background:#16a34a; color:#fff; border:none; height:40px; padding:0 14px; border-radius:10px;}
+.btn-grey{background:#6b7280;}
+.btn-outline{background:#fff; color:#16a34a; border:1px solid #16a34a; height:40px; padding:0 14px; border-radius:10px;}
+.msg-err{color:#b00020; font-weight:600;}
 
-/* ===== SellerApplication specific ===== */
+/* =========================================================
+   ОБЩАЯ ВЁРСТКА СТРАНИЦЫ
+   ======================================================= */
+.page-container{padding:0 16px 32px;} /* ближе к хедеру */
+.container .sa-name-card,
+.container .sa-card{max-width: 620px; margin: 0 auto;}
 
-.user-info-box {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  background: #f9fafb;
+/* =========================================================
+   ШАГ 1 — карточка строго по размерам фигмы
+   ======================================================= */
+.sa-name-card{
+  position: relative;
+  width: 500px;
+  height: 571px;
+  border-radius: 15px;
+  border: 2px solid var(--Color-3, #ECECEC);
+  background: #FFFFFF;
+  margin: 32px auto 0;
+  padding: 90px 54px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px; /* расстояние поле↔кнопка */
+}
+.sa-name-title{
+  margin: 0 auto;
+  font-family: 'Ubuntu', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  text-align: center;
+  color: #35C65E;
+}
+.sa-name-input-wrap{ width:100%; height:55px; }
+.sa-name-input{
+  width:100%; height:55px; box-sizing:border-box;
+  border:2px solid var(--Color-3, #ECECEC); border-radius:10px; background:#FFF;
+  padding:14px 12px 14px 25px; font:400 14px/24px 'Ubuntu', system-ui, sans-serif; color:#000; outline:none;
+}
+.sa-name-input::placeholder{ color:#828181; }
+.sa-name-input:focus{ border-color:#35C65E; }
+.sa-name-btn-wrap{ width:100%; height:55px; }
+.sa-name-btn{
+  width:100%; height:55px; box-sizing:border-box;
+  border:2px solid var(--Color-3, #ECECEC); border-radius:10px;
+  background:#FFFFFF; color:#828181;
+  font:400 14px/24px 'Ubuntu', system-ui, sans-serif;
+  display:flex; align-items:center; justify-content:center;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  cursor:pointer;
+  margin:0;
+}
+.sa-name-btn:hover:not(:disabled){ background:#35C65E; border-color:#35C65E; color:#fff; }
+
+/* =========================================================
+   ШАГ 2 — адрес (фикс. карточка 500×571 + кнопка снизу 50px)
+   ======================================================= */
+.sa-addr-card{
+  position: relative;
+  width: 500px;
+  height: 571px;
+  margin: 32px auto 0;
+  background: #fff;
+  border: 2px solid var(--Color-3, #ECECEC);
+  border-radius: 15px;
+  overflow: hidden;
+}
+.sa-addr-title{
+  position: absolute; left:128px; top:60px;
+  width:243px; height:36px; margin:0;
+  font-family:'Ubuntu', system-ui, sans-serif; font-weight:400; font-size:25px; line-height:36px;
+  text-align:center; color:#35C65E; white-space:nowrap;
+}
+.sa-addr-group{ position:absolute; }
+.sa-addr-country{ left:54px;    top:136px; width:391px;    height:55px; }
+.sa-addr-ship{    left:54px;    top:198px; width:391px;    height:55px; }
+.sa-addr-city{    left:54px;    top:260px; width:191.96px; height:55px; }
+.sa-addr-zip{     left:253.04px; top:260px; width:191.96px; height:55px; }
+.sa-addr-input,
+.sa-addr-input-sm{
+  position:absolute; inset:0; box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:10px; background:#FFF; color:#000;
+  font:400 14px/24px 'Ubuntu', system-ui, sans-serif;
+  padding:13.5px 12px 13.5px 25px; outline:none;
+}
+.sa-addr-input::placeholder, .sa-addr-input-sm::placeholder{ color:#828181; }
+.sa-addr-input:focus, .sa-addr-input-sm:focus{ border-color:#35C65E; }
+.sa-addr-btn-wrap{
+  position:absolute;
+  left:54px; width:391px; height:55px;
+  bottom:50px; /* фиксированное расстояние от низа карточки */
+}
+.sa-addr-btn-wrap .sa-name-btn{ margin:0; }
+
+/* =========================================================
+   ШАГ 3 — документы (карточка 500×571, кнопка снизу 50px)
+   ======================================================= */
+.sa-figma-card{
+  position:relative;
+  width:500px;
+  height:571px;
+  margin:32px auto 0;
+  background:#fff;
+  border:2px solid #ECECEC;
+  border-radius:15px;
+  overflow:hidden;
+}
+.sa-figma-title{
+  position:absolute;
+  left:128px; top:60px;
+  width:243px; height:36px; margin:0;
+  font:400 25px/36px 'Ubuntu', system-ui, sans-serif;
+  text-align:center; color:#35C65E; white-space:nowrap;
 }
 
-.form-grid-12 {
-  display: grid;
-  gap: 12px;
+/* Точки выбора типа */
+.sa3-dot{
+  position:absolute; width:16px; height:16px; box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:50%; background:transparent; cursor:pointer;
+}
+.sa3-dot.company{ left:54px;  top:140px; }
+.sa3-dot.indiv  { left:204px; top:140px; }
+.sa3-dot.is-active{ border-color:#35C65E; background:#35C65E; }
+
+.sa3-label{
+  position:absolute; height:24px; font:400 14px/24px 'Ubuntu', sans-serif; color:#828181;
+}
+.sa3-label.company{ left:82px;  top:136px;  width:94px; }
+.sa3-label.indiv  { left:232px; top:136px;  width:133px; }
+.sa3-label.is-active{ color:#363535; }
+
+/* Две upload-кнопки (391×55) */
+.sa3-up{ position:absolute; left:54px; width:391px; height:55px; }
+.sa3-up.up1{ top:175px; }
+.sa3-up.up2{ top:237.37px; }
+
+.sa-upload-btn{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:10px; background:#fff; color:#363535;
+  font:400 14px/24px 'Ubuntu', sans-serif; cursor:pointer; outline:none;
+  transition:border-color .12s ease, filter .12s ease, background .12s ease, color .12s ease;
+}
+.sa-upload-btn:hover{ filter:brightness(1.02); }
+.sa-upload-btn.is-filled{ border-color:#35C65E; }
+
+/* зелёная «плашка-иконка» слева */
+.sa-upload-btn .ico{
+  position:absolute; left:21px; top:50%; transform:translateY(-50%);
+  width:28px; height:28px; border-radius:8px; background:#ecfdf5; border:1px solid #bbf7d0;
 }
 
-.label-12 {
-  font-size: 12px;
-  color: #374151;
+/* Фикс-кнопка внизу карточки (50px от низа) */
+.sa-fixed-btn{
+  position:absolute; left:54px; bottom:50px; width:391px; height:55px;
+}
+.sa-fixed-btn .sa-name-btn{ width:100%; height:55px; margin:0; }
+
+/* =========================================================
+   ШАГ 4 — реквізити компанії (фикс. карточка 500×571, кнопка снизу 50px)
+   ======================================================= */
+.sa-step4-card{
+  position: relative;
+  width: 500px;
+  height: 571px;
+  margin: 32px auto 0;
+  background:#fff;
+  border:2px solid #ECECEC;
+  border-radius:15px;
+  overflow:hidden;
+}
+.sa-step4-title{
+  position:absolute; left:128px; top:60px;
+  width:243px; height:36px; margin:0;
+  font:400 25px/36px 'Ubuntu', system-ui, sans-serif;
+  text-align:center; color:#35C65E; white-space:nowrap;
 }
 
-.textarea-vert {
-  resize: vertical;
+/* Три поля — как в макете: 391×55, top: 136 / 198 / 260 */
+.sa-step4-group{ position:absolute; left:54px; width:391px; height:55px; }
+.sa-step4-company{ top:136px; }
+.sa-step4-edrpou{  top:198px; }
+.sa-step4-iban{    top:260px; }
+
+/* Поля ввода (идентичны шагу 2) */
+.sa-step4-input{
+  position:absolute; inset:0; box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:10px; background:#FFF; color:#000;
+  font:400 14px/24px 'Ubuntu', system-ui, sans-serif;
+  padding:13.5px 12px 13.5px 25px; outline:none;
+}
+.sa-step4-input::placeholder{ color:#828181; }
+.sa-step4-input:focus{ border-color:#35C65E; }
+
+/* Кнопки управления — фикс. снизу 50px */
+.sa-step4-actions{
+  position:absolute; left:54px; bottom:50px; width:391px; height:55px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.sa-step4-actions .btn-left{ height:55px; border:2px solid #ECECEC; border-radius:10px; background:#fff; color:#363535; padding:0 16px; }
+.sa-step4-actions .btn-right.sa-name-btn{ width:calc(100% - 120px); height:55px; margin:0; }
+
+/* =========================================================
+   СПИСОК КАРТОК ДЛЯ ВЫПЛАТ (step 5) — общие
+   ======================================================= */
+.sa-cards{display:flex; gap:12px; flex-wrap:wrap;}
+.sa-card-item{
+  display:flex; border:1px solid #e5e7eb; border-radius:14px; padding:10px 12px; cursor:pointer; background:#fff;
+}
+.sa-card-item input{display:none;}
+.sa-card-item.selected{border-color:#16a34a; box-shadow:0 0 0 4px rgba(22,163,74,.12);}
+.sa-card-body{min-width:190px}
+.sa-card-brand{font-weight:700; margin-bottom:2px;}
+.sa-card-num{font-size:18px; letter-spacing:1px;}
+.sa-card-meta{font-size:12px; color:#6b7280;}
+.sa-card-holder{font-size:12px; color:#374151; margin-top:2px;}
+.sa-new-card{border-top:1px dashed #e5e7eb; padding-top:12px; margin-top:8px}
+
+/* =========================================================
+   ФИНАЛЬНЫЙ ЭКРАН
+   ======================================================= */
+.sa-finish{padding:56px 16px;}
+.sa-finish h2{font-size:26px; color:#16a34a; font-weight:800;}
+.sa-finish .btn-primary{min-width:220px}
+/* =========================================================
+   ШАГ 4 — реквізити (карточка 500×571, кнопка снизу 50px)
+   ======================================================= */
+.sa4-group{ position:absolute; left:54px; width:391px; height:55px; }
+.sa4-fname{ top:136px; }   /* *Повна назва компанії */
+.sa4-edrpou{ top:198px; }  /* *ЄДРПОУ */
+.sa4-iban{   top:260px; }  /* *IBAN */
+
+.sa4-input{
+  position:absolute; inset:0; box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:10px; background:#FFF; color:#000;
+  font:400 14px/24px 'Ubuntu', system-ui, sans-serif;
+  padding:13.5px 12px 13.5px 25px; outline:none;
+}
+.sa4-input::placeholder{ color:#828181; }
+.sa4-input:focus{ border-color:#35C65E; }
+
+/* один и тот же контейнер заголовка/кнопки как на шаге 3 */
+.sa-figma-card .sa-figma-title{ /* чтобы не дублировать селекторы */ }
+.sa-figma-card .sa-fixed-btn{ left:54px; bottom:50px; width:391px; height:55px; }
+/* =========================================================
+   ШАГ 5 — выбор карты (фикс. карточка 500×571 + кнопка снизу)
+   ======================================================= */
+.sa-step5-card{
+  position: relative;
+  width: 500px;
+  height: 571px;
+  margin: 32px auto 0;
+  background:#fff;
+  border:2px solid #ECECEC;
+  border-radius:15px;
+  overflow:hidden;
 }
 
-.btn-grey {
-  background: #6b7280;
+/* заголовок как в макете */
+.sa-step5-title{
+  position:absolute; left:128px; top:60px;
+  width:243px; height:36px; margin:0;
+  font-family:'Ubuntu', system-ui, sans-serif; font-weight:400; font-size:25px; line-height:36px;
+  text-align:center; color:#35C65E; white-space:nowrap;
 }
 
-.msg-ok { color: #0a7d16; }
-.msg-err { color: #b00020; }
+/* две «кнопки-выбора» — 391×55, top: 136 / 198 */
+.sa5-choice-group{ position:absolute; left:54px; width:391px; height:55px; }
+.sa5-choice-1{ top:136px; }
+.sa5-choice-2{ top:198px; }
+
+/* сама кнопка-выбора */
+.sa5-choice-btn{
+  position:absolute; inset:0; box-sizing:border-box;
+  border:2px solid #ECECEC; border-radius:10px; background:#FFFFFF; color:#828181;
+  display:flex; align-items:center; justify-content:flex-start;
+  padding-left: calc(391px * 0.0639); /* ≈25px слева — как в фигме */
+  font:400 14px/24px 'Ubuntu', system-ui, sans-serif;
+  cursor:pointer; transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+.sa5-choice-btn:hover{ background:#F9FFFB; }
+.sa5-choice-btn.is-active{ border-color:#35C65E; }
+.sa5-choice-btn:focus-visible{ outline:none; border-color:#35C65E; }
+
+/* фикс-кнопка внизу карточки на 50px от низа */
+.sa5-fixed-btn{
+  position:absolute; left:54px; bottom:50px; width:391px; height:55px;
+}
+.sa5-fixed-btn .sa-name-btn{ width:100%; height:55px; margin:0; }
+
+/* на очень узких экранах позволим карточке чуть сжаться */
+@media (max-width:640px){
+  .sa-step5-card{ width:92vw; }
+}
+
+/* =========================================================
+   Адаптив для 3–4 шагов (по ширине) — опционально
+   ======================================================= */
+@media (max-width: 640px){
+  .sa-figma-card{ width:92vw; }
+}
+/* =========================================================
+   АДАПТИВ
+   ======================================================= */
+@media (max-width: 640px){
+  .grid-2{grid-template-columns:1fr;}
+  .sa-actions .btn-primary{min-width:220px}
+  .sa-name-card{padding:72px 16px 64px; min-height: 360px;}
+  .sa-step3-card, .sa-step4-card{ width: 92vw; }
+}
+/* ---- FIX: убрать зелёный квадрат у иконки загрузки ---- */
+.sa-upload-btn .ico,
+.sa-doc-btn .ico {                /* на всякий случай перекроем оба */
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 29px;
+  background: none !important;    /* рубим фон */
+  border: 0 !important;           /* и рамку */
+  box-shadow: none !important;
+}
+
+/* чтобы текст не налезал на иконку */
+.sa-upload-btn {
+  padding-left: 54px;             /* ~25px отступ + ширина иконки */
+}
+
+/* подстраховка: сам SVG не трогаем */
+.sa-upload-btn .ico svg {
+  width: 28px;
+  height: 29px;
+  display: block;
+}
+/* Центровка заголовков карточек по-настоящему по центру */
+.sa-figma-title,
+.sa-addr-title,
+.sa-step3-title,
+.sa-step4-title {
+  position: absolute;
+  top: 60px;
+  left: 50% !important;
+  transform: translateX(-50%);
+  width: auto !important;         /* не фиксируем ширину */
+  max-width: calc(100% - 32px);   /* чтобы не прилипал к краям */
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* если где-то остались старые значения — обнулим */
+.sa-figma-title,
+.sa-addr-title,
+.sa-step3-title,
+.sa-step4-title {
+  right: auto !important;
+}
