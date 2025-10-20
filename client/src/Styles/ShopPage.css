@@ -1,0 +1,126 @@
+:root{
+  --text:#363535;
+  --muted:#828181;
+  --stroke:#ECECEC;
+  --green:#35C65E;
+  --card-bg:#fff;
+  --shadow:0 10px 26px rgba(0,0,0,.06);
+}
+.shop-page{ font-family:'Ubuntu', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--text); }
+
+/* breadcrumbs */
+.breadcrumbs{ width:min(1320px, 94%); margin:24px auto 0; display:flex; align-items:center; gap:8px; }
+.breadcrumbs a{ text-decoration:none; color:var(--text); font:700 13px/24px 'Ubuntu', sans-serif; }
+.breadcrumbs .arrow{ width:21px; height:21px; }
+
+/* hero */
+.shop-hero{ display:grid; grid-template-columns:760px 1fr auto; align-items:start; gap:36px; margin:96px auto 16px; width:min(1320px,94%); }
+.shop-hero .hero-img{ width:760px; height:340px; object-fit:cover; border-radius:20px; border:2px solid var(--stroke); box-shadow:var(--shadow); }
+.shop-hero .hero-meta{ margin-top:6px; }
+.shop-hero .seller-badge{ color:var(--muted); font-size:28px; line-height:38px; margin-bottom:2px; }
+.shop-hero .store-title{ font-weight:600; font-size:44px; line-height:50px; margin:0 0 8px; }
+.shop-hero .rating-line{ display:flex; align-items:center; gap:10px; }
+.shop-hero .rating-line .num{ color:var(--text); font-size:28px; }
+.shop-hero .rating-line .dot{ width:8px; height:8px; background:var(--green); border-radius:10px; display:inline-block; }
+.shop-hero .rating-line .count{ color:var(--green); font:400 15px/24px 'Ubuntu', sans-serif; }
+.shop-hero .tabbar{ display:flex; gap:28px; position:relative; margin-top:12px; height:30px; }
+.shop-hero .tab{ background:none; border:0; padding:0; cursor:pointer; color:var(--muted); font: 500 15px/24px 'Ubuntu', sans-serif; }
+.shop-hero .tab.is-active{ color:var(--text); }
+.shop-hero .tab-underline{ position:absolute; top:100%; height:0; border-top:2px solid var(--green); left:0; width:0; transition:left .22s cubic-bezier(.22,.61,.36,1), width .22s cubic-bezier(.22,.61,.36,1); }
+.shop-hero .contact-btn{ height:58px; min-width:230px; align-self:start; border:2px solid var(--green); border-radius:12px; background:#fff; color:#35C65E; font:500 15px/24px 'Ubuntu', sans-serif; display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:0 16px; box-shadow:var(--shadow); }
+.about-text.under-tabs{ margin:8px 0 0; font:400 14px/22px 'Ubuntu', sans-serif; color:var(--text); }
+
+/* body layout */
+.shop-body{ width:min(1320px, 94%); margin:16px auto 80px; display:grid; grid-template-columns:1fr 340px; gap:28px; }
+.shop-body[data-tab="about"], .shop-body[data-tab="reviews"]{ grid-template-columns:1fr; } /* hide sidebar layout */
+
+/* rating row below title in card */
+.pcard-rating-row{ display:flex; align-items:center; gap:6px; margin:6px 16px 0 16px; color:#363535; font-size:14px; line-height:18px; }
+.pcard-rating-row img{ display:block; }
+.pcard-rating-val{ font-weight:600; }
+
+/* full filter box like catalog */
+.shop-filter-full{
+  position:sticky; top:110px;
+  border:2px solid var(--stroke); border-radius:12px; padding:16px;
+  height:fit-content; background:#fff; box-shadow:var(--shadow);
+}
+.flt-group{ margin-bottom:18px; }
+.flt-title{ color:var(--muted); margin:0 0 10px; font:500 15px/24px 'Ubuntu', sans-serif; }
+.flt-range{ width:100%; accent-color:var(--green); }
+.flt-price-row{ display:flex; gap:12px; margin-top:6px; }
+.flt-price-row input{ width:120px; padding:6px 8px; border:2px solid var(--stroke); border-radius:8px; outline:none; }
+.chk, .rad{ display:flex; align-items:center; gap:10px; margin:6px 0; color:var(--text); }
+.chk input, .rad input{ width:16px; height:16px; }
+.flt-stars{ display:flex; align-items:center; gap:6px; }
+.flt-star{ background:#fff; border:0; padding:2px; cursor:pointer; opacity:.5; }
+.flt-star.on{ opacity:1; }
+.flt-clear{ margin-left:10px; background:none; border:0; color:#3CA46B; cursor:pointer; }
+
+/* minor tune so rating doesn't overlap any absolute elements from Home.css */
+.pcard-title{ margin-bottom:2px; }
+
+/* =================== ABOUT SELLER — NEW GRID =================== */
+.about-grid{
+  display:grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-areas:
+    "work work work rating rating rating"
+    "since since trusted trusted socials socials";
+  gap:24px;
+  margin-top:22px;
+}
+.card{ border:2px solid var(--stroke); border-radius:12px; background:#fff; box-shadow:var(--shadow); padding:16px; }
+.card.work{ grid-area: work; min-height:300px; display:flex; flex-direction:column; }
+.card.rating{ grid-area: rating; min-height:300px; }
+.card.since{ grid-area: since; min-height:180px; display:flex; align-items:center; }
+.card.trusted{ grid-area: trusted; min-height:180px; display:flex; align-items:center; justify-content:space-between; }
+.card.socials{ grid-area: socials; min-height:180px; display:flex; align-items:center; justify-content:center; }
+
+/* schedule content */
+.sch-title{ color:var(--muted); font:500 14px/24px 'Ubuntu', sans-serif; margin-bottom:8px; }
+.sch-content{ display:flex; align-items:center; justify-content:flex-start; gap:24px; width:100%; flex-direction:row-reverse; }
+.sch-times{ font:400 24px/34px 'Ubuntu', sans-serif; padding-left:6px; }
+.sch-mascot{ width:300px; height:auto; object-fit:contain; margin-right:0; margin-left:8px; filter: drop-shadow(0 4px 14px rgba(0,0,0,.06)); }
+
+/* rating box reused */
+.h-300{ min-height:300px; }
+.sr{ border:none; box-shadow:none; padding:0; }
+.sr-title{ text-align:left; font:600 22px/28px 'Ubuntu', sans-serif; margin:0 0 8px; }
+.sr-wrap{ display:grid; grid-template-columns:160px 1fr; gap:18px; align-items:center; }
+.sr-avg{ display:flex; align-items:center; gap:8px; justify-content:flex-start; }
+.sr-avg .val{ font:600 32px/38px 'Ubuntu', sans-serif; color:#828181; }
+.sr-stars{ display:flex; gap:6px; }
+.sr-stars img{ width:26px; height:26px; }
+.sr-bars{ display:grid; gap:10px; }
+.sr-row{ display:grid; grid-template-columns:24px 1fr 40px; align-items:center; gap:12px; }
+.sr-track{ position:relative; height:4px; background:#ECECEC; }
+.sr-track::before{ content:""; position:absolute; left:0; top:0; height:4px; width:var(--w,0%); background:#35C65E; }
+.sr-count{ text-align:right; color:#363535; font:400 14px/24px 'Ubuntu', sans-serif; }
+
+/* since */
+.since-row{ display:flex; align-items:center; gap:12px; }
+.since-label{ color:var(--muted); font:500 14px/24px 'Ubuntu', sans-serif; }
+.since-date{ font:400 24px/32px 'Ubuntu', sans-serif; }
+
+/* trusted */
+.trust-row{ display:flex; align-items:center; justify-content:space-between; width:100%; }
+.trust-badge{ color:var(--green); font:600 16px/24px 'Ubuntu', sans-serif; }
+.good-seller-img{ height:120px; width:auto; object-fit:contain; }
+
+/* socials */
+.social-title{ text-align:center; color:var(--muted); font:500 14px/24px 'Ubuntu', sans-serif; margin-right:12px; }
+.social-row{ display:flex; align-items:center; justify-content:center; gap:18px; padding-bottom:0; }
+.social-row img{ width:46px; height:46px; object-fit:contain; }
+
+@media (max-width: 1100px){
+  .about-grid{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "work"
+      "rating"
+      "since"
+      "trusted"
+      "socials";
+  }
+}

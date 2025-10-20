@@ -1626,14 +1626,8 @@ app.get('/api/users/:id/public', async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ message: 'User not found' });
     const u = rows[0];
-    const [[r1]] = await db.query(
-      SQL.select_product_reviews_03,
-      [userId]
-    );
-    const [[r2]] = await db.query(
-      SQL.select_order_items,
-      [userId]
-    );
+    const [[r1]] = await db.query(SQL.select_product_reviews_03, [userId]);
+    const [[r2]] = await db.query(SQL.select_order_items, [userId]);
     const online = req.app?.locals?.isOnline ? req.app.locals.isOnline(userId) : false;
     res.json({
       id: u.id,
@@ -1645,6 +1639,7 @@ app.get('/api/users/:id/public', async (req, res) => {
       soldCount: Number(r2?.soldCount || 0),
       online,
       lastSeenAt: u.last_seen_at,
+      createdAt: u.created_at // <<< добавили дату регистрации
     });
   } catch (e) {
     console.error('GET /api/users/:id/public error:', e);
@@ -1734,3 +1729,107 @@ app.post('/api/me/avatar', requireAuth, upload.single('avatar'), async (req, res
 server.listen(PORT, () => {
   console.log(`✅ Сервер + Socket.IO на http://localhost:${PORT}`);
 });
+
+/* ===== Ensure wishlist schema ===== */
+(async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS wishlist_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        product_id INT NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_user_product (user_id, product_id),
+        INDEX idx_user (user_id),
+        INDEX idx_product (product_id),
+        CONSTRAINT fk_wishlist_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT fk_wishlist_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    console.log('✅ wishlist_items table ensured');
+  } catch (e) {
+    console.error('ensure wishlist schema error:', e.message || e);
+  }
+})();
+
+/* ===== Seller's products (public) ===== */
+app.get('/api/sellers/:id/products', async (req, res) => {
+  try {
+    const sellerId = Number(req.params.id);
+    if (!Number.isFinite(sellerId)) return res.status(400).json({ message: 'Invalid seller id' });
+    const [rows] = await db.query(
+      `
+      SELECT
+        p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
+        COALESCE(NULLIF(TRIM(p.preview_image_url), ''), NULLIF(TRIM(p.image_url), '')) AS preview_image_url,
+        p.image_url,
+        COALESCE((SELECT ROUND(AVG(r2.rating), 1) FROM product_reviews r2 WHERE r2.product_id = p.id), 0) AS avg_rating
+      FROM products p
+      WHERE p.status = 'active' AND p.seller_id = ?
+      ORDER BY p.created_at DESC, p.id DESC
+      `,[sellerId]
+    );
+    res.json({ items: rows || [] });
+  } catch (e) {
+    console.error('GET /api/sellers/:id/products error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/* ===== Wishlist schema + endpoints (toggle) ===== */
+(async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS wishlist_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        product_id INT NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_user_product (user_id, product_id),
+        INDEX idx_user (user_id),
+        INDEX idx_product (product_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    console.log('✅ wishlist_items ready');
+  } catch (e) { console.error('wishlist ensure error', e.message || e); }
+})();
+
+app.get('/api/wishlist', requireAuth, async (req, res) => {
+  try {
+    const [rows] = await db.query(`SELECT product_id FROM wishlist_items WHERE user_id = ? ORDER BY id DESC`, [req.user.id]);
+    res.json({ items: rows.map(r => r.product_id) });
+  } catch (e) { console.error('GET /api/wishlist', e); res.status(500).json({ message: 'Server error' }); }
+});
+app.post('/api/wishlist', requireAuth, async (req, res) => {
+  try {
+    const pid = Number(req.body?.product_id);
+    if (!pid) return res.status(400).json({ message: 'Invalid product_id' });
+    const [[ex]] = await db.query(`SELECT id FROM wishlist_items WHERE user_id=? AND product_id=? LIMIT 1`, [req.user.id, pid]);
+    if (ex) { await db.query(`DELETE FROM wishlist_items WHERE id=?`, [ex.id]); return res.json({ ok:true, removed:true, product_id:pid }); }
+    await db.query(`INSERT INTO wishlist_items (user_id, product_id) VALUES (?, ?)`, [req.user.id, pid]);
+    res.status(201).json({ ok:true, added:true, product_id:pid });
+  } catch (e) { console.error('POST /api/wishlist', e); res.status(500).json({ message: 'Server error' }); }
+});
+
+/* ===== Fallback seller products endpoint (if not present) ===== */
+try {
+  if (!app._router.stack.some(l => l.route && l.route.path === '/api/sellers/:id/products')) {
+    app.get('/api/sellers/:id/products', async (req, res) => {
+      try {
+        const sellerId = Number(req.params.id);
+        if (!sellerId) return res.status(400).json({ message: 'Invalid seller id' });
+        const [rows] = await db.query(
+          `SELECT
+             p.id, p.title, p.description, p.price, p.qty, p.status, p.category, p.created_at,
+             p.preview_image_url, p.image_url,
+             COALESCE((SELECT ROUND(AVG(r2.rating),1) FROM product_reviews r2 WHERE r2.product_id = p.id), 0) AS avg_rating
+           FROM products p
+           WHERE p.status='active' AND p.seller_id=?
+           ORDER BY p.created_at DESC, p.id DESC`,
+           [sellerId]
+        );
+        res.json({ items: rows || [] });
+      } catch(e) { console.error('GET /api/sellers/:id/products', e); res.status(500).json({ message:'Server error' }); }
+    });
+  }
+} catch {}

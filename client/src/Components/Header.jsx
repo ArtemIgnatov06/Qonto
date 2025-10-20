@@ -14,7 +14,7 @@ import ChatWidget from './ChatWidget';
 export default function Header() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { user, refresh } = useAuth();
+  const { user } = useAuth();
 
   const tt = (key, fallback) => {
     const v = t(key);
@@ -38,12 +38,6 @@ export default function Header() {
   const changeLang = (code) => {
     i18n.changeLanguage(code);
     localStorage.setItem('i18nextLng', code);
-  };
-
-  const handleLogout = async () => {
-    await fetch('http://localhost:5050/api/logout', { method: 'POST', credentials: 'include' });
-    await refresh();
-    navigate('/');
   };
 
   const [q, setQ] = useState('');
@@ -319,25 +313,6 @@ export default function Header() {
                 </button>
               );
             })}
-            {user && (
-              <button
-                onClick={handleLogout}
-                style={{
-                  marginTop: 6,
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '10px 12px',
-                  border: 'none',
-                  background: 'transparent',
-                  borderRadius: 10,
-                  cursor: 'pointer',
-                  color: '#b91c1c',
-                  fontWeight: 600,
-                }}
-              >
-                {tt('auth.logout', 'Вийти')}
-              </button>
-            )}
           </div>
         )}
       </header>

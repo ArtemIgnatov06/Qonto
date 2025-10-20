@@ -1,231 +1,323 @@
-// client/src/Pages/Profile.jsx — merged with avatar upload
-import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+// client/src/Pages/Profile.jsx — full name display + dynamic checklist + avatar upload/initials
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../Styles/Profile.css';
-import { useAuth } from '../Hooks/useAuth';
-import PhoneBinder from '../Components/PhoneBinder';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useAuth } from '../Hooks/useAuth';
 
-const Profile = () => {
-  const { t } = useTranslation();
-  const { user, refresh } = useAuth();
+import imgSettings from '../assets/settings.png';
+import imgChat from '../assets/chat.png';
+import imgCompleteSmall from '../assets/complete-small.png';
+import imgPlane from '../assets/planex.png';
+import imgReady from '../assets/ready.png';
+
+/* ===================== helpers ===================== */
+const pick = (obj, path) =>
+  (path||'').split('.').reduce((a,k)=> (a && a[k]!==undefined ? a[k] : undefined), obj);
+
+function parseLocal(keyList){
+  for (const k of keyList){
+    try{
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const val = JSON.parse(raw);
+      if (val) return val;
+    }catch{/* ignore */}
+  }
+  return null;
+}
+
+function splitName(full=''){
+  const s = (full||'').trim().replace(/\s+/g,' ');
+  if (!s) return { first:'', last:'' };
+  const parts = s.split(' ');
+  if (parts.length === 1) return { first: parts[0], last:'' };
+  return { first: parts[0], last: parts.slice(1).join(' ') };
+}
+
+function titleCase(s=''){
+  return s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : '';
+}
+
+function nameFromEmail(email=''){
+  const local = (email||'').split('@')[0] || '';
+  if (!local) return '';
+  const parts = local.replace(/[^a-zA-Zа-яА-ЯіІїЇєЄёЁ._-]/g,'').split(/[._-]+/).filter(Boolean);
+  if (parts.length >= 2){
+    return `${titleCase(parts[0])} ${titleCase(parts[1])}`;
+  }
+  return titleCase(local);
+}
+
+function deriveInitials({ first='', last='', email='' }){
+  const f = (first||'').trim();
+  const l = (last||'').trim();
+  if (f || l){
+    if (f && l) return (f[0] + l[0]).toUpperCase();
+    const single = (f || l);
+    return (single.slice(0,2)).toUpperCase();
+  }
+  const mail = (email||'').split('@')[0] || '';
+  if (mail){
+    const parts = mail.replace(/[^a-zA-Zа-яА-ЯіІїЇєЄёЁ\-_.]/g,'').split(/[._-]+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return (mail.slice(0,2)).toUpperCase();
+  }
+  return '??';
+}
+
+async function fetchJSONFrom(urls){
+  for (const u of urls){
+    try{
+      const res = await fetch(u, { credentials:'include' });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data!=null) return data;
+    }catch{/* ignore */}
+  }
+  return null;
+}
+
+async function fetchUserFallback(){
+  return await fetchJSONFrom(['/api/profile','/api/me','/auth/me','/users/me']);
+}
+
+function normalizeUser(src){
+  if (!src) return {};
+  const roots = [src, src.user, src.data, src.profile, pick(src,'data.user'), pick(src,'profile.user')].filter(Boolean);
+  const best = Object.assign({}, ...roots);
+  let first = best.first_name ?? best.firstName ?? best.given_name ?? best.givenName ?? best.first;
+  let last  = best.last_name  ?? best.lastName  ?? best.family_name ?? best.familyName ?? best.last;
+  let full  = best.full_name  ?? best.fullName  ?? best.displayName ?? best.name;
+  if ((!first || !last) && full){
+    const sp = splitName(full);
+    first = first || sp.first;
+    last  = last  || sp.last;
+  }
+  const email = best.email ?? best.mail ?? pick(best,'contacts.email') ?? pick(best,'emails.0') ?? '';
+  const avatar = best.avatar_url ?? best.avatarUrl ?? best.avatar ?? pick(best,'images.avatar') ?? '';
+  return { first_name:first||'', last_name:last||'', email, avatar };
+}
+
+async function uploadAvatar(file){
+  const form = new FormData();
+  form.append('avatar', file);
+  const endpoints = ['/api/profile/avatar','/api/users/avatar','/api/me/avatar','/upload/avatar'];
+  for (const url of endpoints){
+    try{
+      const res = await fetch(url, { method:'POST', body: form, credentials:'include' });
+      if (!res.ok) continue;
+      const json = await res.json().catch(()=>({}));
+      const urlOut = json?.url || json?.avatar_url || json?.avatarUrl || json?.avatar || json?.data?.url;
+      if (urlOut) return urlOut;
+    }catch{/* ignore */}
+  }
+  return null;
+}
+
+/* ===================== component ===================== */
+export default function Profile(){
   const navigate = useNavigate();
+  const { user: authUser, setUser: setAuthUser } = useAuth() || {};
 
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', contact_email: '' });
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState(null);
-  const [err, setErr] = useState(null);
-  const [showEdit, setShowEdit] = useState(false); // <-- toggle editor
+  const [user, setUser] = useState(()=> authUser || parseLocal(['user','auth','profile','qonto_user','qonto.auth','qonto.profile']) || null);
 
-  // ---- avatar upload
-  const fileRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
+  // Checklist statuses
+  const [done, setDone] = useState({ photo:false, address:false, card:false, order:false });
 
-  useEffect(() => {
-    if (user) {
-      setForm({
-        first_name: user.first_name || '',
-        last_name : user.last_name  || '',
-        email     : user.email      || '',
-        contact_email: user.contact_email || '',
-      });
-    }
+  useEffect(()=>{ if (authUser) setUser(prev => ({ ...(prev||{}), ...normalizeUser(authUser) })); }, [authUser]);
+
+  // Pull more data if missing; also compute checklist from APIs/localStorage
+  useEffect(()=>{
+    let cancelled = false;
+    (async () => {
+      // user fill
+      const missing = !user || !(user.first_name || user.firstName || user.full_name || user.name);
+      if (missing){
+        const local = parseLocal(['user','auth','profile','qonto_user','qonto.auth','qonto.profile']);
+        if (!cancelled && local){
+          setUser(prev => ({ ...(prev||{}), ...normalizeUser(local) }));
+        }
+        const data = await fetchUserFallback();
+        if (!cancelled && data){
+          setUser(prev => ({ ...(prev||{}), ...normalizeUser(data) }));
+        }
+      }
+      // checklist
+      const avatarUrl = (user?.avatar_url || user?.avatarUrl || user?.avatar || '').trim();
+      const localAddr  = parseLocal(['addresses','qonto.addresses','user.addresses']);
+      const localCards = parseLocal(['cards','qonto.cards','user.cards']);
+      const localOrders= parseLocal(['orders','qonto.orders','user.orders']);
+      let address = !!(Array.isArray(localAddr) ? localAddr.length : (localAddr?.length||0));
+      let card    = !!(Array.isArray(localCards) ? localCards.length : (localCards?.length||0));
+      let order   = !!(Array.isArray(localOrders) ? localOrders.length : (localOrders?.length||0));
+      try{
+        const [a,c,o] = await Promise.all([
+          fetchJSONFrom(['/api/addresses','/addresses','/user/addresses']),
+          fetchJSONFrom(['/api/cards','/cards','/payment/cards']),
+          fetchJSONFrom(['/api/orders','/orders','/user/orders'])
+        ]);
+        address = address || (Array.isArray(a) ? a.length>0 : (a?.count>0));
+        card    = card    || (Array.isArray(c) ? c.length>0 : (c?.count>0));
+        order   = order   || (Array.isArray(o) ? o.length>0 : (o?.count>0));
+      }catch{/* ignore */}
+      if (!cancelled){
+        setDone({ photo: !!avatarUrl, address, card, order });
+      }
+    })();
+    return ()=>{ cancelled = true; };
   }, [user]);
 
-  const handleLogout = async () => {
-    await fetch('http://localhost:5050/api/logout', { method: 'POST', credentials: 'include' });
-    window.location.href = '/';
-  };
+  const first = user?.first_name || user?.firstName || '';
+  const last  = user?.last_name  || user?.lastName  || '';
+  const email = user?.email || '';
+  const displayName = ([first,last].filter(Boolean).join(' ')) || nameFromEmail(email) || 'Користувач';
+  const avatarUrl = user?.avatar_url || user?.avatarUrl || user?.avatar || '';
 
-  const saveProfile = async () => {
-    setSaving(true); setMsg(null); setErr(null);
-    try {
-      const { data } = await axios.post('/api/me/update-profile', form, { withCredentials: true });
-      if (data.ok) { setMsg(t('profile.saved')); await refresh(); setShowEdit(false); }
-      else setErr(data.error || t('profile.saveFailed'));
-    } catch (e) {
-      setErr(e?.response?.data?.error || t('profile.saveFailed'));
-    } finally { setSaving(false); }
-  };
-
-  const goApply = () => navigate('/seller/apply');
-
-  // ---- avatar helpers
-  const pickFile = () => fileRef.current?.click();
-  const onAvatarSelected = async (e) => {
+  // Avatar upload
+  const fileRef = useRef(null);
+  const onAvatarClick = () => fileRef.current?.click();
+  const onFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const fd = new FormData();
-    fd.append('avatar', file);
-    try {
-      setUploading(true);
-      await axios.post('/api/me/avatar', fd, {
-        withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      await refresh(); // подтянуть новый avatar_url
-      setMsg(t('profile.avatarUpdated', { defaultValue: 'Аватар оновлено' }));
-    } catch (e) {
-      setErr(t('profile.avatarUploadFailed', { defaultValue: 'Не вдалося завантажити аватар' }));
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
+    const objectUrl = URL.createObjectURL(file);
+    setUser(prev => ({ ...(prev||{}), avatar_url: objectUrl }));
+    setDone(prev => ({ ...prev, photo: true }));
+    const uploadedUrl = await uploadAvatar(file);
+    if (uploadedUrl){
+      setUser(prev => ({ ...(prev||{}), avatar_url: uploadedUrl, avatarUrl: uploadedUrl, avatar: uploadedUrl }));
+      try{ setAuthUser?.((prev)=> ({ ...(prev||{}), avatar_url: uploadedUrl })); }catch{/* ignore */}
     }
   };
 
-  if (!user) return <div className="container">...</div>;
+  const initials = useMemo(()=> deriveInitials({ first, last, email }), [first, last, email]);
 
-  const fullName = [form.first_name, form.last_name].filter(Boolean).join(' ') || t('profile.noName', { defaultValue: 'Без имени' });
-  const avatarUrl = user?.avatar_url || user?.avatarUrl || null;
+  // Keep profile in sync if another tab saves
+  useEffect(()=>{
+    const handler = (e)=>{
+      if (['user','auth','profile','qonto_user','qonto.auth','qonto.profile'].includes(e.key||'')){
+        const val = (()=>{ try{ return JSON.parse(e.newValue||'null'); }catch{ return null; } })();
+        if (val) setUser(prev=> ({ ...(prev||{}), ...normalizeUser(val) }));
+      }
+      if (e.key === 'addresses' || e.key === 'cards' || e.key === 'orders'){
+        // re-evaluate checklist
+        setDone(d=> ({ ...d })); // simple trigger; next effect recomputes
+      }
+    };
+    window.addEventListener('storage', handler);
+    return ()=> window.removeEventListener('storage', handler);
+  }, []);
+
+  async function doLogout(){
+    // Try server endpoints; then clear local session and redirect
+    const endpoints = [
+      { url: '/api/logout', method:'POST' },
+      { url: '/logout', method:'POST' },
+      { url: '/auth/logout', method:'POST' },
+    ];
+    for (const ep of endpoints){
+      try{
+        const res = await fetch(ep.url, { method: ep.method, credentials:'include' });
+        // not critical whether ok or not — proceed to local cleanup
+      }catch{/* ignore */}
+    }
+    try{
+      // Clear common auth storages
+      const keys = ['token','auth','user','profile','qonto_user','qonto.auth','qonto.profile','addresses','cards','orders','twofa'];
+      keys.forEach(k => localStorage.removeItem(k));
+      sessionStorage.clear?.();
+    }catch{}
+    try{ setAuthUser?.(null); }catch{}
+    try{ navigate('/'); }catch{ window.location.href = '/'; }
+  }
 
   return (
-    <main className="container page-grid">
-      {/* === Sidebar (left) === */}
-      <aside className="sidebar" aria-label="Панель профілю">
-        <div className="profile">
-          <div className="avatar-lg" aria-hidden="true">
-            {avatarUrl
-              ? <img src={avatarUrl} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}}/>
-              : '👤'}
-          </div>
-          <div className="role">{t('profile.roleBuyer', { defaultValue: 'Покупець' })}</div>
-          <h1 className="username">{fullName}</h1>
-          <div className="profile-actions">
-            <button className="btn btn-primary" type="button" onClick={() => setShowEdit(v => !v)}>
-              {showEdit ? (t('common.close', { defaultValue: 'Закрыть' })) : (t('profile.edit', { defaultValue: 'Редагувати профіль' }))}
-            </button>
-            <Link className="btn btn-ghost" to="/chats">{t('profile.chat', { defaultValue: 'Чати' })}</Link>
-          </div>
-          <div className="side-links mtop-8">
-            <Link to="/cart" className="side-link underlined">{t('profile.cart', { defaultValue: 'Кошик' })}</Link>
-            <Link to="/favorites" className="side-link underlined">{t('profile.wishlist', { defaultValue: 'Список бажань' })}</Link>
-            <button className="side-link" onClick={handleLogout} style={{ textAlign: 'left', background: 'none', border: 0, padding: 0 }}>
-              {t('profile.logout', { defaultValue: 'Вийти з профілю' })}
-            </button>
-          </div>
-        </div>
+    <main className="q-profile" role="main">
+      <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={onFileChange} />
 
-        <section className="promo" aria-labelledby="promo-title">
-          <h2 id="promo-title" className="promo-title">{t('seller.promo.title', { defaultValue: 'Відкрийте свій магазин та почніть свої перші продажі!' })}</h2>
-          <div className="promo-illustration" aria-hidden="true"></div>
-          {user?.seller_status !== 'approved' ? (
-            <button className="btn btn-primary promo-btn" type="button" onClick={goApply} disabled={user?.seller_status === 'pending'}>
-              { user?.seller_status === 'pending' ? t('seller.status.pending', { defaultValue: 'Заявка отправлена' }) : t('seller.actions.become', { defaultValue: 'Стати продавцем' }) }
-            </button>
-          ) : (
-            <button className="btn btn-primary promo-btn" type="button" onClick={() => navigate('/product/new')}>
-              { t('seller.actions.addProduct', { defaultValue: 'Додати товар' }) }
-            </button>
-          )}
-          {user?.seller_status === 'rejected' && user.seller_rejection_reason && (
-            <p className="muted mt-8">{t('seller.status.reason')}: {user.seller_rejection_reason}</p>
-          )}
-        </section>
-      </aside>
-
-      {/* === Content (right) === */}
-      <section className="content">
-        {/* Редактирование профиля */}
-        {showEdit && (
-          <div className="card mb-16">
-            <div className="grid-2 gap-16">
-              <div>
-                <label className="label">{t('profile.firstName', { defaultValue: 'Імя' })}</label>
-                <input className="input" value={form.first_name} onChange={e=>setForm({ ...form, first_name: e.target.value })} />
-              </div>
-              <div>
-                <label className="label">{t('profile.lastName', { defaultValue: 'Прізвище' })}</label>
-                <input className="input" value={form.last_name} onChange={e=>setForm({ ...form, last_name: e.target.value })} />
-              </div>
-              <div>
-                <label className="label">Email</label>
-                <input className="input" type="email" value={form.email} onChange={e=>setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div>
-                <label className="label">{t('profile.contactEmail', { defaultValue: 'Пошта для звязку' })}</label>
-                <input className="input" type="email" value={form.contact_email} onChange={e=>setForm({ ...form, contact_email: e.target.value })} />
-              </div>
-            </div>
-
-            {/* Телефон/пароль */}
-            <div className="mt-16">
-              <PhoneBinder />
-            </div>
-
-            {/* === NEW: Загрузить аватар под телефоном === */}
-            <div className="mt-16">
-              <label className="label">{t('profile.uploadAvatar', { defaultValue: 'Завантажити аватар' })}</label>
-              <div className="row gap-12">
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onAvatarSelected} />
-                <button type="button" className="btn" onClick={pickFile} disabled={uploading}>
-                  {uploading ? t('common.loading', { defaultValue: 'Завантаження...' }) : t('common.chooseFile', { defaultValue: 'Вибрати зображення' })}
-                </button>
-                {avatarUrl && <img src={avatarUrl} alt="" style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',border:'1px solid #e5e7eb'}}/>}
-              </div>
-              <div className="muted-12 mt-8">{t('profile.avatarHint', { defaultValue: 'PNG/JPG до 5 МБ. Картинка буде в круглій рамці.' })}</div>
-            </div>
-
-            <div className="row gap-12 mt-16">
-              <button className="btn btn-primary" onClick={saveProfile} disabled={saving}>
-                {saving ? t('common.saving', { defaultValue: 'Збереження…' }) : t('common.save', { defaultValue: 'Зберегти' })}
-              </button>
-              <button className="btn btn-ghost" onClick={() => setShowEdit(false)}>
-                {t('common.cancel', { defaultValue: 'Відмінити' })}
-              </button>
-            </div>
-            {msg && <div className="msg-ok mt-8" role="status">{msg}</div>}
-            {err && <div className="msg-err mt-8" role="alert">{err}</div>}
-          </div>
+      <section className="frame-918" aria-label="Профіль">
+        {avatarUrl ? (
+          <button className="avatar avatar--button" type="button" onClick={onAvatarClick} aria-label="Змінити аватар">
+            <img src={avatarUrl} alt="Аватар" />
+          </button>
+        ) : (
+          <button className="avatar avatar--button" type="button" onClick={onAvatarClick} aria-label="Завантажити аватар">
+            <span className="avatar__initials">{initials}</span>
+          </button>
         )}
-
-        <header className="section-head">
-          <h2 className="section-title">{t('orders.my', { defaultValue: 'Мої замовлення' })}</h2>
-          <Link className="section-link" to="/orders">{t('orders.all', { defaultValue: 'Всі замовлення →' })}</Link>
-        </header>
-
-        <div className="card-grid">
-          <Link className="order-card order-card--ready" to="/orders?tab=ready">
-            <div className="thumb" aria-hidden="true"></div>
-            <div className="order-meta">
-              <div className="order-status ok">{t('orders.status.ready', { defaultValue: 'Готово' })}</div>
-              <div className="order-sub">8 серпня, Пт</div>
-              <div className="order-note">{t('orders.pickup', { defaultValue: 'Можна забирати до 16 серпня, Сб' })}</div>
-            </div>
-          </Link>
-
-          {[1,2,3].map(i => (
-            <Link key={i} className="order-card" to="/orders?tab=onway">
-              <div className="thumb" aria-hidden="true"></div>
-              <div className="order-meta">
-                <div className="order-status">{t('orders.status.onway', { defaultValue: 'В дорозі' })}</div>
-                <div className="order-sub">{t('orders.expected', { defaultValue: 'Очікується:' })}</div>
-                <div className="order-note ok">9 серпня, Сб</div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <header className="section-head mt-32">
-          <h2 className="section-title">{t('orders.history', { defaultValue: 'Історія замовлень' })}</h2>
-          <Link className="section-link" to="/orders/history">{t('orders.allHistory', { defaultValue: 'Вся історія →' })}</Link>
-        </header>
-
-        <div className="card-grid card-grid--wrap">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Link key={i} className="order-card" to={`/orders/${i+1}`}>
-              <div className="thumb" aria-hidden="true"></div>
-              <div className="order-meta">
-                <div className="order-status">{t('orders.status.delivered', { defaultValue: 'Доставлено' })}</div>
-                <div className="order-sub">9 серпня, Сб</div>
-                <div className="order-note">{t('orders.deliveredOn', { defaultValue: 'Було забрано 10 серпня, Сб' })}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <span className="seller-dot" aria-hidden="true"></span>
+        <span className="seller-tag">Покупець</span>
+        <h5 className="seller-name">{displayName}</h5>
       </section>
+
+      <button className="btn-edit-shop" type="button" onClick={() => navigate('/profile/settings')}>
+        <span className="btn-edit-bg" />
+        <img className="btn-edit-ico" src={imgSettings} alt="" />
+        <span className="btn-edit-label">Редагувати профіль</span>
+      </button>
+
+      <Link className="btn-chats" to="/chats">
+        <span className="btn-chats-bg" />
+        <img className="btn-chats-ico" src={imgChat} alt="" />
+        <span className="btn-chats-label">Чати</span>
+      </Link>
+
+      <section className="checklist" id="sellerChecklist" aria-label="Чекліст профілю">
+        <div className="cl-frame"></div>
+        <div className={`cl-icon cl-icon-1 ${done.photo ? 'is-done' : ''}`} style={done.photo ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+        <div className={`cl-icon cl-icon-2 ${done.address ? 'is-done' : ''}`} style={done.address ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+        <div className={`cl-icon cl-icon-3 ${done.card ? 'is-done' : ''}`} style={done.card ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+        <div className={`cl-icon cl-icon-4 ${done.order ? 'is-done' : ''}`} style={done.order ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+        <div className="cl-text cl-text-1">Додайте фото профілю</div>
+        <div className="cl-text cl-text-2">Додайте адресу</div>
+        <div className="cl-text cl-text-3">Додайте карту</div>
+        <div className="cl-text cl-text-4">Замовте перший товар</div>
+      </section>
+
+      <nav className="seller-quicklinks" aria-label="Швидкі дії">
+        <Link className="ql-view" to="/cart">Кошик</Link>
+        <Link className="ql-analyt" to="/favorites">Список бажань</Link>
+      </nav>
+
+      <button className="btn-signout" type="button" onClick={doLogout}>Вийти з профілю</button>
+
+      <h4 className="orders-title">Мої замовлення</h4>
+
+      <a className="order-card is-done" href="/orders/ready">
+        <div className="thumb"></div>
+        <div className="oc-title oc-done">Готово</div>
+        <div className="oc-date">8 серпня, Пт</div>
+        <div className="oc-note">Можна забирати до 16 серпня, Сб</div>
+        <span className="oc-frame" />
+      </a>
+
+      <a className="order-card" href="/orders/shipping">
+        <div className="thumb"></div>
+        <div className="oc-title">В дорозі</div>
+        <div className="oc-wait">Очікується:</div>
+        <div className="oc-date-green">9 серпня, Сб</div>
+        <span className="oc-frame" />
+      </a>
+
+      <h4 className="orders-history-title">Історія замовлень</h4>
+
+      <div className="mini-product">
+        <div className="mp-mask"></div>
+        <div className="mp-title">Доставлено</div>
+        <div className="mp-date">9 серпня, Сб</div>
+        <div className="mp-note">Було забрано 10 серпня, Сб</div>
+        <a className="mp-link" href="/orders/123"></a>
+        <div className="mp-frame"></div>
+      </div>
+
+      <div className="mini-banner">
+        <img className="bn-img" src={imgCompleteSmall} alt="" />
+        <div className="bn-title">Відкрийте свій магазин та почніть свої перші продажі!</div>
+        <button className="bn-btn" type="button" onClick={() => navigate('/become-seller')}>
+          <span>Стати продавцем</span>
+        </button>
+        <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" />
+        <div className="bn-frame"></div>
+      </div>
     </main>
   );
-};
-
-export default Profile;
+}

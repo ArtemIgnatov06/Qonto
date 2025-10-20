@@ -38,6 +38,9 @@ import ProductPage from './Pages/ProductPage';
 // 🔥 Новое: страница вишлиста
 import WishlistPage from './Pages/Wishlist.jsx';
 
+import ShopPage from './Pages/ShopPage.jsx';
+import ProfileSettings from './Pages/ProfileSettings';
+
 import './App.css';
 
 // Обёртка, которая держит <html lang> в актуальном состоянии при смене языка
@@ -110,6 +113,9 @@ export default function App() {
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/returns" element={<ReturnPage />} />
                 <Route path="/guarantee" element={<GuaranteePage />} />
+
+                <Route path="/shop/:sellerId" element={<ShopPage />} />
+                <Route path="/profile/settings" element={<ProfileSettings />} />
               </Routes>
             </main>
 

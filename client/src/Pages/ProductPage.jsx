@@ -1,4 +1,7 @@
-// client/src/Pages/ProductPage.jsx
+
+// client/src/Pages/ProductPage.jsx — MERGED
+// Основа: ваша рабочая версия. Изменение: ссылка "Продавець" ведёт на /shop/:sellerId.
+
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -145,14 +148,20 @@ export default function ProductPage() {
   const avg = item.avg_rating ?? item.ratingAvg ?? 0;
   const cnt = item.reviews_count ?? item.ratingCount ?? 0;
 
+  // --- Seller: name & link to SHOP page ---
+  // Сохраняем вашу логику вычисления ФИО и поля seller_name, но
+  // меняем ссылку: теперь ведёт на /shop/:sellerId вместо /profile/public/:id
+  const sellerId =
+    item.seller_id ?? item.sellerId ?? item.owner_id ?? item.ownerId ?? item.user_id ?? item.userId ?? null;
+
   const sellerNameText =
     item.seller_name ||
     `${(item.seller_first_name || '').trim()} ${(item.seller_last_name || '').trim()}`.trim() ||
     '—';
 
-  const sellerNode = item.seller_id ? (
+  const sellerNode = sellerId ? (
     <Link
-      to={`/profile/public/${item.seller_id}`}
+      to={`/shop/${sellerId}`}
       className="seller-link"
       title={t('productPage.viewSellerProfile')}
     >
