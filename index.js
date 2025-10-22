@@ -2025,10 +2025,6 @@ app.post('/seller/apply', requireAuth, async (req, res) => {
   }
 });
 
-/* ===== Seller Apply: helpers ===== */
-function luhn(n){let s=0,d=false;for(let i=n.length-1;i>=0;i--){let x=+n[i];if(d){x*=2;if(x>9)x-=9} s+=x; d=!d;} return s%10===0;}
-function detectBrand(n){ if(/^4/.test(n))return 'visa'; if(/^5[1-5]/.test(n)||/^2(2[2-9]|[3-6]|7[01])/.test(n))return 'mastercard'; if(/^3[47]/.test(n))return 'amex'; if(/^6(?:011|5)/.test(n))return 'discover'; return 'card'; }
-
 /* 1) Проверка уникальности названия */
 app.post('/api/seller/apply/validate-name', requireAuth, async (req,res)=>{
   try{
