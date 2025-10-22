@@ -1,268 +1,507 @@
+// ProductPage.jsx — карточка товара + магазин-плашка + отзывы с фото
 
-// client/src/Pages/ProductPage.jsx — MERGED
-// Основа: ваша рабочая версия. Изменение: ссылка "Продавець" ведёт на /shop/:sellerId.
-
-import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import '../Styles/ProductPage.css';
 
-function Stars({ value = 0 }) {
-  const { t } = useTranslation();
-  const v = Number.isFinite(+value) ? Math.min(5, Math.max(0, Math.round(+value))) : 0;
-  return <span title={t('productPage.ratingTooltip', { v })}>{'★'.repeat(v)}{'☆'.repeat(5 - v)}</span>;
-}
+import star from '../assets/star.png';
+import starGray from '../assets/starg.png';
+import basketWhite from '../assets/basket-white.png';
+import addIcon from '../assets/add.png';
+import sendIcon from '../assets/send.png';
+import shopFruits from '../assets/fruits.png';
 
-function normalizeReview(r, fallbackId = null) {
-  if (!r || typeof r !== 'object') return null;
-  const id = r.id ?? r.review_id ?? r._id ?? fallbackId;
-  const rating = Number.isFinite(+r.rating) ? +r.rating : 0;
-  const comment = (r.comment ?? '').toString();
-  const user_name = (r.user_name ?? r.author ?? '').toString();
-  const created_at = r.created_at ?? r.createdAt ?? null;
-  return { id, rating, comment, user_name, created_at };
-}
+/* ---------------------------- helpers ---------------------------------- */
+
+const isBase64 = (s) => typeof s === 'string' && /^[A-Za-z0-9+/=\r\n]+$/.test(s) && s.length > 100;
+const looksLikeExt = (s) => /\.(png|jpe?g|webp|gif|svg|avif)(\?.*)?$/i.test(s || '');
+
+const normSrc = (u) => {
+  if (!u || typeof u !== 'string') return null;
+  const s = u.trim().replace(/\\/g, '/');
+  if (/^data:image\//i.test(s)) return s;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.startsWith('/')) return s;
+  if (s.startsWith('assets/')) return '/' + s;
+  if (/^(uploads|images|static|files|media)\//i.test(s)) return '/' + s;
+  if (isBase64(s) && !looksLikeExt(s)) return `data:image/jpeg;base64,${s}`;
+  try {
+    // eslint-disable-next-line no-undef
+    return new URL(`../assets/${s}`, import.meta.url).href;
+  } catch {
+    return null;
+  }
+};
+
+const pickShopCover = (...names) => {
+  for (const n of names) {
+    const u = normSrc(n);
+    if (u) return u;
+  }
+  return null;
+};
+
+const pluckProduct = (raw) => {
+  if (!raw) return null;
+  if (Array.isArray(raw)) return raw[0] || null;
+  if (raw.item) return raw.item;
+  if (raw.product) return raw.product;
+  if (raw.data && (raw.data.product || raw.data.item)) return raw.data.product || raw.data.item;
+  if (raw.data && (Array.isArray(raw.data) ? raw.data[0] : typeof raw.data === 'object')) return Array.isArray(raw.data) ? raw.data[0] : raw.data;
+  return raw;
+};
+
+const extractTitle = (p, catalogTitle = '') => {
+  if (!p) return catalogTitle || 'product.title';
+  const t = p.title || p.name || p.productTitle || p.product_name || p.label || p.model || p.caption;
+  if (t) return t;
+  const fromCat = p.category?.title || p.category?.name || p.catalog?.title || p.catalog?.name;
+  return fromCat || catalogTitle || 'product.title';
+};
+
+const extractGallery = (p) => {
+  if (!p) return [];
+  const primary = [p.preview_image_url, p.image_url].map(normSrc).filter(Boolean);
+  if (primary.length) return primary;
+
+  const candidates = [
+    p.images, p.photos, p.gallery, p.media, p.mediaFiles,
+    p.productImages, p.product_images, p.images_list,
+    p.galleryImages, p.photos_urls, p.picture_urls,
+    p.pictures, p.files, p.imagesUrls, p.images_urls,
+  ].filter(Boolean);
+
+  for (const cand of candidates) {
+    if (Array.isArray(cand) && cand.length) {
+      const urls = cand
+        .map((x) => (typeof x === 'string' ? x : (x?.url || x?.src || x?.path || x?.link || x?.imageUrl || x?.image_url)))
+        .map(normSrc)
+        .filter(Boolean);
+      if (urls.length) return urls;
+    }
+  }
+
+  const single =
+    p.image || p.imageUrl || p.image_url ||
+    p.photo || p.photoUrl || p.photo_url ||
+    p.thumbnail || p.thumbnail_url || p.cover ||
+    p.main_image || p.mainImage || p.preview;
+  const one = normSrc(single);
+  return one ? [one] : [];
+};
+
+/* ------------------------------ Component ------------------------------ */
 
 export default function ProductPage() {
   const { id } = useParams();
-  const nav = useNavigate();
-  const { t, i18n } = useTranslation();
-  const { convertFromUAH, formatMoney } = useCurrency();
 
-  const [item, setItem] = useState(null);
-  const [reviews, setReviews] = useState([]);
+  const [product, setProduct] = useState(null);
+  const [gallery, setGallery] = useState([]);
+  const [catalogTitle, setCatalogTitle] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  const [myRating, setMyRating] = useState(5);
-  const [myComment, setMyComment] = useState('');
-  const canSubmit = useMemo(() => myRating >= 1 && myRating <= 5, [myRating]);
+  // CART
+  const [cartBusy, setCartBusy] = useState(false);
+  const [cartMsg, setCartMsg] = useState('');
 
-  const [added, setAdded] = useState(false);
+  // REVIEWS
+  const [reviews, setReviews] = useState([]);
+  const [revLoading, setRevLoading] = useState(true);
+  const [revText, setRevText] = useState('');
+  const [revRating, setRevRating] = useState(0);
+  const [revAnon, setRevAnon] = useState(false);
+  const [revFiles, setRevFiles] = useState([]);
+  const fileRef = useRef(null);
 
-  const API = process.env.REACT_APP_API || '';
-  const locale = useMemo(
-    () => (i18n.language?.startsWith('ua') || i18n.language?.startsWith('uk') ? 'uk-UA' : 'ru-RU'),
-    [i18n.language]
-  );
-  const dateTime = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }), [locale]);
-
-  async function loadData(pid) {
-    setLoading(true);
-    setError('');
-    setItem(null);
-    setReviews([]);
-    try {
-      const [r1, r2] = await Promise.all([
-        fetch(`${API}/api/products/${pid}`),
-        fetch(`${API}/api/products/${pid}/reviews`)
-      ]);
-      const d1 = await r1.json().catch(() => ({}));
-      const d2 = await r2.json().catch(() => ({}));
-      if (!r1.ok || !d1?.item) {
-        setError(d1?.message || t('productPage.errors.notFound'));
-        return;
+  /* ---------------------- product fetch ---------------------- */
+  useEffect(() => {
+    let abort = false;
+    const endpoints = [
+      `/api/products/${id}`, `/api/product/${id}`,
+      `/products/${id}`, `/product/${id}`,
+      `/api/catalog/products/${id}`,
+    ];
+    (async () => {
+      setLoading(true);
+      for (const url of endpoints) {
+        try {
+          const r = await fetch(url, { credentials: 'include' });
+          if (!r.ok) continue;
+          const json = await r.json();
+          const p = pluckProduct(json);
+          if (p && !abort) { setProduct(p); break; }
+        } catch {}
       }
-      setItem(d1.item);
-      const list = (Array.isArray(d2?.items) ? d2.items : [])
-        .map((x, i) => normalizeReview(x, i))
-        .filter(Boolean);
+      if (!abort) setLoading(false);
+    })();
+    return () => { abort = true; };
+  }, [id]);
+
+  // optional gallery endpoint
+  useEffect(() => {
+    let abort = false;
+    const ends = [
+      `/api/products/${id}/images`,
+      `/api/product/${id}/images`,
+      `/products/${id}/images`,
+      `/product/${id}/images`,
+    ];
+    (async () => {
+      for (const url of ends) {
+        try {
+          const r = await fetch(url, { credentials: 'include' });
+          if (!r.ok) continue;
+          const data = await r.json();
+          const urls = Array.isArray(data)
+            ? data
+              .map((x) => (typeof x === 'string' ? x : (x?.url || x?.src || x?.path || x?.imageUrl || x?.image_url)))
+              .map(normSrc)
+              .filter(Boolean)
+            : [];
+          if (!abort && urls.length) { setGallery(urls); break; }
+        } catch {}
+      }
+    })();
+    return () => { abort = true; };
+  }, [id]);
+
+  // catalog title
+  useEffect(() => {
+    let abort = false;
+    (async () => {
+      const p = product;
+      if (!p) return;
+      const catId = p.catalog_id || p.category_id || p.catalogId || p.categoryId || p.catalog?.id || p.category?.id;
+      if (!catId) return;
+      const urls = [`/api/catalog/${catId}`, `/api/categories/${catId}`, `/categories/${catId}`];
+      for (const u of urls) {
+        try {
+          const r = await fetch(u, { credentials: 'include' });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const t = d?.title || d?.name || d?.data?.title || d?.data?.name;
+          if (t && !abort) { setCatalogTitle(t); break; }
+        } catch {}
+      }
+    })();
+    return () => { abort = true; };
+  }, [product]);
+
+  // reviews
+  const reloadReviews = async () => {
+    try {
+      const r = await fetch(`/api/products/${id}/reviews`, { credentials: 'include' });
+      if (!r.ok) return;
+      const arr = await r.json();
+      const list = Array.isArray(arr?.items) ? arr.items
+        : Array.isArray(arr?.data) ? arr.data
+        : Array.isArray(arr) ? arr
+        : [];
       setReviews(list);
-    } catch {
-      setError(t('productPage.errors.network'));
-    } finally {
-      setLoading(false);
-    }
-  }
+    } catch {}
+  };
 
   useEffect(() => {
-    loadData(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, API]);
-
-  useEffect(() => {
-    if (item?.title) document.title = item.title;
-  }, [item?.title]);
-
-  async function submitReview(e) {
-    e.preventDefault();
-    if (!canSubmit) return;
-    try {
-      const resp = await fetch(`${API}/api/products/${id}/reviews`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ rating: myRating, comment: myComment })
-      });
-      const raw = await resp.text();
-      let data; try { data = raw ? JSON.parse(raw) : {}; } catch { data = {}; }
-      const newRaw = data?.item ?? (Array.isArray(data?.items) ? data.items[0] : null);
-      const newReview = normalizeReview(newRaw, Date.now());
-
-      if (!resp.ok || !newReview) {
-        await loadData(id);
-      } else {
-        setReviews(prev => [newReview, ...prev.filter(Boolean)]);
+    let abort = false;
+    (async () => {
+      setRevLoading(true);
+      try {
+        const r = await fetch(`/api/products/${id}/reviews`, { credentials: 'include' });
+        if (r.ok) {
+          const d = await r.json();
+          const list = Array.isArray(d?.items) ? d.items
+            : Array.isArray(d?.data) ? d.data
+            : Array.isArray(d) ? d
+            : [];
+          if (!abort) setReviews(list);
+        }
+      } finally {
+        if (!abort) setRevLoading(false);
       }
-      setMyComment('');
-      setMyRating(5);
-    } catch {
-      alert(t('productPage.errors.reviewSend'));
-    }
-  }
+    })();
+    return () => { abort = true; };
+  }, [id]);
 
-  // === добавить в корзину ===
-  async function addToCart(productId, qty = 1) {
-    try {
-      const r = await fetch(`${API}/api/cart`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ product_id: productId, qty })
-      });
-      if (!r.ok) {
-        const d = await r.json().catch(() => ({}));
-        alert(d?.message || t('productPage.errors.addToCart'));
-        return false;
-      }
-      setAdded(true);
-      window.dispatchEvent(new CustomEvent('cart:changed', { detail: { type: 'add', productId, qty } }));
-      return true;
-    } catch {
-      alert(t('productPage.errors.network'));
-      return false;
-    }
-  }
+  /* ------------------------- derived ------------------------- */
+  const photos = useMemo(() => {
+    if (gallery.length) return gallery;
+    return extractGallery(product);
+  }, [gallery, product]);
 
-  if (loading) return <div className="pad-24 ta-center">{t('common.loading')}</div>;
-  if (error) {
-    return (
-      <div className="pad-24 ta-center">
-        <h2>{t('common.error')}</h2>
-        <div>{error}</div>
-      </div>
-    );
-  }
+  const title = extractTitle(product, catalogTitle);
+  const rating = Number(product?.avg_rating ?? product?.ratingAvg ?? product?.rating ?? 0);
+  const reviewsCount = Number(product?.reviews_count ?? product?.ratingCount ?? reviews?.length ?? 0);
+  const hasPhotos = photos.length > 0;
 
-  const avg = item.avg_rating ?? item.ratingAvg ?? 0;
-  const cnt = item.reviews_count ?? item.ratingCount ?? 0;
-
-  // --- Seller: name & link to SHOP page ---
-  // Сохраняем вашу логику вычисления ФИО и поля seller_name, но
-  // меняем ссылку: теперь ведёт на /shop/:sellerId вместо /profile/public/:id
+  // --- Shop/Seller info ---
   const sellerId =
-    item.seller_id ?? item.sellerId ?? item.owner_id ?? item.ownerId ?? item.user_id ?? item.userId ?? null;
+    product?.seller_id ?? product?.sellerId ?? product?.owner_id ?? product?.ownerId ?? product?.user_id ?? product?.userId ?? null;
 
   const sellerNameText =
-    item.seller_name ||
-    `${(item.seller_first_name || '').trim()} ${(item.seller_last_name || '').trim()}`.trim() ||
-    '—';
+    product?.seller_name ||
+    `${(product?.seller_first_name || '').trim()} ${(product?.seller_last_name || '').trim()}`.trim() ||
+    'Super Noname Store';
 
-  const sellerNode = sellerId ? (
-    <Link
-      to={`/shop/${sellerId}`}
-      className="seller-link"
-      title={t('productPage.viewSellerProfile')}
-    >
-      {sellerNameText}
-    </Link>
-  ) : (
-    <span>{sellerNameText}</span>
-  );
+  const shopCover =
+    product?.shop_cover_url ? normSrc(product.shop_cover_url) :
+    (shopFruits || null) ||
+    pickShopCover('fruits.png','shop-cover.jpg','shop-cover.png','store-cover.jpg','store-cover.png','shop.jpg','shop.png') ||
+    null;
+
+  /* ------------------------- handlers ------------------------ */
+
+  const handleAddToCart = async () => {
+    if (!product?.id) return;
+    setCartBusy(true); setCartMsg('');
+    const tries = [
+      { url: '/api/cart', method: 'POST', body: { product_id: product.id, quantity: 1 } },
+      { url: '/cart', method: 'POST', body: { product_id: product.id, quantity: 1 } },
+      { url: '/api/cart/add', method: 'POST', body: { product_id: product.id, qty: 1 } },
+    ];
+    for (const t of tries) {
+      try {
+        const r = await fetch(t.url, {
+          method: t.method,
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(t.body),
+        });
+        if (!r.ok) continue;
+        setCartMsg('Товар додано до кошика');
+        setTimeout(() => setCartMsg(''), 2500);
+        setCartBusy(false);
+        return;
+      } catch {}
+    }
+    setCartMsg('Не вдалося додати до кошика');
+    setTimeout(() => setCartMsg(''), 2500);
+    setCartBusy(false);
+  };
+
+  const handleChooseFiles = (e) => {
+    const files = Array.from(e.target.files || []).slice(0, 3);
+    setRevFiles(files);
+  };
+
+  const handleSendReview = async () => {
+    if (!revRating) { alert('Оцініть товар (1–5)'); return; }
+    if (!revText.trim()) { alert('Напишіть короткий відгук'); return; }
+
+    try {
+      const fd = new FormData();
+      fd.append('rating', String(revRating));
+      fd.append('comment', revText.trim());
+      fd.append('is_anonymous', revAnon ? '1' : '0');
+      revFiles.forEach((f, i) => fd.append('images[]', f, f.name || `img${i}.jpg`));
+
+      const r = await fetch(`/api/products/${id}/reviews`, {
+        method: 'POST',
+        credentials: 'include',
+        body: fd
+      });
+
+      if (r.ok) {
+        const data = await r.json().catch(() => null);
+        const saved = data?.item;
+        if (saved) setReviews((prev) => [saved, ...prev]);
+        else await reloadReviews();
+        setRevText(''); setRevRating(0); setRevAnon(false); setRevFiles([]);
+        if (fileRef.current) fileRef.current.value = '';
+        return;
+      }
+    } catch {}
+
+    alert('Не вдалося надіслати відгук');
+  };
+
+  /* ------------------------------- UI ----------------------------------- */
+
+  if (loading) return <div className="pad-24">Loading…</div>;
+  if (!product) return <div className="pad-24">Товар не знайдено</div>;
 
   return (
-    <div className="product-page">
-      <h1 className="mb-8">{item.title}</h1>
-
-      <div className="row-center gap-12">
-        <div className="price">
-          {formatMoney(convertFromUAH(item.price || 0))}
+    <div className="pdp-wrap">
+      <div className="pdp-grid pdp-grid--nochips">
+        {/* Thumbs */}
+        <div className="pdp-thumbs" aria-label="Галерея зображень">
+          {Array.from({ length: Math.min(5, Math.max(photos.length, 0)) }).map((_, i) => {
+            const src = photos[i];
+            return (
+              <button
+                key={i}
+                className={'thumb' + (i === 0 ? ' is-active' : '')}
+                onClick={(e) => {
+                  const main = e.currentTarget.closest('.pdp-grid').querySelector('.pdp-photo .main');
+                  if (main && src) main.src = src;
+                  e.currentTarget.parentElement.querySelectorAll('.thumb').forEach((b) => b.classList.remove('is-active'));
+                  e.currentTarget.classList.add('is-active');
+                }}
+                type="button"
+                disabled={!src}
+              >
+                {src ? <img src={src} alt={`${title} ${i + 1}`} /> : <span style={{opacity:.5}}>—</span>}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Купить: положить в корзину и перейти в корзину */}
-        <button
-          className="btn-buy-now"
-          onClick={async () => { if (await addToCart(item.id, 1)) nav('/cart'); }}
-          title={t('productPage.buttons.buyNow')}
-          aria-label={t('productPage.buttons.buyNow')}
-        >
-          {t('productPage.buttons.buyNow')}
-        </button>
-
-        {/* В корзину: положить и остаться на странице */}
-        <button
-          className="btn-add-to-cart"
-          onClick={async () => { await addToCart(item.id, 1); }}
-          title={t('productPage.buttons.addToCart')}
-          aria-label={t('productPage.buttons.addToCart')}
-        >
-          {t('productPage.buttons.addToCart')}
-        </button>
-      </div>
-
-      {added && (
-        <div className="added-note">
-          {t('productPage.added')} <a href="/cart">{t('productPage.buttons.goToCart')} →</a>
+        {/* Main photo */}
+        <div className="pdp-photo">
+          {hasPhotos ? (
+            <img className="main" src={photos[0]} alt={title} />
+          ) : (
+            <div className="main empty" aria-label="Немає зображення">no image</div>
+          )}
         </div>
-      )}
 
-      <div className="seller-line">
-        {t('productPage.seller')}: {sellerNode} · {t('productPage.category')}: {item.category || '—'}
-      </div>
+        {/* Right info */}
+        <div className="pdp-info">
+          <h1 className="title">{title}</h1>
 
-      <div className="mb-16">
-        <Stars value={avg} /> {avg} ({cnt})
-      </div>
+          <div className="rating">
+            <img src={star} alt="" className="star" />
+            <span className="score">{rating.toFixed(1).replace('.', ',')}</span>
+            <span className="dot" aria-hidden="true"></span>
+            <a href="#reviews" className="link">
+              {reviewsCount ? `${reviewsCount.toLocaleString('uk-UA')} відгуків` : 'Немає відгуків'}
+            </a>
+          </div>
 
-      <h3 className="mt-12 mb-6">{t('productPage.description')}</h3>
-      <p className="mb-24">{item.description}</p>
+          <div className="buy-row" style={{ marginTop: '16px' }}>
+            <button className="btn-primary" type="button" disabled={cartBusy} onClick={handleAddToCart}>
+              <span className="icon"><img src={basketWhite} alt="" /></span>
+              <span className="txt">{cartBusy ? 'Додаємо…' : 'Додати до кошику'}</span>
+            </button>
+            {cartMsg && <span className="cart-msg" style={{ marginLeft: 12 }}>{cartMsg}</span>}
+          </div>
 
-      <h3 className="mt-24">{t('productPage.reviews')}</h3>
-      <form onSubmit={submitReview} className="row gap-8">
-        <label>
-          {t('productPage.rating')}:{' '}
-          <input
-            type="number"
-            min="1"
-            max="5"
-            value={myRating}
-            onChange={(e) => setMyRating(Number(e.target.value))}
-            className="w-60"
-          />
-        </label>
-        <textarea
-          placeholder={t('productPage.yourComment')}
-          value={myComment}
-          onChange={(e) => setMyComment(e.target.value)}
-          rows={3}
-          className="review-textarea"
-        />
-        <button disabled={!canSubmit} className="pad-8-10">
-          {t('productPage.leaveReview')}
-        </button>
-      </form>
-
-      {reviews.length === 0 ? (
-        <div>{t('productPage.noReviews')}</div>
-      ) : (
-        <div className="reviews-list">
-          {reviews.map((r, i) => (
-            <div key={r.id ?? i} className="review-card">
-              <div className="row-center gap-6">
-                <Stars value={r.rating} />
-                <strong>— {r.user_name || t('productPage.customer')}</strong>
-              </div>
-              <div className="prewrap">{r.comment}</div>
-              {r.created_at && (
-                <div className="review-date">
-                  {dateTime.format(new Date(r.created_at))}
+          {/* Магазин: сверху картинка, снизу белый блок */}
+          <section className="shop">
+            <h3>Магазин</h3>
+            {sellerId ? (
+              <Link to={`/shop/${sellerId}`} className="shop-card" aria-label="Перейти до магазину">
+                <div className="shop-card__media">
+                  <img src={shopCover || shopFruits} alt="" />
                 </div>
-              )}
-            </div>
+                <div className="shop-card__body">
+                  <div className="shop-card__name" title={sellerNameText || 'Магазин'}>
+                    {sellerNameText || 'Магазин'}
+                  </div>
+                  <div className="shop-card__cta">
+                    Перейти до магазину <span className="arrow" aria-hidden>›</span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="shop-card is-disabled">
+                <div className="shop-card__media"><img src={shopCover || shopFruits} alt="" /></div>
+                <div className="shop-card__body">
+                  <div className="shop-card__name">{sellerNameText || 'Магазин'}</div>
+                  <div className="shop-card__cta muted">Профіль продавця недоступний</div>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+
+      {/* About */}
+      <div className="pdp-below">
+        <section className="about" style={{ gridColumn: '1 / -1' }}>
+          <h3>Про товар</h3>
+          <p>{(product?.short_description || product?.description || '—')}</p>
+          <button className="link-inline" type="button">Детальніше</button>
+        </section>
+      </div>
+
+      {/* Reviews composer + list */}
+      <div className="reviews-strip" id="reviews">
+        <div className="stars">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <button
+              key={i}
+              className="sbtn"
+              type="button"
+              onClick={() => setRevRating(i + 1)}
+              aria-label={`${i + 1}/5`}
+              title={`${i + 1}/5`}
+            >
+              <img src={i < revRating ? star : starGray} alt="" />
+            </button>
+          ))}
+        </div>
+
+        <input
+          className="r-input"
+          placeholder="Залишіть свій відгук"
+          value={revText}
+          onChange={(e) => setRevText(e.target.value)}
+        />
+
+        <button className="r-attach" type="button" onClick={() => fileRef.current?.click()} title="Додати фото">
+          <img src={addIcon} alt="" />
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={handleChooseFiles}
+        />
+        <button className="r-send" type="button" onClick={handleSendReview} title="Надіслати">
+          <img src={sendIcon} alt="" />
+        </button>
+
+        <label className="anon" title="Приховати ім'я та прізвище">
+          <span>Анонімний відгук</span>
+          <input type="checkbox" checked={revAnon} onChange={(e) => setRevAnon(e.target.checked)} />
+        </label>
+      </div>
+
+      {revFiles.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, padding: '8px 20px 0 20px' }}>
+          {revFiles.map((f, idx) => (
+            <span key={idx} style={{ fontSize: 12, opacity: .8 }}>{f.name}</span>
           ))}
         </div>
       )}
+
+      <div style={{ padding: '10px 20px 30px' }}>
+        {revLoading ? (
+          <div style={{ opacity: .6 }}>Завантаження відгуків…</div>
+        ) : (
+          reviews.map((r) => (
+            <div key={r.id || r._id} style={{ border: '1px solid #eee', borderRadius: 12, padding: 12, margin: '10px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <strong>
+                  {r.is_anonymous ? 'Анонім' :
+                    ((r.user?.first_name || r.first_name || '') + ' ' + (r.user?.last_name || r.last_name || '')).trim() || r.user_name || r.username || 'Користувач'}
+                </strong>
+                <span style={{ opacity: .6, fontSize: 13 }}>
+                  {new Date(r.created_at || r.createdAt || r.updated_at || Date.now()).toLocaleDateString('uk-UA')}
+                </span>
+                <span style={{ marginLeft: 'auto' }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <img key={i} src={i < (Number(r.rating) || 0) ? star : starGray} alt="" style={{ height: 14, verticalAlign: 'middle' }} />
+                  ))}
+                </span>
+              </div>
+              {(r.comment || r.text) && <div style={{ margin: '4px 0 8px 0' }}>{r.comment || r.text}</div>}
+              {!!(r.images?.length) && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {r.images.map((img, i) => {
+                    const src = typeof img === 'string'
+                      ? normSrc(img)
+                      : normSrc(img?.url || img?.src || img?.path || img?.image_url || img?.imageUrl);
+                    return src ? <img key={i} src={src} alt="" style={{ height: 64, borderRadius: 8 }} /> : null;
+                  })}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

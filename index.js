@@ -117,6 +117,24 @@ const uploadChat = multer({
   fileFilter: (req, file, cb) => cb(null, isAllowedAttachment(file))
 });
 
+/* ===== Reviews images upload (for product reviews) ===== */
+const reviewsDir = path.join(uploadsRoot, 'reviews');
+fs.mkdirSync(reviewsDir, { recursive: true });
+
+const reviewsStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, reviewsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '.jpg');
+    cb(null, `${Date.now()}_${Math.random().toString(36).slice(2)}${ext}`);
+  }
+});
+
+const uploadReviews = multer({
+  storage: reviewsStorage,
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB на файл
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype))
+});
+
 /* ===== HTTP + Socket.IO ===== */
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: allowedOrigins, credentials: true } });
@@ -435,6 +453,63 @@ async function ensureProductsSchema() {
     console.error('Не удалось инициализировать таблицы:', e?.message || e);
   }
 })();
+
+// === ensure review_images with EXACT same type as product_reviews.id ===
+async function ensureReviewImages(db, dbName) {
+  try {
+    // 1) узнаём тип id в product_reviews
+    const [cols] = await db.query(`
+      SELECT COLUMN_TYPE
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'product_reviews' AND COLUMN_NAME = 'id'
+      LIMIT 1
+    `, [dbName]);
+
+    if (!cols.length) {
+      console.warn('⚠️ product_reviews.id не найден — пропускаю review_images');
+      return;
+    }
+
+    const columnType = cols[0].COLUMN_TYPE;  // напр. 'int(11) unsigned' или 'bigint(20) unsigned'
+    // выделим базовый тип и unsigned
+    const isUnsigned = /unsigned/i.test(columnType);
+    const isBig = /bigint/i.test(columnType);
+    const base = isBig ? 'BIGINT' : 'INT';
+    const unsigned = isUnsigned ? 'UNSIGNED' : '';
+
+    // 2) создаём таблицу если её нет
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS review_images (
+        id ${base} ${unsigned} AUTO_INCREMENT PRIMARY KEY,
+        review_id ${base} ${unsigned} NOT NULL,
+        url VARCHAR(512) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_review (review_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // 3) приводим тип review_id на случай, если таблица уже существовала с другим типом
+    await db.query(`
+      ALTER TABLE review_images MODIFY review_id ${base} ${unsigned} NOT NULL;
+    `);
+
+    // 4) (пере)создаём внешний ключ
+    // сначала пытаемся удалить, если уже существует (не страшно, если не было)
+    try { await db.query(`ALTER TABLE review_images DROP FOREIGN KEY fk_review_images_review`); } catch (_) {}
+
+    await db.query(`
+      ALTER TABLE review_images
+      ADD CONSTRAINT fk_review_images_review
+      FOREIGN KEY (review_id) REFERENCES product_reviews(id) ON DELETE CASCADE;
+    `);
+
+    console.log('✅ review_images table ensured (type:', base, unsigned, ')');
+  } catch (e) {
+    console.error('ensure review_images error:', e?.message || e);
+  }
+}
+
+await ensureReviewImages(db, DB_NAME);
 
 /* ===== Username/password auth (basic) ===== */
 app.post('/api/register', async (req, res) => {
@@ -1406,6 +1481,7 @@ app.get('/api/products/:id', async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 });
+
 app.get('/api/products/:id/reviews', async (req, res) => {
   const productId = Number(req.params.id);
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit ?? '20', 10)));
@@ -1414,40 +1490,80 @@ app.get('/api/products/:id/reviews', async (req, res) => {
   try {
     const [rows] = await db.query(
       `
-      SELECT r.id, r.rating, r.comment, r.created_at, r.updated_at, r.user_id,
-             TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS user_name, u.username
+      SELECT
+        r.id, r.product_id, r.user_id, r.rating, r.comment, r.created_at, r.updated_at,
+        TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS user_name,
+        u.username,
+        GROUP_CONCAT(ri.url SEPARATOR '||') AS images_csv
       FROM product_reviews r
       JOIN users u ON u.id = r.user_id
+      LEFT JOIN review_images ri ON ri.review_id = r.id
       WHERE r.product_id = ?
+      GROUP BY r.id
       ORDER BY r.created_at DESC, r.id DESC
       LIMIT ? OFFSET ?`,
       [productId, limit, offset]
     );
-    res.json({ items: rows || [], limit, offset });
+    const items = (rows || []).map(r => ({
+      ...r,
+      images: r.images_csv ? r.images_csv.split('||') : []
+    }));
+    res.json({ items, limit, offset });
   } catch (e) {
     console.error('GET /api/products/:id/reviews error', e);
     res.status(500).json({ message: 'Server error' });
   }
 });
-app.post('/api/products/:id/reviews', requireAuth, async (req, res) => {
+
+// multipart: rating, comment, is_anonymous + images[]
+app.post('/api/products/:id/reviews', requireAuth, uploadReviews.array('images[]', 3), async (req, res) => {
   const productId = Number(req.params.id);
   let { rating, comment } = req.body || {};
   if (!Number.isFinite(productId)) return res.status(400).json({ message: 'Invalid id' });
   rating = parseInt(rating, 10);
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-    return res.status(400).json({ message: 'rating должен быть целым числом от 1 до 5' });
+    return res.status(400).json({ message: 'rating должен быть целым числом 1–5' });
   }
   comment = (comment ?? '').toString().trim() || null;
+
   try {
+    // 1) сохраняем/обновляем сам отзыв (используй свой запрос, если хочешь)
     await db.query(
-      SQL.insert_general_12,
+      `
+      INSERT INTO product_reviews (product_id, user_id, rating, comment)
+      VALUES (?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE rating = VALUES(rating), comment = VALUES(comment), updated_at = CURRENT_TIMESTAMP
+      `,
       [productId, req.user.id, rating, comment]
     );
-    const [rows] = await db.query(
-      SQL.select_product_reviews_02,
+
+    // 2) берём актуальную запись отзыва пользователя по этому товару
+    const [[review]] = await db.query(
+      `SELECT * FROM product_reviews WHERE product_id = ? AND user_id = ? ORDER BY updated_at DESC, id DESC LIMIT 1`,
       [productId, req.user.id]
     );
-    return res.status(201).json({ item: rows[0] });
+
+    // 3) если пришли файлы — докладываем в review_images
+    const files = Array.isArray(req.files) ? req.files : [];
+    if (files.length) {
+      const values = files.map(f => [review.id, `/uploads/reviews/${f.filename}`]);
+      await db.query(`INSERT INTO review_images (review_id, url) VALUES ?`, [values]);
+    }
+
+    // 4) отдаём отзыв с прикреплёнными картинками
+    const [[row]] = await db.query(
+      `
+      SELECT
+        r.*, GROUP_CONCAT(ri.url SEPARATOR '||') AS images_csv
+      FROM product_reviews r
+      LEFT JOIN review_images ri ON ri.review_id = r.id
+      WHERE r.id = ?
+      GROUP BY r.id
+      `,[review.id]
+    );
+    const item = row ? { ...row, images: row.images_csv ? row.images_csv.split('||') : [] } : review;
+
+    return res.status(201).json({ item });
   } catch (e) {
     console.error('POST /api/products/:id/reviews error', e);
     res.status(500).json({ message: 'Server error' });
@@ -2141,6 +2257,25 @@ app.post('/api/wishlist', requireAuth, async (req, res) => {
     res.status(201).json({ ok:true, added:true, product_id:pid });
   } catch (e) { console.error('POST /api/wishlist', e); res.status(500).json({ message: 'Server error' }); }
 });
+
+// Ensure review_images table (stores urls of review pictures)
+(async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS review_images (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        review_id INT NOT NULL,
+        url VARCHAR(512) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_review (review_id),
+        CONSTRAINT fk_review_images_review FOREIGN KEY (review_id) REFERENCES product_reviews(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    console.log('✅ review_images table ensured');
+  } catch (e) {
+    console.error('ensure review_images error:', e?.message || e);
+  }
+})();
 
 /* ===== Fallback seller products endpoint (if not present) ===== */
 try {
