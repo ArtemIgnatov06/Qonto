@@ -157,7 +157,7 @@
   .cards__add-text{ font:500 14px/24px 'Ubuntu'; }
   .cards__add-icon{ margin-left:auto; margin-right:14px; display:block; }
 
-    .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;}
+    .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px,1px);white-space:nowrap;}
 
   /* Геометрия секции по макету (левый верх 568×251) */
   .ps-root .addresses{
@@ -190,8 +190,10 @@
 
   /* Правый блок-адрес: по макету 247px (ряд1) и 243px (ряд2) */
   .ps-root .addr-row__field{
-    position:absolute; top:0; height:55px; border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box;
-  }
+    position:absolute; top:0; height:55px; 
+    border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box; 
+    background:#fff;
+}
   .addr-row__field--r1{ left:87px;  width:247px; } /* 568→655 (+87), 247×55 */
   .addr-row__field--r2{ left:103px; width:243px; } /* 568→671 (+103), 243×55 */
 
@@ -205,11 +207,13 @@
 
   /* Инпуты редактирования */
   .addr-row__input,
-  .ps-root .addr-row__input-label{
+.ps-root .addr-row__input-label,
+.addr-row__input-label{
     position:absolute; top:50%; transform:translateY(-50%);
-    height:32px; border:1.5px solid #ECECEC; border-radius:7px; padding:0 8px; box-sizing:border-box;
-    font:400 14px/32px 'Ubuntu'; color:#363535; background:#fff; width: 225px;
-  }
+    height:32px; padding:0 12px; box-sizing:border-box;
+    font:400 14px/32px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+    color:#363535; background:transparent; border:0;
+}
   .addr-row__input[hidden],
   .addr-row__input-label[hidden]{ display:none; }
   .addr-row__input:focus,
@@ -218,8 +222,8 @@
   /* Позиции инпутов */
   .addr-row__input-label--w77{ left:10px; width:57px; }  /* внутри 77 */
   .addr-row__input-label--w93{ left:10px; width:73px; }  /* внутри 93 */
-  .addr-row__input--r1{ left:96px; right:47px; }  /* внутри правого поля первого ряда */
-  .addr-row__input--r2{ left:112px; right:47px; } /* внутри правого поля второго ряда */
+  .addr-row__input--r1{ left:107px; right:47px; }  /* внутри правого поля первого ряда */
+  .addr-row__input--r2{ left:123px; right:47px; } /* внутри правого поля второго ряда */
 
   /* Карандаш (29×29) справа */
   .ps-root .addr-row__edit{
@@ -276,7 +280,7 @@
   color:#363535;
 }
 
-/* ===== Кнопка “Змінити пароль” (Group 262) ===== */
+/* ===== Кнопка “Змінити пароль” ===== */
 .ps-root .btn-change-pass{
   position:absolute; left:80px; top:426px;
   width:206px; height:55px;
@@ -286,6 +290,7 @@
   display:flex; align-items:center; gap:12px;
   padding:0 16px 0 30px; cursor:pointer;
   transition:transform .12s ease, filter .12s ease;
+  z-index: 2;
 }
 .ps-root .btn-change-pass__text{
   font-weight:500; font-size:14px; line-height:24px;
@@ -298,6 +303,62 @@
 .btn-change-pass:hover{ transform:translateY(-1px); filter:brightness(1.02); }
 .btn-change-pass:active{ transform:translateY(0);    filter:brightness(0.98); }
 .btn-change-pass:focus-visible{ outline:2px solid #35C65E; outline-offset:2px; background:#2fb357; }
+
+/* ===== Slide-down panel with 2 inputs ===== */
+.ps-root .pass-panel{
+  position:absolute; left:80px; top:491px;
+  width:391px;
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  transition:max-height .26s ease, opacity .2s ease;
+}
+.ps-root .pass-panel.is-open{
+  max-height:220px;
+  opacity:1;
+}
+
+/* One pass field (look like inline-field) */
+.ps-root .pass-field{
+  position:relative;
+  width:391px; height:55px;
+  margin:0 0 10px 0;
+}
+.ps-root .pass-field__frame{
+  position:absolute; inset:0;
+  border:2px solid #ECECEC; border-radius:10px; box-sizing:border-box;
+  background:#fff;
+}
+.ps-root .pass-field__input{
+  position:absolute; left:20px; right:20px; top:50%; transform:translateY(-50%);
+  height:32px; padding:0 10px; box-sizing:border-box;
+  font:400 14px/32px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#363535; background:#fff; border:1.5px solid #ECECEC; border-radius:7px;
+}
+.pass-field.is-error .pass-field__frame,
+.pass-field.is-error .pass-field__input{ border-color:#FF4D4F !important; }
+
+/* Second row has hint text below */
+.ps-root .pass-field--second{ margin-bottom:16px; }
+.ps-root .pass-field__hint{
+  position:absolute; left:6px; right:6px; top:58px;
+  font:400 12px/16px 'Ubuntu', system-ui, -apple-system, Arial, sans-serif;
+  color:#FF4D4F;
+}
+
+/* Save password button */
+.ps-root .btn-pass-save{
+  width:180px; height:44px;
+  border-radius:10px; border:2px solid #35C65E;
+  background:#FFFFFF; color:#35C65E;
+  display:flex; align-items:center; justify-content:center;
+  font:500 14px/24px 'Ubuntu';
+  cursor:pointer;
+  transition:transform .12s ease, filter .12s ease, opacity .2s ease;
+}
+.ps-root .btn-pass-save:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+.ps-root .btn-pass-save:active{ transform:translateY(0);    filter:brightness(0.98); }
+.ps-root .btn-pass-save:disabled{ opacity:.6; cursor:not-allowed; }
 
 /* ===== Соглашение/переключатель (Group 263) ===== */
 .ps-root .twofa{
@@ -505,8 +566,17 @@
   display:flex; align-items:center; justify-content:center; gap:12px;
   padding:0 16px; cursor:pointer;
   transition:transform .12s ease, filter .12s ease, opacity .2s ease;
+  z-index: 2;
 }
 .ps-root .btn-save__text{ font-weight:500; font-size:14px; line-height:24px; }
 .ps-root .btn-save:hover{ transform:translateY(-1px); filter:brightness(1.02); }
 .ps-root .btn-save:active{ transform:translateY(0);    filter:brightness(0.98); }
 .ps-root .btn-save:disabled{ opacity:.6; cursor:not-allowed; }
+
+/* Ensure address container doesn't render a full-width bar */
+.addresses__list{ overflow:visible; }
+
+/* address focus */
+.addr-row__input:focus,
+.addr-row__input-label:focus{ outline:none; box-shadow:0 0 0 2px rgba(53,198,94,.25); }
+.addr-row__input::placeholder{ color:#A3A2A3; }

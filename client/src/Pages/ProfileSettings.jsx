@@ -1,4 +1,4 @@
-// client/src/Pages/ProfileSettings.jsx — one Save button to persist ALL changes (name, email, 2FA, addresses, cards)
+// client/src/Pages/ProfileSettings.jsx — one Save button to persist ALL changes (name, email, 2FA, addresses, cards) + password changer
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../Styles/ProfileSettings.css';
 import { useAuth } from '../Hooks/useAuth';
@@ -135,6 +135,26 @@ async function persistTwoFA(enabled){
   try{ localStorage.setItem('twofa', JSON.stringify({ enabled: !!enabled })); }catch{}
 }
 
+// Password change (separate action)
+async function changePasswordRequest(newPassword){
+  const urls = ['/api/me/change-password','/api/change-password','/users/me/password'];
+  let lastErr = null;
+  for (const u of urls){
+    try{
+      const res = await fetch(u, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        credentials:'include',
+        body: JSON.stringify({ new_password: newPassword })
+      });
+      if (res.ok) return { ok:true };
+      const err = await res.json().catch(()=>({ message:'Помилка зміни пароля' }));
+      lastErr = err?.message || 'Помилка зміни пароля';
+    }catch(e){ lastErr = e?.message || 'Помилка мережі'; }
+  }
+  return { ok:false, message:lastErr || 'Не вдалося змінити пароль' };
+}
+
 /* ========================= Page ========================= */
 export default function ProfileSettings(){
   const { user: authUser, setUser: setAuthUser } = useAuth() || {};
@@ -185,6 +205,15 @@ export default function ProfileSettings(){
   // 2FA
   const [twofa, setTwofa] = useState(false);
 
+  // Password change UI
+  const [showPass, setShowPass] = useState(false);
+  const [p1, setP1] = useState('');
+  const [p2, setP2] = useState('');
+  const [passErr, setPassErr] = useState('');
+  const [passBusy, setPassBusy] = useState(false);
+  const p1Ref = useRef(null);
+  useEffect(()=>{ if (showPass) p1Ref.current?.focus(); }, [showPass]);
+
   // Addresses — add empty
   const [addresses, setAddresses] = useState([]);
   const addAddress = () => setAddresses(prev => prev.length < 2 ? [...prev, { label:'', address:'' }] : prev);
@@ -195,6 +224,47 @@ export default function ProfileSettings(){
   const addCard = () => setCards(prev => prev.length < 3 ? [...prev, { number:'' }] : prev);
   const saveCard = (idx, val) => setCards(prev => prev.map((c,i)=> i===idx ? { ...c, number:val } : c));
   const cardsAddTop = useMemo(()=> (cards.length ? cards.length*65 + 20 : 90), [cards.length]);
+  // ===== Initial load for addresses, cards and 2FA =====
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      // small helper to try a list of endpoints
+      const fetchList = async (urls) => {
+        for (const u of urls) {
+          try {
+            const r = await fetch(u, { credentials: 'include' });
+            if (r.ok) return await r.json();
+          } catch {}
+        }
+        return null;
+      };
+
+      // Try API first
+      let addr = await fetchList(['/api/addresses','/addresses','/user/addresses']);
+      let crds = await fetchList(['/api/cards','/cards','/payment/cards']);
+      let tf   = await fetchList(['/api/security/2fa','/api/2fa','/users/2fa']);
+
+      // Fallback to localStorage
+      try { if (!addr) addr = JSON.parse(localStorage.getItem('addresses') || 'null'); } catch {}
+      try { if (!crds) crds = JSON.parse(localStorage.getItem('cards') || 'null'); } catch {}
+      try { if (!tf)   tf   = JSON.parse(localStorage.getItem('twofa') || 'null'); } catch {}
+
+      if (cancelled) return;
+
+      if (Array.isArray(addr)) {
+        setAddresses(addr.map(a => ({ label: a.label || '', address: a.address || '' })));
+      }
+      if (Array.isArray(crds)) {
+        setCards(crds.map(c => ({ number: (c.number || '').replace(/\D/g,'').slice(0,16) })));
+      }
+      if (tf && typeof tf === 'object') {
+        const en = (tf.enabled != null ? !!tf.enabled : !!tf.isEnabled || !!tf.on);
+        setTwofa(en);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   // explicit save state
   const [saving, setSaving] = useState(false);
@@ -215,6 +285,32 @@ export default function ProfileSettings(){
     } finally {
       setSaving(false);
     }
+  };
+
+  const handlePasswordSave = async () => {
+    const a = (p1||'').trim();
+    const b = (p2||'').trim();
+    if (a.length < 6){
+      setPassErr('Мінімум 6 символів');
+      return;
+    }
+    if (a !== b){
+      setPassErr('Паролі не співпадають');
+      return;
+    }
+    setPassErr('');
+    setPassBusy(true);
+    const res = await changePasswordRequest(a);
+    setPassBusy(false);
+    if (!res.ok){
+      setPassErr(res.message || 'Не вдалося змінити пароль');
+      return;
+    }
+    // success
+    setP1('');
+    setP2('');
+    setShowPass(false);
+    alert('Пароль успішно змінено');
   };
 
   return (
@@ -275,7 +371,7 @@ export default function ProfileSettings(){
         )}
       </div>
 
-      {/* Security widgets (2FA) */}
+      {/* Security widgets (2FA + Password) */}
       <section className="security-widgets" aria-label="Налаштування безпеки">
         <div className="twofa" role="group" aria-label="Двофакторна автентифікація">
           <span className="twofa__label">Двофакторна автентифікація</span>
@@ -286,10 +382,56 @@ export default function ProfileSettings(){
             onClick={()=>setTwofa(v=>!v)}
           />
         </div>
-        <button className="btn-change-pass" type="button">
-          <span className="btn-change-pass__text">Змінити пароль</span>
+
+        <button
+          className="btn-change-pass"
+          type="button"
+          onClick={()=> setShowPass(v => !v)}
+          aria-expanded={showPass ? 'true' : 'false'}
+          aria-controls="pass-panel"
+        >
+          <span className="btn-change-pass__text">{showPass ? 'Сховати' : 'Змінити пароль'}</span>
           <img className="btn-change-pass__icon" src={settingsPng} alt="" width="27" height="27" draggable="false"/>
         </button>
+
+        {/* Slide-down panel */}
+        <div id="pass-panel" className={`pass-panel${showPass ? ' is-open' : ''}`} aria-hidden={showPass ? 'false' : 'true'}>
+          <div className={`pass-field ${passErr ? 'is-error' : ''}`}>
+            <div className="pass-field__frame"></div>
+            <input
+              ref={p1Ref}
+              type="password"
+              className="pass-field__input"
+              placeholder="Новий пароль"
+              value={p1}
+              onChange={(e)=> setP1(e.target.value)}
+              onKeyDown={(e)=>{ if (e.key==='Enter') { document.getElementById('pass2')?.focus(); } }}
+            />
+          </div>
+
+          <div className={`pass-field pass-field--second ${passErr ? 'is-error' : ''}`}>
+            <div className="pass-field__frame"></div>
+            <input
+              id="pass2"
+              type="password"
+              className="pass-field__input"
+              placeholder="Повторіть пароль"
+              value={p2}
+              onChange={(e)=> setP2(e.target.value)}
+              onKeyDown={(e)=>{ if (e.key==='Enter') handlePasswordSave(); }}
+            />
+            {passErr && <div className="pass-field__hint" role="alert">{passErr}</div>}
+          </div>
+
+          <button
+            className="btn-pass-save"
+            type="button"
+            onClick={handlePasswordSave}
+            disabled={passBusy}
+          >
+            {passBusy ? 'Збереження...' : 'Зберегти пароль'}
+          </button>
+        </div>
 
         {/* SINGLE SAVE BUTTON FOR THE WHOLE PAGE */}
         <button className="btn-save" type="button" onClick={handleSaveAll} disabled={saving}>
@@ -409,11 +551,14 @@ function AddressRow({ index, labelDefault='', valueDefault='', onSave }){
   return (
     <div className="addr-row" data-index={index} style={{ top }}>
       <div className={`addr-row__label ${isFirst ? 'addr-row__label--w77' : 'addr-row__label--w93'}`}></div>
-      <div className="addr-row__label-text" onClick={()=>setEditing(true)}>{label}</div>
+      {!editing && (
+        <div className="addr-row__label-text" onClick={()=>setEditing(true)}>{label}</div>
+      )}
       <div className={`addr-row__field ${isFirst ? 'addr-row__field--r1' : 'addr-row__field--r2'}`}></div>
-      <span className="addr-row__value" onClick={()=>setEditing(true)}>{addr}</span>
 
-      {editing && (
+      {!editing ? (
+        <span className="addr-row__value" onClick={()=>setEditing(true)}>{addr}</span>
+      ) : (
         <>
           <input
             ref={labRef}

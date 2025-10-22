@@ -2295,3 +2295,28 @@ try {
     });
   }
 } catch {}
+
+// index.js (server) — добавить маршрут смены пароля
+app.post('/api/me/change-password', async (req, res) => {
+  try {
+    // 1) получаем юзера из сессии/JWT
+    const userId = req.user?.id || req.auth?.id || req.session?.user?.id;
+    if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+    // 2) валидируем вход
+    const { new_password } = req.body || {};
+    if (!new_password || new_password.length < 6) {
+      return res.status(400).json({ message: 'Пароль закороткий' });
+    }
+
+    // 3) хэш и апдейт
+    const hash = await bcrypt.hash(new_password, 10);
+    await db.execute('UPDATE users SET password_hash=? WHERE id=?', [hash, userId]);
+
+    // 4) done
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('change-password error:', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
