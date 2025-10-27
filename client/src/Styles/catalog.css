@@ -1,18 +1,15 @@
-:root{
+/* вместо :root — локально для страницы каталога */
+.cat-stage{
   --stroke:#ECECEC;
   --text:#363535;
   --card-w:268px;
-  --card-h:250.44px;
+  --card-h:250.44px;      /* нужная высота */
   --gap:25px;
 
-  /* Фигмовские контейнеры под ноутбуки — без «резины» */
-  --container-1600: 1440px; /* когда окно широкое */
-  --container-1366: 1200px; /* популярный ноут 1366 */
-  --container-1280: 1120px; /* ещё один ноуткейс */
-}
+  --container-1600: 1440px;
+  --container-1366: 1200px;
+  --container-1280: 1120px;
 
-/* сцена */
-.cat-stage{
   width:100%;
   background:#fff;
 }
@@ -36,10 +33,10 @@
 /* Сетка — количество колонок меняем ступенями, карточка всегда фикс ширины/высоты */
 .cat-grid{
   display:grid;
-  grid-auto-rows: var(--card-h);
-  grid-template-columns: repeat(5, var(--card-w));
-  gap: var(--gap);
-  justify-content: start;            /* как в фигме — от левого края контейнера */
+  grid-auto-rows: var(--card-h, 250.44px);   /* фолбэк */
+  grid-template-columns: repeat(5, var(--card-w, 268px));
+  gap: var(--gap, 25px);
+  justify-content:start;
 }
 
 /* ступени по количеству колонок (ноутбуки) */
@@ -51,16 +48,18 @@
 }
 
 /* Карточка (пикс-в-пикс из фигмы, но без абсолютов к странице) */
+
 .cat-card{
   position:relative;
-  width:var(--card-w);
-  height:var(--card-h);
+  width:var(--card-w, 268px);
+  height:var(--card-h, 250.44px);            /* фолбэк */
+  min-height:var(--card-h, 250.44px);        /* страховка */
   padding:0;
   border:none;
   background:transparent;
   cursor:pointer;
   overflow:hidden;
-  border-radius:6.5px; /* как в макете */
+  border-radius:6.5px;
 }
 
 /* фон/рамка */
