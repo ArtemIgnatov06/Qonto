@@ -1,31 +1,26 @@
 // client/src/Pages/ModerCases.jsx
 import React, { useEffect, useState } from 'react';
 import '../Styles/ModerCases.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import backArrow from '../assets/planex.png';
 import checkoutTick from '../assets/checkout-tick.png';
 
-/** Аватарка с плейсхолдером */
 function Avatar({ src, name='' }){
   if (src) return <img className="case-ava" src={src} alt="" />;
   const initials = (name||'').trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('') || '??';
   return <span className="case-ava case-ava--ph">{initials}</span>;
 }
 
-/** Одна строка списка */
 function CaseRow({ item, kind, onOpen }){
   const title = kind==='request'
     ? `Від ${item.user_name||'Користувач'} надійшла заявка на створення магазину “${item.store_name||'Без назви'}”. Перевірте, будь ласка.`
     : `Прийшла скарга на товар магазину “${item.store_name||'Без назви'}”. Перевірте, будь ласка.`;
-
   return (
     <li className="case-row">
       <div className="case-card">
         <Avatar src={item.avatar_url} name={item.user_name} />
-        <p className="case-text" title={title}>
-          {title}
-        </p>
+        <p className="case-text" title={title}>{title}</p>
         <button type="button" className="case-cta" onClick={()=> onOpen(item)}>
           <img className="case-cta-ico" src={checkoutTick} alt="" aria-hidden="true" />
           <span>Перевірити</span>
@@ -37,7 +32,10 @@ function CaseRow({ item, kind, onOpen }){
 
 export default function ModerCases(){
   const navigate = useNavigate();
-  const [tab, setTab] = useState('requests'); // 'requests' | 'complaints'
+  const [params] = useSearchParams();
+  const initialTab = (params.get('tab') === 'complaints') ? 'complaints' : 'requests';
+
+  const [tab, setTab] = useState(initialTab); // 'requests' | 'complaints'
   const [requests, setRequests] = useState([]);
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -52,8 +50,8 @@ export default function ModerCases(){
           fetch('/api/moder/cases/complaints?limit=20', { credentials:'include' })
         ]);
         if (!stop){
-          if (r1.ok){ const j = await r1.json(); setRequests(j?.items||[]); }
-          if (r2.ok){ const j = await r2.json(); setComplaints(j?.items||[]); }
+          if (r1.ok){ const j = await r1.json(); setRequests(Array.isArray(j)?j:(j.items||[])); }
+          if (r2.ok){ const j = await r2.json(); setComplaints(Array.isArray(j)?j:(j.items||[])); }
         }
       }catch{/* ignore */}
       finally{ if(!stop) setLoading(false); }
@@ -65,13 +63,19 @@ export default function ModerCases(){
 
   const openDetails = (item) => {
     const type = tab === 'requests' ? 'request' : 'complaint';
-    // важно: у items должен быть корректный id (он уже приходит из бэка)
-    navigate(`/moder/cases/${item.id}?type=${type}`, { state: { full_name: item.user_name, avatar_url: item.avatar_url } });
+    navigate(`/moder/cases/${item.id}?type=${type}`, {
+      state: {
+        avatar_url: item.avatar_url || null,
+        user_name:  item.user_name  || item.username || null,
+        first_name: item.first_name || null,
+        last_name:  item.last_name  || null,
+        full_name:  item.full_name  || null,
+      }
+    });
   };
 
   return (
     <main className="cases-page" role="main">
-      {/* Заголовок — такая же зона, как на странице уведомлений */}
       <div className="cases-head">
         <button className="head-left-btn" type="button" onClick={()=> navigate(-1)}>
           <img className="head-left-btn__ico" src={backArrow} alt="" aria-hidden="true" />
@@ -79,21 +83,11 @@ export default function ModerCases(){
         </button>
       </div>
 
-      {/* Табы */}
       <div className="tabs">
-        <button
-          className={'tab' + (tab==='requests' ? ' is-active' : '')}
-          onClick={()=> setTab('requests')}
-          type="button"
-        >Заявки</button>
-        <button
-          className={'tab' + (tab==='complaints' ? ' is-active' : '')}
-          onClick={()=> setTab('complaints')}
-          type="button"
-        >Скарги</button>
+        <button className={'tab' + (tab==='requests' ? ' is-active' : '')} onClick={()=> setTab('requests')} type="button">Заявки</button>
+        <button className={'tab' + (tab==='complaints' ? ' is-active' : '')} onClick={()=> setTab('complaints')} type="button">Скарги</button>
       </div>
 
-      {/* Список */}
       <ul className="case-list" aria-busy={loading?'true':'false'}>
         {list.map((it)=> (
           <CaseRow
@@ -103,9 +97,7 @@ export default function ModerCases(){
             onOpen={openDetails}
           />
         ))}
-        {!loading && list.length===0 && (
-          <li className="empty">Поки порожньо</li>
-        )}
+        {!loading && list.length===0 && <li className="empty">Поки порожньо</li>}
       </ul>
     </main>
   );

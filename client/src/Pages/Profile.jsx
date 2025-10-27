@@ -86,10 +86,12 @@ async function fetchUserFallback(){
   return await fetchJSONFrom(['/api/profile','/api/me','/auth/me','/users/me']);
 }
 
+/* ---------- FIXED normalizeUser ---------- */
 function normalizeUser(src){
   if (!src) return {};
   const roots = [src, src.user, src.data, src.profile, pick(src,'data.user'), pick(src,'profile.user')].filter(Boolean);
   const best = Object.assign({}, ...roots);
+
   let first = best.first_name ?? best.firstName ?? best.given_name ?? best.givenName ?? best.first;
   let last  = best.last_name  ?? best.lastName  ?? best.family_name ?? best.familyName ?? best.last;
   let full  = best.full_name  ?? best.fullName  ?? best.displayName ?? best.name;
@@ -98,21 +100,43 @@ function normalizeUser(src){
     first = first || sp.first;
     last  = last  || sp.last;
   }
-  const email = best.email ?? best.mail ?? pick(best,'contacts.email') ?? pick(best,'emails.0') ?? '';
+
+  const email  = best.email ?? best.mail ?? pick(best,'contacts.email') ?? pick(best,'emails.0') ?? '';
   const avatar = best.avatar_url ?? best.avatarUrl ?? best.avatar ?? pick(best,'images.avatar') ?? '';
+
+  // role/id flags (в предыдущей версии были "после return" — из-за этого не попадали в user)
+  const idRaw   = best.id ?? best.user_id ?? best.userId ?? best.uid ?? null;
+  const id      = idRaw ?? null;
+
+  const roleRaw = best.role ?? best.user_role ?? best.role_name ?? best.rate ?? null;
+  const role    = roleRaw ? String(roleRaw).toLowerCase() : null;
+
+  const is_admin = !!(
+    best.is_admin || best.isAdmin ||
+    best.is_moderator || best.isModerator ||
+    role === 'admin' || role === 'moderator'
+  );
 
   // normalize seller fields too
   const seller_status =
     best.seller_status ?? best.sellerStatus ?? best.seller?.status ?? null;
+
   const seller_rejection_reason =
     best.seller_rejection_reason ?? best.sellerRejectionReason ?? best.seller?.rejection_reason ?? null;
 
-  return { first_name:first||'', last_name:last||'', email, avatar, seller_status, seller_rejection_reason };
-  const id = best.id ?? best.user_id ?? best.userId ?? best.uid ?? null;
-  const role = best.role ?? best.user_role ?? best.role_name ?? (best.is_admin ? 'admin' : null);
-  const is_admin = !!(best.is_admin || role === 'admin' || role === 'moderator');
-  return { id, role, is_admin, first_name:first||'', last_name:last||'', email, avatar };
+  return {
+    id,
+    role,
+    is_admin,
+    first_name: first || '',
+    last_name : last  || '',
+    email,
+    avatar,
+    seller_status,
+    seller_rejection_reason
+  };
 }
+/* ---------------------------------------- */
 
 async function uploadAvatar(file){
   const form = new FormData();
@@ -201,9 +225,13 @@ export default function Profile(){
     user?.sellerRejectionReason ??
     user?.seller?.rejection_reason ??
     null;
-  // Moderator check:
-  // We treat DB admin/moderator role OR specific id=2 as moderator.
-  const isModerator = !!(user?.is_admin || ['admin','moderator','адмін','модератор'].includes((user?.role||'').toString().toLowerCase()) || user?.id === 2);
+
+  // Moderator check (после фикса normalizeUser работает корректно)
+  const isModerator = !!(
+    user?.is_admin ||
+    ['admin','moderator','адмін','модератор'].includes((user?.role||'').toString().toLowerCase()) ||
+    user?.id === 2
+  );
 
   // Avatar upload
   const fileRef = useRef(null);
@@ -332,44 +360,45 @@ export default function Profile(){
             <span className="oc-frame" />
           </a>
 
-      {/* Banner with seller status–aware CTA */}
-      <div className="mini-banner">
-        {/* отключаем перехват кликов у декоративных элементов */}
-        <img className="bn-img" src={imgCompleteSmall} alt="" style={{ pointerEvents: 'none' }} />
-        <div className="bn-title">Відкрийте свій магазин та почніть свої перші продажі!</div>
+          {/* Banner with seller status–aware CTA */}
+          <div className="mini-banner">
+            {/* отключаем перехват кликов у декоративных элементов */}
+            <img className="bn-img" src={imgCompleteSmall} alt="" style={{ pointerEvents: 'none' }} />
+            <div className="bn-title">Відкрийте свій магазин та почніть свої перші продажі!</div>
 
-        {sellerStatus !== 'approved' ? (
-          <button
-            className="bn-btn"
-            type="button"
-            onClick={goApply}
-            disabled={sellerStatus === 'pending'}
-            aria-label="Перейти до Seller Application"
-            style={{ position: 'relative', zIndex: 2 }}
-          >
-            {sellerStatus === 'pending' ? 'Заявка відправлена' : 'Стати продавцем'}
-          </button>
-        ) : (
-          <button
-            className="bn-btn"
-            type="button"
-            onClick={() => navigate(ADD_PRODUCT_URL)}
-            aria-label="Додати товар"
-            style={{ position: 'relative', zIndex: 2 }}
-          >
-            Додати товар
-          </button>
-        )}
+            {sellerStatus !== 'approved' ? (
+              <button
+                className="bn-btn"
+                type="button"
+                onClick={goApply}
+                disabled={sellerStatus === 'pending'}
+                aria-label="Перейти до Seller Application"
+                style={{ position: 'relative', zIndex: 2 }}
+              >
+                {sellerStatus === 'pending' ? 'Заявка відправлена' : 'Стати продавцем'}
+              </button>
+            ) : (
+              <button
+                className="bn-btn"
+                type="button"
+                onClick={() => navigate(ADD_PRODUCT_URL)}
+                aria-label="Додати товар"
+                style={{ position: 'relative', zIndex: 2 }}
+              >
+                Додати товар
+              </button>
+            )}
 
-        {sellerStatus === 'rejected' && sellerRejectionReason && (
-          <p className="bn-reason" style={{ marginTop: 8, opacity: 0.75 }}>
-            Причина відхилення: {sellerRejectionReason}
-          </p>
-        )}
+            {sellerStatus === 'rejected' && sellerRejectionReason && (
+              <p className="bn-reason" style={{ marginTop: 8, opacity: 0.75 }}>
+                Причина відхилення: {sellerRejectionReason}
+              </p>
+            )}
 
-        <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" style={{ pointerEvents: 'none' }} />
-        <div className="bn-frame" style={{ pointerEvents: 'none' }}></div>
-      </div>
+            <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" style={{ pointerEvents: 'none' }} />
+            <div className="bn-frame" style={{ pointerEvents: 'none' }}></div>
+          </div>
+
           <h4 className="orders-history-title">Історія замовлень</h4>
 
           <div className="mini-product">
