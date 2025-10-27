@@ -103,7 +103,6 @@ export default function ProductNew() {
     return arr;
   }, [mainPreview, thumbPreviews]);
   // ===========================================================
-
   if (!user) return <div style={{ padding: 24 }}>Завантаження…</div>;
   if (user.seller_status !== 'approved') {
     return <div style={{ padding: 24 }}>Ваш обліковий запис ще не схвалено модератором.</div>;

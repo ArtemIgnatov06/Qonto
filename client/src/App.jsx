@@ -21,6 +21,8 @@ import Catalog from './Pages/Catalog';
 
 import AdminApplications from './Pages/AdminApplications.jsx';
 import SellerApplication from './Pages/SellerApplication';
+import SellerApplyComplete from './Pages/SellerApplyComplete';
+
 import ProductNew from './Pages/ProductNew';
 import AdminDeletions from './Pages/AdminDeletions';
 import CartPage from './Pages/CartPage';
@@ -95,7 +97,8 @@ export default function App() {
                 <Route path="/products/new" element={<ProductNew />} />
                 <Route path="/my/products" element={<MyProducts />} />
                 <Route path="/product/:id/edit" element={<ProductEdit />} />
-
+                  <Route path="/seller/complete" element={<SellerApplyComplete />} />
+                  
                 {/* Страница товара */}
                 <Route path="/product/:id" element={<ProductPage />} />
 
