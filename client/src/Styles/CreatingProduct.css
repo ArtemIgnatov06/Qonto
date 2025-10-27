@@ -565,3 +565,663 @@
   color:#FFF; 
   cursor:pointer;
 }
+
+/* === NEW: кнопки удаления на изображениях === */
+.img-delete{
+  position:absolute;
+  right:6px;
+  top:6px;
+  width:26px;
+  height:26px;
+  border:0;
+  border-radius:50%;
+  background:#2a2a2a;
+  color:#fff;
+  font-size:18px;
+  line-height:26px;
+  text-align:center;
+  cursor:pointer;
+  z-index:3;
+  opacity:0.9;
+}
+.img-delete:hover{ opacity:1; }
+.img-delete--main{ right:10px; top:10px; }
+
+/* === NEW: drag state (можешь добавить класс при dragover, но и так ок) */
+.thumb-slot[draggable="true"]{ cursor: grab; }
+.thumb-slot[draggable="true"]:active{ cursor: grabbing; }
+
+/* === NEW: категория — input + datalist, но валидируем на блюре */
+.group-1046{
+  position:absolute;
+  width: 340px;
+  height: 55px;
+  left: 813px;   /* выровняли по левому краю цены */
+  top: 519px;          /* на уровне цены */
+}
+.rectangle-cat{
+  box-sizing:border-box;
+  position:absolute;
+  inset:0;
+  border:2px solid #ECECEC;
+  border-radius:12px;
+  background:#FFF;
+  overflow:hidden;
+}
+.cat-input{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  border:0; outline:none; background:transparent;
+  font-size:18px;             /* как price-input */
+  line-height:55px;           /* как у остальных полей высотой 55 */
+  padding:0 14px;
+  color:#828181;
+}
+.cat-input::placeholder{ color:#828181; }
+
+/* === CHANGE: миниатюры — чтобы delete кнопка отображалась поверх */
+.thumb-slot { position:absolute; overflow:hidden; }
+.thumb-slot.has-image .thumb-preview { display:block; }
+.thumb-slot.has-image .img-delete { display:block; }
+
+/* === NEW: инлайн атрибуты (инпут внутри чипа) === */
+.attr-chip{
+  position:absolute; top:0; width:182px; height:55px;   /* шире, чтобы текст влезал */
+  border:2px solid #ECECEC; border-radius:12px; background:#FFF;
+  display:flex; align-items:center; justify-content:flex-start;
+  padding:0 36px 0 12px;
+  gap:8px;
+}
+.attr-chip .attr-input{
+  border:0; outline:none; background:transparent;
+  width:100%; height:100%;
+  font-size:16px; color:#363535;
+}
+.attr-chip .attr-del{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:24px; height:24px; border:0; border-radius:50%;
+  background:#eee; color:#333; cursor:pointer;
+  font-size:16px; line-height:24px; text-align:center;
+}
+.attr-chip .attr-del:hover{ background:#e4e4e4; }
+
+/* — твои существующие стили остаются без изменений ниже — */
+.attr-add-btn:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+
+
+/* контейнер атрибутов */
+.attrs-anchor{
+  position: absolute;
+  width: 550px;
+  height: 55px;
+  left: 813px;
+  top: 375px;
+  z-index: 600;
+}
+
+#attrs-root{
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 55px;
+  width: 100%;
+  display: flex;           /* главное */
+  align-items: center;     /* вертикальное выравнивание кнопки и чипов */
+  gap: 18px;               /* вместо ручных left */
+}
+
+/* чип с инпутом */
+.attr-chip{
+  position: relative;      /* больше не absolute */
+  width: 182px;
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  padding: 0 36px 0 12px;
+  gap: 8px;
+}
+
+.attr-chip .attr-input{
+  border: 0;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  color: #363535;
+}
+
+.attr-chip .attr-del{
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px; height: 24px;
+  border: 0; border-radius: 50%;
+  background: #eee; color: #333; cursor: pointer;
+  font-size: 16px; line-height: 24px; text-align: center;
+}
+
+/* кнопка «добавить атрибут» — в одной линии с чипами */
+.attr-add-btn{
+  position: relative;      /* больше не absolute */
+  width: 209px;
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #828181;
+  cursor: pointer;
+}
+.attr-add-btn .plus{ font-size: 37.5px; line-height: 43px; color:#35C65E; }
+.attr-add-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+/* было без wrap и с фиксированной высотой контейнера */
+#attrs-root{
+  position: absolute;
+  left: 0; top: 0;
+  height: auto;              /* авто */
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;           /* ⬅️ перенос строк */
+  column-gap: 18px;          /* как было gap */
+  row-gap: 12px;             /* межстрочный зазор */
+  align-items: center;
+}
+
+/* контейнер-рамка — убираем жёсткую высоту, пусть задаётся из JSX */
+.attrs-anchor{
+  position: absolute;
+  width: 550px;
+  left: 813px;
+  top: 375px;
+  /* height зададим инлайном из React */
+}
+
+/* контейнер атрибутов */
+.attrs-anchor{
+  position: absolute;
+  width: 550px;
+  /* height задаём из JSX через inline-style (attrsHeight) */
+  left: 813px;
+  top: 375px;
+  z-index: 600;
+}
+
+/* FLEX вместо абсолютных left */
+#attrs-root{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 18px;   /* горизонтальный интервал */
+  row-gap: 12px;      /* вертикальный интервал */
+}
+
+/* Чип атрибута: ширина 170 для 3 в ряд */
+.attr-chip{
+  box-sizing: border-box;
+  position: relative;          /* было absolute — убрать */
+  width: 170px;                /* было 182 */
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 36px 0 12px;
+  gap: 8px;
+}
+
+/* кнопка добавления — той же ширины, чтобы сетка была ровной */
+.attr-add-btn{
+  box-sizing: border-box;
+  position: relative;          /* было absolute — убрать */
+  width: 170px;                /* было 209 */
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #828181;
+  cursor: pointer;
+}
+.attr-add-btn .plus{ font-size: 37.5px; line-height: 43px; color: #35C65E; }
+
+/* инпут и крестик внутри чипа */
+.attr-chip .attr-input{
+  border: 0; outline: none; background: transparent;
+  width: 100%; height: 100%;
+  font-size: 16px; color: #363535;
+}
+.attr-chip .attr-del{
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; border: 0; border-radius: 50%;
+  background: #eee; color: #333; cursor: pointer;
+  font-size: 16px; line-height: 24px; text-align: center;
+}
+.attr-chip .attr-del:hover{ background:#e4e4e4; }
+
+/* запрет пустого атрибута визуально */
+.attr-add-btn:disabled{
+  opacity:.5; cursor:not-allowed;
+}
+
+/* Контейнер атрибутов: 3 колонки, авто-ряды */
+#attrs-root{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 55px;          /* высота одного ряда */
+  column-gap: 18px;              /* горизонтальный промежуток */
+  row-gap: 12px;                 /* вертикальный промежуток */
+  align-items: stretch;
+}
+
+/* Чип и кнопка имеют одинаковую высоту, чтобы хорошо вставать в сетку */
+.attr-chip{
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  padding: 0 36px 0 12px;
+  position: relative;
+}
+.attr-chip .attr-input{
+  border: 0;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 16px;
+  color: #363535;
+}
+.attr-chip .attr-del{
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: #eee;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Кнопка добавления — такой же размер, как у чипа */
+.attr-add-btn{
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #828181;
+  cursor: pointer;
+}
+.attr-add-btn .plus{ font-size: 24px; color: #35C65E; }
+.attr-add-btn[disabled],
+.attr-add-btn:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ===== Атрибуты: делаем сетку на 3 колонки */
+#attrs-root{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 55px;
+  column-gap: 18px;
+  row-gap: 12px;
+  align-items: stretch;
+  width: 550px; /* ширина зоны справа */
+}
+.attr-chip{
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  padding: 0 36px 0 12px;
+  position: relative;
+}
+.attr-chip .attr-input{
+  border: 0; outline: none; background: transparent;
+  width: 100%;
+  font-size: 16px; color: #363535;
+}
+.attr-chip .attr-del{
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; border: 0; border-radius: 50%;
+  background: #eee; color: #333; cursor: pointer;
+}
+.attr-add-btn{
+  height: 55px;
+  border: 2px solid #ECECEC; border-radius: 12px; background: #FFF;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  color: #828181; cursor: pointer;
+}
+.attr-add-btn .plus{ font-size: 24px; color:#35C65E; }
+.attr-add-btn[disabled]{ opacity:.5; cursor:not-allowed; }
+
+/* ===== Категория: плейсхолдер как обычный текст */
+.cat-input{
+  font-size:18px;
+  line-height:55px;
+  padding:0 14px;
+  color:#828181;
+}
+.cat-input::placeholder{ color:#828181; }
+
+/* ===== Слайдер категорий ===== */
+.cat-slider{
+  position: absolute;
+  left: 813px;
+  width: 550px;
+  height: 164px; /* карточка 150 + отступы */
+}
+.cat-track{
+  position: absolute;
+  left: 44px;  /* место для левой стрелки */
+  right: 44px; /* место для правой стрелки */
+  top: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  display: flex;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+.cat-track::-webkit-scrollbar{ height: 8px; }
+.cat-track::-webkit-scrollbar-thumb{ background:#E5E5E5; border-radius:8px; }
+
+.cat-card{
+  flex: 0 0 160px;
+  height: 150px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 10px 8px;
+  cursor: pointer;
+}
+.cat-card.is-active{ border-color:#35C65E; box-shadow: 0 0 0 2px rgba(53,198,94,.15) inset; }
+
+.cat-hero-wrap{
+  width: 100%;
+  height: 100px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #F7F7F7;
+  display:flex; align-items:center; justify-content:center;
+}
+.cat-hero{ max-width: 100%; max-height: 100%; object-fit: contain; }
+.cat-title{
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 16px;
+  color: #363535;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.cat-arrow{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 2px solid #ECECEC;
+  background: #fff;
+  cursor: pointer;
+}
+.cat-arrow.left{ left: 0; }
+.cat-arrow.right{ right: 0; }
+
+/* Слайдер категорий */
+.cat-slider{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 62px; /* сразу под полем категории внутри .group-1046 */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-viewport{
+  position: relative;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cat-track{
+  display: inline-flex;
+  gap: 8px;
+  padding: 2px;
+  white-space: nowrap;
+  will-change: transform;
+  /* горизонтальный скролл (но прячем полоску) */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;           /* Firefox */
+}
+.cat-track::-webkit-scrollbar{ display:none; } /* Chrome/Safari */
+
+.cat-chip{
+  flex: 0 0 auto;
+  max-width: 260px;
+  padding: 8px 14px;
+  border: 2px solid #ECECEC;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 14px;
+  color: #363535;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cat-chip:hover{ border-color:#dfe3e6; }
+.cat-chip.is-active{
+  border-color:#35C65E;
+  background:#EAF7EF;
+  color:#828181;
+}
+
+.cat-nav{
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #ECECEC;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 20px;
+  line-height: 30px;
+  color:#828181;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cat-nav:hover{ border-color:#dfe3e6; }
+.cat-nav:active{ transform: translateY(1px); }
+
+/* ===== Атрибуты: сетка 3 колонки, авто-перенос ===== */
+.attrs-anchor{
+  position: absolute;
+  left: 813px;
+  top: 375px;
+  width: 550px;
+}
+
+#attrs-root{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 55px;
+  column-gap: 18px;
+  row-gap: 12px;
+  width: 100%;
+}
+
+.attr-chip{
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  padding: 0 36px 0 12px;
+  position: relative;
+}
+.attr-chip .attr-input{
+  border: 0; outline: none; background: transparent;
+  width: 100%;
+  font-size: 16px; color: #363535;
+}
+.attr-chip .attr-del{
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; border: 0; border-radius: 50%;
+  background: #eee; color: #333; cursor: pointer;
+}
+
+.attr-add-btn{
+  height: 55px;
+  border: 2px solid #ECECEC; border-radius: 12px; background: #FFF;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  color: #828181; cursor: pointer;
+}
+.attr-add-btn .plus{ font-size: 24px; color:#35C65E; }
+.attr-add-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+/* ===== Категория: поле + кнопка-стрелка ===== */
+.group-1046{
+  position: absolute;
+  left: 813px;
+  width: 300px;
+  height: auto;
+}
+.rectangle-cat{
+  position: relative;
+  height: 55px;
+  border: 2px solid #ECECEC;
+  border-radius: 12px;
+  background: #FFF;
+}
+.cat-input{
+  position: absolute; inset: 0;
+  border: 0; outline: none; background: transparent;
+  padding: 0 44px 0 14px;
+  font-size: 18px; line-height: 55px; color: #828181;
+}
+.cat-input::placeholder{ color:#828181; }
+
+.cat-toggle{
+  position: absolute;
+  right: 8px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid #ECECEC;
+  background: #fff;
+  font-size: 16px; color:#828181;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+/* ===== Текстовый слайдер категорий (по клику) ===== */
+.cat-slider{
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cat-viewport{
+  position: relative;
+  flex: 1 1 auto;
+  height: 40px;
+  overflow: hidden;
+}
+.cat-track{
+  display: inline-flex;
+  gap: 8px;
+  padding: 2px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.cat-track::-webkit-scrollbar{ display: none; }
+
+.cat-chip{
+  flex: 0 0 auto;
+  max-width: 260px;
+  padding: 8px 14px;
+  border: 2px solid #ECECEC;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 14px;
+  color: #363535;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cat-chip:hover{ border-color:#dfe3e6; }
+.cat-chip.is-active{
+  border-color:#35C65E; background:#EAF7EF; color:#828181;
+}
+
+.cat-nav{
+  width: 36px; height: 36px;
+  border: 2px solid #ECECEC; border-radius: 50%;
+  background: #fff; color:#828181;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.cat-nav:hover{ border-color:#dfe3e6; }
+/* Слайдер категорий: фикс высота 48 + сверху margin 10 = ~58px итого */
+.cat-slider{
+  margin-top: 10px;
+  height: 48px;               /* важное! */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-viewport{
+  position: relative;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: hidden;
+}

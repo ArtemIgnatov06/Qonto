@@ -92,7 +92,33 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage });
+/* ===== Product images upload ===== */
+const productImagesDir = path.join(uploadsRoot, 'products');
+fs.mkdirSync(productImagesDir, { recursive: true });
 
+const productImagesStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const productId = req.params.id;
+    const productDir = path.join(productImagesDir, String(productId));
+    fs.mkdirSync(productDir, { recursive: true });
+    cb(null, productDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '.jpg');
+    const fieldName = file.fieldname;
+    const timestamp = Date.now();
+    cb(null, `${fieldName}_${timestamp}${ext}`);
+  }
+});
+
+const uploadProductImages = multer({
+  storage: productImagesStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
+    cb(null, allowed.includes(file.mimetype));
+  }
+});
 /* ===== Chat attachments upload ===== */
 const chatUploadsDir = path.join(uploadsRoot, 'chat');
 fs.mkdirSync(chatUploadsDir, { recursive: true });
@@ -453,6 +479,25 @@ async function ensureProductsSchema() {
     console.error('Не удалось инициализировать таблицы:', e?.message || e);
   }
 })();
+const miscDir = path.join(uploadsRoot, 'misc');
+fs.mkdirSync(miscDir, { recursive: true });
+
+const miscStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, miscDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '');
+    cb(null, `${Date.now()}_${Math.random().toString(36).slice(2)}${ext}`);
+  }
+});
+const uploadAny = multer({ storage: miscStorage });
+
+app.post('/api/upload', uploadAny.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'file missing' });
+  const relative = `/uploads/misc/${req.file.filename}`;
+  // полезно сразу отдавать абсолютный, чтобы фронт не гадал про хост
+  const absolute = `${req.protocol}://${req.get('host')}${relative}`;
+  res.json({ url: absolute, relative });
+});
 
 // === ensure review_images with EXACT same type as product_reviews.id ===
 async function ensureReviewImages(db, dbName) {
@@ -1007,12 +1052,11 @@ app.get('/api/chats/my', requireAuth, async (req, res) => {
 });
 app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'file missing' });
-  // отдай публичный URL до файла (на dev можешь раздавать папку как статику)
-  const url = `/uploads/${req.file.filename}`;
+  const url = `/uploads/avatars/${req.file.filename}`; // <-- верный путь
   res.json({ url });
 });
 
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 
 
 // Удалить чат целиком
@@ -1280,10 +1324,8 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: 'price должен быть неотрицательным числом' });
     }
     const q = Number.isFinite(Number(qty)) ? Math.max(0, parseInt(qty, 10)) : 1;
-    const preview = (preview_image_url && String(preview_image_url).trim()) || null;
-    if (preview && !/^https?:\/\//i.test(preview)) {
-      return res.status(400).json({ message: 'preview_image_url должен быть абсолютным URL' });
-    }
+    const preview = preview_image_url?.trim() || null;
+
     const cat = String(category).trim();
     if (req.user?.role !== 'admin') {
       const exists = await isCategoryExists(cat);
@@ -1315,6 +1357,100 @@ const createProduct = async (req, res) => {
 };
 app.post('/products', requireAuth, requireApprovedSeller, createProduct);
 app.post('/api/products', requireAuth, requireApprovedSeller, createProduct);
+// Upload product images
+app.post('/api/products/:id/images', requireAuth, requireApprovedSeller, uploadProductImages.any(), async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    console.log('📸 Загрузка изображений для продукта:', productId);
+    console.log('📦 Файлы:', req.files?.map(f => f.fieldname));
+    
+    if (!productId) return res.status(400).json({ message: 'Invalid product id' });
+
+    const [[product]] = await db.query(`SELECT id, seller_id FROM products WHERE id = ? LIMIT 1`, [productId]);
+    
+    if (!product) {
+      console.log('❌ Продукт не найден:', productId);
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    
+    if (product.seller_id !== req.user.id && req.user.role !== 'admin') {
+      console.log('❌ Нет доступа:', req.user.id, 'seller:', product.seller_id);
+      return res.status(403).json({ message: 'Нет доступа' });
+    }
+
+    const files = req.files || [];
+    if (!files.length) {
+      console.log('❌ Нет файлов');
+      return res.status(400).json({ message: 'Нет файлов' });
+    }
+
+    const mainFile = files.find(f => f.fieldname === 'main');
+    let main_url = null;
+
+    if (mainFile) {
+      main_url = `/uploads/products/${productId}/${mainFile.filename}`;
+      console.log('✅ Главное фото:', main_url);
+      
+      await db.query(
+        `UPDATE products SET image_url = ?, preview_image_url = ?, updated_at = NOW() WHERE id = ?`,
+        [main_url, main_url, productId]
+      );
+    }
+
+    console.log('✅ Изображения загружены успешно');
+    res.json({
+      ok: true,
+      main_url,
+      image_url: main_url,
+      preview_image_url: main_url,
+      main_image_url: main_url
+    });
+  } catch (e) {
+    console.error('❌ POST /api/products/:id/images error:', e);
+    res.status(500).json({ message: 'Server error', detail: e.message });
+  }
+});
+
+// Fallback без /api/
+app.post('/products/:id/images', requireAuth, requireApprovedSeller, uploadProductImages.any(), async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    console.log('📸 Fallback: Загрузка изображений для продукта:', productId);
+    
+    if (!productId) return res.status(400).json({ message: 'Invalid product id' });
+
+    const [[product]] = await db.query(`SELECT id, seller_id FROM products WHERE id = ? LIMIT 1`, [productId]);
+    
+    if (!product) return res.status(404).json({ message: 'Товар не найден' });
+    if (product.seller_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Нет доступа' });
+    }
+
+    const files = req.files || [];
+    if (!files.length) return res.status(400).json({ message: 'Нет файлов' });
+
+    const mainFile = files.find(f => f.fieldname === 'main');
+    let main_url = null;
+
+    if (mainFile) {
+      main_url = `/uploads/products/${productId}/${mainFile.filename}`;
+      await db.query(
+        `UPDATE products SET image_url = ?, preview_image_url = ?, updated_at = NOW() WHERE id = ?`,
+        [main_url, main_url, productId]
+      );
+    }
+
+    res.json({
+      ok: true,
+      main_url,
+      image_url: main_url,
+      preview_image_url: main_url
+    });
+  } catch (e) {
+    console.error('❌ POST /products/:id/images error:', e);
+    res.status(500).json({ message: 'Server error', detail: e.message });
+  }
+});
 
 app.get('/api/my/products', requireAuth, requireApprovedSeller, async (req, res) => {
   try {
@@ -1772,6 +1908,89 @@ app.get('/api/users/:id/public', async (req, res) => {
   }
 });
 
+// POST /api/products/:id/images - загрузка изображений товара
+app.post('/api/products/:id/images', 
+  requireAuth, 
+  requireApprovedSeller, 
+  uploadProductImages.any(), 
+  async (req, res) => {
+    try {
+      const productId = Number(req.params.id);
+      if (!productId) return res.status(400).json({ message: 'Invalid product id' });
+
+      // Проверяем, что продукт принадлежит текущему пользователю
+      const [[product]] = await db.query(
+        `SELECT id, seller_id FROM products WHERE id = ? LIMIT 1`,
+        [productId]
+      );
+      
+      if (!product) {
+        return res.status(404).json({ message: 'Товар не найден' });
+      }
+      
+      if (product.seller_id !== req.user.id && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Нет доступа к этому товару' });
+      }
+
+      const files = req.files || [];
+      if (!files.length) {
+        return res.status(400).json({ message: 'Не загружено ни одного файла' });
+      }
+
+      // Формируем URLs загруженных файлов
+      const mainFile = files.find(f => f.fieldname === 'main');
+      const thumbFiles = files.filter(f => f.fieldname.startsWith('thumb'));
+
+      let main_url = null;
+      const thumb_urls = [];
+
+      if (mainFile) {
+        main_url = `/uploads/products/${productId}/${mainFile.filename}`;
+      }
+
+      thumbFiles.forEach(f => {
+        thumb_urls.push(`/uploads/products/${productId}/${f.filename}`);
+      });
+
+      // Обновляем продукт с главным изображением
+      if (main_url) {
+        await db.query(
+          `UPDATE products 
+           SET image_url = ?, 
+               preview_image_url = ?,
+               updated_at = NOW()
+           WHERE id = ?`,
+          [main_url, main_url, productId]
+        );
+      }
+
+      // Возвращаем URLs для фронтенда
+      res.json({
+        ok: true,
+        main_url,
+        main_image_url: main_url,
+        image_url: main_url,
+        preview_image_url: main_url,
+        thumb_urls,
+        images: [main_url, ...thumb_urls].filter(Boolean)
+      });
+    } catch (e) {
+      console.error('POST /api/products/:id/images error:', e);
+      res.status(500).json({ message: 'Server error', detail: e.message });
+    }
+  }
+);
+
+// Альтернативный путь без /api/ (на случай fallback)
+app.post('/products/:id/images', 
+  requireAuth, 
+  requireApprovedSeller, 
+  uploadProductImages.any(), 
+  async (req, res) => {
+    req.url = `/api${req.url}`;
+    app.handle(req, res);
+  }
+);
 /* ===== Image proxy (CORS bypass for product images) ===== */
 const _fetch = (typeof fetch === 'function') ? fetch : ((...args) => import('node-fetch').then(({default: f}) => f(...args)));
 app.get('/api/proxy-img', async (req, res) => {
