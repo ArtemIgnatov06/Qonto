@@ -383,6 +383,36 @@ function requireApprovedSeller(req, res, next) {
   }
   next();
 }
+// === MySQL pool ensure
+
+let pool = global.pool;
+
+// пробуем найти существующий пул под другими именами
+if (!pool) {
+  pool =
+    (typeof db !== 'undefined' && db) ||
+    (typeof mysqlPool !== 'undefined' && mysqlPool) ||
+    (typeof connection !== 'undefined' && connection) ||
+    (typeof conn !== 'undefined' && conn) ||
+    null;
+}
+
+// если всё же нет — создаём свой
+if (!pool) {
+  pool = mysql.createPool({
+    host: process.env.DB_HOST || '127.0.0.1',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'myshopdb',
+    waitForConnections: true,
+    connectionLimit: 10,
+    namedPlaceholders: true,
+    charset: 'utf8mb4_unicode_ci',
+  });
+}
+
+// делаем пул доступным глобально (один на процесс)
+global.pool = pool;
 
 /* ===== Ensure schemas ===== */
 async function ensureCategoriesSchema() {
@@ -1588,7 +1618,92 @@ app.get('/api/reco/personal', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+// ==== SEARCH API (drop this near your other Express routes) ====
+// Requires: import mysql from 'mysql2/promise'; (already in your index.js)
+// Uses existing 'pool' or 'db' connection – adjust the name if different.
 
+/**
+ * GET /api/search/suggest?q=
+ * Lightweight suggestions for the header dropdown.
+ * Returns: [{id, title}] — top 6 matches by title.
+ */
+app.get('/api/search/suggest', async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim();
+    if (!q) return res.json([]);
+
+    const like = '%' + q.replace(/\s+/g, '%') + '%';
+
+    const [rows] = await pool.query(
+      `SELECT id, title
+         FROM products
+        WHERE status='active'
+          AND (title LIKE ? OR category LIKE ?)
+        ORDER BY
+          CASE WHEN title LIKE CONCAT(?, '%') THEN 0 ELSE 1 END,  -- prefix boost
+          LENGTH(title) ASC,
+          id DESC
+        LIMIT 6`,
+      [like, like, q]
+    );
+
+    res.json(rows);
+  } catch (e) {
+    console.error('suggest error', e);
+    res.status(500).json({ error: 'suggest_failed' });
+  }
+});
+
+/**
+ * GET /api/search
+ * q: string, page: number (1-based), pageSize: number
+ * Returns: { items, total, page, pageSize }
+ */
+app.get('/api/search', async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim();
+    const page = Math.max(1, parseInt(req.query.page || '1', 10));
+    const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize || '20', 10)));
+    const offset = (page - 1) * pageSize;
+
+    if (!q) return res.json({ items: [], total: 0, page, pageSize });
+
+    const like = '%' + q.replace(/\s+/g, '%') + '%';
+
+    // Count
+    const [[{ cnt }]] = await pool.query(
+      `SELECT COUNT(*) AS cnt
+         FROM products
+        WHERE status='active'
+          AND (title LIKE ? OR description LIKE ? OR category LIKE ?)`,
+      [like, like, like]
+    );
+
+    // Page
+    const [items] = await pool.query(
+      `SELECT id, title, price, category, preview_image_url AS preview, image_url
+         FROM products
+        WHERE status='active'
+          AND (title LIKE ? OR description LIKE ? OR category LIKE ?)
+        ORDER BY
+          CASE WHEN title LIKE CONCAT(?, '%') THEN 0 ELSE 1 END,
+          LENGTH(title) ASC,
+          id DESC
+        LIMIT ? OFFSET ?`,
+      [like, like, like, q, pageSize, offset]
+    );
+
+    res.json({ items, total: cnt, page, pageSize });
+  } catch (e) {
+    console.error('search error', e);
+    res.status(500).json({ error: 'search_failed' });
+  }
+});
+
+// Helpful MySQL indexes to run once (in MySQL):
+// CREATE INDEX idx_products_status ON products(status);
+// CREATE FULLTEXT INDEX ftx_products_title_desc ON products(title, description);  -- optional (MySQL 8+)
+// CREATE INDEX idx_products_category ON products(category);
 /* ===== Product details & reviews ===== */
 app.get('/api/products/:id', async (req, res) => {
   const id = Number(req.params.id);

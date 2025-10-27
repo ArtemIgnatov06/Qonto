@@ -7,7 +7,8 @@ import { flagByLang } from './Flag';
 
 // базовые стили из фиги
 import '../Styles/Header.css';
-
+import SearchBox from './SearchBox';
+import '../Styles/Search.css';
 // AI поповер-чат
 import ChatWidget from './ChatWidget';
 
@@ -120,22 +121,7 @@ export default function Header() {
         </NavLink>
 
         {/* SEARCH */}
-        <form className="search-wrap" onSubmit={onSearch} role="search">
-          <input
-            className="search-input"
-            type="search"
-            placeholder={tt('search.placeholder', 'Пошук товарів…')}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <button className="search-btn" type="submit" aria-label={tt('search.search', 'Знайти')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </button>
-        </form>
-
+          <SearchBox />
         {/* КНОПКА AI */}
         <button
           ref={aiBtnRef}

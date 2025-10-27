@@ -1,0 +1,15 @@
+/* client/src/Styles/Search.css */
+.search-wrap { position:absolute; width:714.29px; height:40px; left:251.71px; top:32.5px; }
+.search-input { position:absolute; inset:0; padding:0 84px 0 16px; border:2px solid var(--stroke); border-radius:10px; background:#363535; color:#ECECEC; font:500 12px/14px 'Ubuntu', sans-serif; }
+.search-input::placeholder { color:#A3A2A3; }
+.search-btn { position:absolute; top:7px; right:7px; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; background:transparent; border:none; padding:0; cursor:pointer; border-radius:6px; }
+.search-btn svg{ width:26px; height:26px; transform:scaleX(-1); }
+.search-clear{ position:absolute; top:7px; right:40px; width:26px; height:26px; background:transparent; border:none; color:#ECECEC; font-size:20px; line-height:1; border-radius:6px; cursor:pointer; }
+.suggest-card{ position:absolute; left:0; top:44px; width:100%; background:#fff; color:#1f2937; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.14); padding:6px 0; }
+.suggest-row{ width:100%; display:flex; align-items:center; gap:10px; padding:10px 12px; background:transparent; border:0; text-align:left; cursor:pointer; }
+.suggest-row:hover, .suggest-row.active{ background:#f3f4f6; }
+.s-ico{ display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center; color:#9ca3af; }
+.s-ico svg{ width:20px; height:20px; }
+.s-title{ flex:1; font:500 14px/20px 'Ubuntu', sans-serif; color:#111827; }
+.suggest-row.muted{ color:#6b7280; cursor:default; }
+
