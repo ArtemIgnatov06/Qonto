@@ -75,8 +75,8 @@ async function firstExistingTable(db, candidates) {
 
 async function smartCount(db, table) {
   if (!table) return { count: 0, lastTime: null };
-  const statusCols = ['status','state','moder_status','moder_state'];
-  const createdCols = ['created_at','createdAt','created','date','created_time','timestamp'];
+  const statusCols = ['status', 'state', 'moder_status', 'moder_state'];
+  const createdCols = ['created_at', 'createdAt', 'created', 'date', 'created_time', 'timestamp'];
   // try pending-like filter first
   for (const col of statusCols) {
     try {
@@ -89,12 +89,12 @@ async function smartCount(db, table) {
           const [lr] = await db.query(`SELECT MAX(\`${cc}\`) AS m FROM \`${table}\``);
           lastTime = (lr && lr[0] && (lr[0].m ?? lr[0].M)) || lastTime;
           if (lastTime) break;
-        } catch(_){}
+        } catch (_) { }
       }
-            if (rows && rows[0] && rows[0].c !== undefined) {
+      if (rows && rows[0] && rows[0].c !== undefined) {
         return { count: Number(rows[0].c) || 0, lastTime: lastTime || null };
       }
-    } catch(_){}
+    } catch (_) { }
   }
   // fallback: just count all
   try {
@@ -105,10 +105,10 @@ async function smartCount(db, table) {
         const [lr] = await db.query(`SELECT MAX(\`${cc}\`) AS m FROM \`${table}\``);
         lastTime = (lr && lr[0] && (lr[0].m ?? lr[0].M)) || lastTime;
         if (lastTime) break;
-      } catch(_){}
+      } catch (_) { }
     }
     return { count: Number(rows?.[0]?.c) || 0, lastTime: lastTime || null };
-  } catch(e) {
+  } catch (e) {
     console.error('smartCount error:', e);
     return { count: 0, lastTime: null };
   }
@@ -313,14 +313,35 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   timezone: '+00:00',
+  // при желании можно зафиксировать кодировку:
+  // charset: 'utf8mb4_unicode_ci',
 });
 
+// === Инициализация таблицы жалоб ===
+(async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS product_reports (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        reporter_user_id INT NULL,
+        reason VARCHAR(255) NOT NULL,
+        status ENUM('new','in_review','resolved','rejected') NOT NULL DEFAULT 'new',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+  } catch (e) {
+    console.error('report table init failed', e);
+  }
+})();
+
+// Пинг БД (как у тебя было)
 (async () => {
   try {
     const [r] = await db.query(SQL.select_general);
-    console.log('Connected DB =', r[0].db);
+    console.log('Connected DB =', r?.[0]?.db);
   } catch (e) {
-    console.error('DB ping failed:', e.message || e);
+    console.error('DB ping failed:', e?.message || e);
   }
 })();
 
@@ -328,18 +349,12 @@ const DB_NAME = process.env.DB_NAME;
 
 async function ensureUsersExtraSchema() {
   try {
-    const [c1] = await db.query(
-      SQL.select_information_schema,
-      [DB_NAME]
-    );
+    const [c1] = await db.query(SQL.select_information_schema, [DB_NAME]);
     if (!c1[0].cnt) {
       await db.query(SQL.alter_general);
       console.log('✅ users.contact_email added');
     }
-    const [c2] = await db.query(
-      SQL.select_information_schema_02,
-      [DB_NAME]
-    );
+    const [c2] = await db.query(SQL.select_information_schema_02, [DB_NAME]);
     if (!c2[0].cnt) {
       await db.query(SQL.alter_general_02);
       console.log('✅ users.avatar_url added');
@@ -1483,16 +1498,16 @@ app.post('/api/products/:id/images', requireAuth, requireApprovedSeller, uploadP
     const productId = Number(req.params.id);
     console.log('📸 Загрузка изображений для продукта:', productId);
     console.log('📦 Файлы:', req.files?.map(f => f.fieldname));
-    
+
     if (!productId) return res.status(400).json({ message: 'Invalid product id' });
 
     const [[product]] = await db.query(`SELECT id, seller_id FROM products WHERE id = ? LIMIT 1`, [productId]);
-    
+
     if (!product) {
       console.log('❌ Продукт не найден:', productId);
       return res.status(404).json({ message: 'Товар не найден' });
     }
-    
+
     if (product.seller_id !== req.user.id && req.user.role !== 'admin') {
       console.log('❌ Нет доступа:', req.user.id, 'seller:', product.seller_id);
       return res.status(403).json({ message: 'Нет доступа' });
@@ -1510,7 +1525,7 @@ app.post('/api/products/:id/images', requireAuth, requireApprovedSeller, uploadP
     if (mainFile) {
       main_url = `/uploads/products/${productId}/${mainFile.filename}`;
       console.log('✅ Главное фото:', main_url);
-      
+
       await db.query(
         `UPDATE products SET image_url = ?, preview_image_url = ?, updated_at = NOW() WHERE id = ?`,
         [main_url, main_url, productId]
@@ -1536,11 +1551,11 @@ app.post('/products/:id/images', requireAuth, requireApprovedSeller, uploadProdu
   try {
     const productId = Number(req.params.id);
     console.log('📸 Fallback: Загрузка изображений для продукта:', productId);
-    
+
     if (!productId) return res.status(400).json({ message: 'Invalid product id' });
 
     const [[product]] = await db.query(`SELECT id, seller_id FROM products WHERE id = ? LIMIT 1`, [productId]);
-    
+
     if (!product) return res.status(404).json({ message: 'Товар не найден' });
     if (product.seller_id !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Нет доступа' });
@@ -1724,7 +1739,7 @@ app.get('/api/search/suggest', async (req, res) => {
 
     const like = '%' + q.replace(/\s+/g, '%') + '%';
 
-    const [rows] = await pool.query(
+    const [rows] = await db.query(
       `SELECT id, title
          FROM products
         WHERE status='active'
@@ -1761,7 +1776,7 @@ app.get('/api/search', async (req, res) => {
     const like = '%' + q.replace(/\s+/g, '%') + '%';
 
     // Count
-    const [[{ cnt }]] = await pool.query(
+    const [[{ cnt }]] = await db.query(
       `SELECT COUNT(*) AS cnt
          FROM products
         WHERE status='active'
@@ -1770,7 +1785,7 @@ app.get('/api/search', async (req, res) => {
     );
 
     // Page
-    const [items] = await pool.query(
+    const [items] = await db.query(
       `SELECT id, title, price, category, preview_image_url AS preview, image_url
          FROM products
         WHERE status='active'
@@ -2114,10 +2129,10 @@ app.get('/api/users/:id/public', async (req, res) => {
 });
 
 // POST /api/products/:id/images - загрузка изображений товара
-app.post('/api/products/:id/images', 
-  requireAuth, 
-  requireApprovedSeller, 
-  uploadProductImages.any(), 
+app.post('/api/products/:id/images',
+  requireAuth,
+  requireApprovedSeller,
+  uploadProductImages.any(),
   async (req, res) => {
     try {
       const productId = Number(req.params.id);
@@ -2128,11 +2143,11 @@ app.post('/api/products/:id/images',
         `SELECT id, seller_id FROM products WHERE id = ? LIMIT 1`,
         [productId]
       );
-      
+
       if (!product) {
         return res.status(404).json({ message: 'Товар не найден' });
       }
-      
+
       if (product.seller_id !== req.user.id && req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Нет доступа к этому товару' });
       }
@@ -2187,10 +2202,10 @@ app.post('/api/products/:id/images',
 );
 
 // Альтернативный путь без /api/ (на случай fallback)
-app.post('/products/:id/images', 
-  requireAuth, 
-  requireApprovedSeller, 
-  uploadProductImages.any(), 
+app.post('/products/:id/images',
+  requireAuth,
+  requireApprovedSeller,
+  uploadProductImages.any(),
   async (req, res) => {
     req.url = `/api${req.url}`;
     app.handle(req, res);
@@ -2820,13 +2835,13 @@ app.get("/api/geo/countries", (req, res) => {
 
 // ====== ГОРОДА ======
 app.get('/api/geo/cities', async (req, res) => {
-  const code  = String(req.query.country || '').toUpperCase();
+  const code = String(req.query.country || '').toUpperCase();
   const cname = String(req.query.countryName || '');
-  const qRaw  = String(req.query.query || '').trim();
-  let   lang  = String(req.query.lang || 'auto');
+  const qRaw = String(req.query.query || '').trim();
+  let lang = String(req.query.lang || 'auto');
 
   const isCyr = (s = '') => /[\u0400-\u04FF]/.test(s);
-  const norm  = (s = '') =>
+  const norm = (s = '') =>
     String(s || '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -2841,7 +2856,7 @@ app.get('/api/geo/cities', async (req, res) => {
   if (!countryCode && cname) {
     const found = CSCountry.getAllCountries().find(
       c => norm(c.name) === norm(cname) ||
-           norm(countriesLib.getName(c.isoCode, 'uk') || '') === norm(cname)
+        norm(countriesLib.getName(c.isoCode, 'uk') || '') === norm(cname)
     );
     countryCode = found?.isoCode || '';
   }
@@ -2860,10 +2875,10 @@ app.get('/api/geo/cities', async (req, res) => {
       else if (ch === 'я') out += atStart ? 'ya' : 'ia';
       else {
         const m = {
-          'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','ж':'zh','з':'z',
-          'и':'y','і':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p',
-          'р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch',
-          'ь':'','’':'',"'":''
+          'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e', 'ж': 'zh', 'з': 'z',
+          'и': 'y', 'і': 'i', 'й': 'i', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p',
+          'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+          'ь': '', '’': '', "'": ''
         };
         out += (m[ch] ?? ch);
       }
@@ -2873,10 +2888,10 @@ app.get('/api/geo/cities', async (req, res) => {
 
   // --- RU -> UA часто используемые экзонимы (префиксами)
   const RU2UA_PREFIX = [
-    ['киев','київ'], ['днепр','дніпро'], ['одесс','одеса'], ['львов','львів'],
-    ['харьк','харків'], ['запорож','запоріж'], ['ровн','рівн'], ['николаев','миколаїв'],
-    ['черновц','чернівц'], ['луганск','луганськ'], ['донецк','донецьк'], ['херсон','херсон'],
-    ['кропивницк','кропивницьк'], ['ужгород','ужгород'], ['кировоград','кропивницьк']
+    ['киев', 'київ'], ['днепр', 'дніпро'], ['одесс', 'одеса'], ['львов', 'львів'],
+    ['харьк', 'харків'], ['запорож', 'запоріж'], ['ровн', 'рівн'], ['николаев', 'миколаїв'],
+    ['черновц', 'чернівц'], ['луганск', 'луганськ'], ['донецк', 'донецьк'], ['херсон', 'херсон'],
+    ['кропивницк', 'кропивницьк'], ['ужгород', 'ужгород'], ['кировоград', 'кропивницьк']
   ];
   function ruToUaGuess(q = '') {
     const nq = norm(q);
@@ -2944,7 +2959,7 @@ app.get('/api/geo/cities', async (req, res) => {
       if (!r.ok) return [];
       const data = await r.json();
       return (Array.isArray(data) ? data : [])
-        .filter(row => ['city','town','village','hamlet','municipality','suburb','quarter','neighbourhood','locality','place'].includes(String(row.type || '')))
+        .filter(row => ['city', 'town', 'village', 'hamlet', 'municipality', 'suburb', 'quarter', 'neighbourhood', 'locality', 'place'].includes(String(row.type || '')))
         .map(row => {
           const nd = row.namedetails || {};
           const uk = nd['name:uk'] || nd['name:uk-Latn'] || null;
@@ -2991,7 +3006,7 @@ app.get('/api/geo/cities', async (req, res) => {
   const shortInput = VARS.some(v => v && v.length <= 2);
 
   function scoreCity(c) {
-    const nm  = norm(c.name);
+    const nm = norm(c.name);
     const loc = norm(c.localName || '');
     let score = 0;
 
@@ -3104,22 +3119,22 @@ app.get("/api/geo/postal", async (req, res) => {
 /* === Moderator routes — summary & lists === */
 app.get('/api/moder/notifications/summary', async (req, res) => {
   try {
-    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
-    const requestsTable   = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
-    const [compl, reqs] = await Promise.all([ smartCount(db, complaintsTable), smartCount(db, requestsTable) ]);
+    const complaintsTable = await firstExistingTable(db, ['product_reports', 'complaints', 'product_complaints', 'reports', 'claims']);
+    const requestsTable = await firstExistingTable(db, ['seller_requests', 'shop_requests', 'seller_applications', 'applications', 'requests_open_shop']);
+    const [compl, reqs] = await Promise.all([smartCount(db, complaintsTable), smartCount(db, requestsTable)]);
     res.json({ complaints: compl.count, shop_requests: reqs.count, lastTimes: { complaints: compl.lastTime, shop_requests: reqs.lastTime } });
   } catch (err) {
     console.error('GET /api/moder/notifications/summary', err);
-    res.json({ complaints:0, shop_requests:0, lastTimes: { complaints:null, shop_requests:null } });
+    res.json({ complaints: 0, shop_requests: 0, lastTimes: { complaints: null, shop_requests: null } });
   }
 });
 
 app.get('/api/moder/cases/requests', async (req, res) => {
   try {
-    const limit = Math.min(Number(req.query.limit||20), 100);
-    const offset = Math.max(Number(req.query.offset||0), 0);
-    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
-    const requestsTable = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
+    const limit = Math.min(Number(req.query.limit || 20), 100);
+    const offset = Math.max(Number(req.query.offset || 0), 0);
+    const usersTable = await firstExistingTable(db, ['users', 'myshopdb.users']);
+    const requestsTable = await firstExistingTable(db, ['seller_requests', 'shop_requests', 'seller_applications', 'applications', 'requests_open_shop']);
     let rows = [];
     if (requestsTable) {
       try {
@@ -3130,7 +3145,7 @@ app.get('/api/moder/cases/requests', async (req, res) => {
            ORDER BY r.created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
         );
         rows = data;
-      } catch(_ ) {
+      } catch (_) {
         const [data] = await db.query(
           `SELECT * FROM \`${requestsTable}\` ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
         );
@@ -3146,21 +3161,21 @@ app.get('/api/moder/cases/requests', async (req, res) => {
 
 app.get('/api/moder/cases/complaints', async (req, res) => {
   try {
-    const limit = Math.min(Number(req.query.limit||20), 100);
-    const offset = Math.max(Number(req.query.offset||0), 0);
-    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
-    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
+    const limit = Math.min(Number(req.query.limit || 20), 100);
+    const offset = Math.max(Number(req.query.offset || 0), 0);
+    const usersTable = await firstExistingTable(db, ['users', 'myshopdb.users']);
+    const complaintsTable = await firstExistingTable(db, ['product_reports', 'complaints', 'product_complaints', 'reports', 'claims']);
     let rows = [];
     if (complaintsTable) {
       try {
         const [data] = await db.query(
-          `SELECT c.*, u.first_name, u.last_name, u.username, u.email, u.avatar_url
+          `SELECT c.*, COALESCE(c.user_id, c.reporter_user_id) AS user_id, u.first_name, u.last_name, u.username, u.email, u.avatar_url
            FROM \`${complaintsTable}\` c
            LEFT JOIN \`${usersTable}\` u ON u.id = c.user_id
            ORDER BY c.created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
         );
         rows = data;
-      } catch(_ ) {
+      } catch (_) {
         const [data] = await db.query(
           `SELECT * FROM \`${complaintsTable}\` ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
         );
@@ -3179,9 +3194,9 @@ app.get('/api/moder/cases/complaints', async (req, res) => {
 app.get('/api/moder/cases/requests/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
-    const requestsTable = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
-    if (!requestsTable) return res.status(404).json({ error:'not found' });
+    const usersTable = await firstExistingTable(db, ['users', 'myshopdb.users']);
+    const requestsTable = await firstExistingTable(db, ['seller_requests', 'shop_requests', 'seller_applications', 'applications', 'requests_open_shop']);
+    if (!requestsTable) return res.status(404).json({ error: 'not found' });
 
     const [rows] = await db.query(
       `SELECT r.*, u.first_name, u.last_name, u.username, u.avatar_url
@@ -3190,13 +3205,13 @@ app.get('/api/moder/cases/requests/:id', async (req, res) => {
        WHERE r.id = ? OR r.request_id = ? LIMIT 1`, [id, id]
     );
     const r = rows?.[0];
-    if (!r) return res.status(404).json({ error:'not found' });
+    if (!r) return res.status(404).json({ error: 'not found' });
 
-    const name = [r.first_name||'', r.last_name||''].join(' ').trim() || r.username || null;
+    const name = [r.first_name || '', r.last_name || ''].join(' ').trim() || r.username || null;
     const docs = {
       passport_url: r.passport_url || r.passport || r.passport_scan || null,
       registry_url: r.registry_url || r.registry || r.registry_extract || null,
-      ipn_url:      r.ipn_url || r.tax_id || r.itn || null,
+      ipn_url: r.ipn_url || r.tax_id || r.itn || null,
     };
 
     res.json({
@@ -3208,63 +3223,189 @@ app.get('/api/moder/cases/requests/:id', async (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error:'server' });
+    res.status(500).json({ error: 'server' });
   }
 });
 
+// Детали жалобы для модерации
 app.get('/api/moder/cases/complaints/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
-    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
-    if (!complaintsTable) return res.status(404).json({ error:'not found' });
+    if (!id) return res.status(400).json({ error: 'bad id' });
 
-    const [rows] = await db.query(
-      `SELECT c.*, u.first_name, u.last_name, u.username, u.avatar_url
-       FROM \`${complaintsTable}\` c
-       LEFT JOIN \`${usersTable}\` u ON u.id = c.user_id
-       WHERE c.id = ? OR c.complaint_id = ? LIMIT 1`, [id, id]
-    );
-    const r = rows?.[0];
-    if (!r) return res.status(404).json({ error:'not found' });
+    // Таблицы-кандидаты (подстрой под себя при необходимости)
+    const usersTable = await firstExistingTable(db, ['users', 'myshopdb.users']);
+    const complaintsTable = await firstExistingTable(db, ['product_reports', 'complaints', 'product_complaints', 'reports', 'claims']);
+    const storesTable = await firstExistingTable(db, ['stores', 'shops', 'markets', 'sellers']);
+    const productsTable = await firstExistingTable(db, ['products', 'goods', 'items', 'catalog']);
 
-    const name = [r.first_name||'', r.last_name||''].join(' ').trim() || r.username || null;
+    if (!complaintsTable) return res.status(404).json({ error: 'not found' });
+
+    // 1) Тянем саму жалобу
+    const [rows] = await db.query(`SELECT * FROM \`${complaintsTable}\` WHERE id=? OR report_id=? OR complaint_id=? LIMIT 1`, [id, id, id]);
+    const r = rows && rows[0];
+    if (!r) return res.status(404).json({ error: 'not found' });
+
+    // 2) Нормализуем "возможные имена" полей
+    const userId = r.user_id ?? r.reporter_user_id ?? r.owner_id ?? null;
+    const storeId = r.store_id ?? r.shop_id ?? r.market_id ?? r.seller_id ?? null;
+    const productId = r.product_id ?? r.goods_id ?? r.item_id ?? r.catalog_id ?? null;
+
+    const createdAt = r.created_at ?? r.createdAt ?? r.date ?? r.created_time ?? r.timestamp ?? null;
+
+    const reason =
+      r.reason ??
+      r.complaint_reason ??
+      r.category ??
+      r.reason_text ??
+      null;
+
+    // Вложения в жалобе
     const docs = {
-      passport_url: r.passport_url || null,
-      registry_url: r.registry_url || null,
-      ipn_url:      r.ipn_url || null,
-      attachment:   r.attachment_url || r.screenshot || null
+      attachment: r.attachment ?? r.evidence ?? r.file_url ?? null,
+      // ниже — если у тебя в жалобе действительно есть эти поля;
+      // оставляем пустыми, фронт их игнорирует для жалоб
+      passport_url: null,
+      registry_url: null,
+      ipn_url: null,
     };
 
+    // 3) Подтягиваем пользователя-скаржника
+    let user = null;
+    if (usersTable && userId) {
+      try {
+        const [urows] = await db.query(`SELECT id, first_name, last_name, username, email, avatar_url, photo, avatar FROM \`${usersTable}\` WHERE id=? LIMIT 1`, [userId]);
+        const u = urows && urows[0];
+        if (u) {
+          const full = [u.first_name || '', u.last_name || ''].join(' ').trim() || u.username || null;
+          user = {
+            id: u.id,
+            full_name: full,
+            first_name: u.first_name || null,
+            last_name: u.last_name || null,
+            username: u.username || null,
+            avatar_url: u.avatar_url || u.photo || u.avatar || null,
+          };
+        }
+      } catch (_) { }
+    }
+
+    // 4) Подтягиваем магазин
+    let store = null;
+    if (storesTable && storeId) {
+      try {
+        const [srows] = await db.query(`SELECT id, name, title, shop_name, logo, avatar, avatar_url, photo FROM \`${storesTable}\` WHERE id=? LIMIT 1`, [storeId]);
+        const s = srows && srows[0];
+        if (s) {
+          store = {
+            id: s.id,
+            name: s.name || s.title || s.shop_name || null,
+            avatar_url: s.avatar_url || s.logo || s.avatar || s.photo || null,
+          };
+        }
+      } catch (_) { }
+    }
+
+    // 5) Подтягиваем товар
+    let product = null;
+    if (productsTable && productId) {
+      try {
+        const [prows] = await db.query(
+          `SELECT id, title, name, image_url, image, photo, main_image, price, price_sale, rating, avg_rating, rate
+           FROM \`${productsTable}\` WHERE id=? LIMIT 1`, [productId]
+        );
+        const p = prows && prows[0];
+        if (p) {
+          const price = p.price_sale ?? p.price ?? null;
+          const rating = p.avg_rating ?? p.rating ?? p.rate ?? null;
+          const img = p.image_url || p.main_image || p.image || p.photo || null;
+          product = {
+            id: p.id,
+            title: p.title || p.name || null,
+            preview_image_url: img,
+            price,
+            avg_rating: rating,
+          };
+        }
+      } catch (_) { }
+    }
+
+    // 6) Кол-во предыдущих жалоб от этого пользователя
+    let reporter_prev_count = 0;
+    if (complaintsTable && userId) {
+      try {
+        const [cc] = await db.query(
+          `SELECT COUNT(*) AS c FROM \`${complaintsTable}\` WHERE (user_id=? OR reporter_user_id=?) AND (id<>? AND report_id<>? AND complaint_id<>?)`,
+          [userId, userId, id, id, id]
+        );
+        reporter_prev_count = Number(cc && cc[0] && (cc[0].c ?? 0)) || 0;
+      } catch (_) { }
+    }
+
+    // 7) Ответ фронту (всё, что ждёт ModerCaseView.jsx)
     res.json({
-      id: r.id || r.complaint_id,
-      store_name: r.store_name || r.shop_name || r.market_name || r.store || r.shop || null,
-      created_at: r.created_at || r.createdAt || r.date || r.created_time || r.timestamp || null,
-      user: { id: r.user_id, name, avatar_url: r.avatar_url || null },
-      docs
+      id: r.id ?? r.report_id ?? r.complaint_id ?? id,
+      created_at: createdAt,
+      reason,
+      docs,
+      user,
+      store,       // { id, name, avatar_url }
+      product,     // { id, title, preview_image_url, price, avg_rating }
+      reporter_prev_count,
     });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error:'server' });
+    console.error('GET /api/moder/cases/complaints/:id', e);
+    res.status(500).json({ error: 'server' });
   }
 });
 
 app.post('/api/moder/cases/requests/:id/approve', async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const requestsTable = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
-    if (!requestsTable) return res.status(404).json({ error:'not found' });
+    const requestsTable = await firstExistingTable(db, ['seller_requests', 'shop_requests', 'seller_applications', 'applications', 'requests_open_shop']);
+    if (!requestsTable) return res.status(404).json({ error: 'not found' });
     await db.query(`UPDATE \`${requestsTable}\` SET status='approved' WHERE id=? OR request_id=?`, [id, id]);
-    res.json({ ok:true });
-  } catch (e) { console.error(e); res.status(500).json({ error:'server' }) }
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'server' }) }
 });
 
 app.post('/api/moder/cases/complaints/:id/approve', async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
-    if (!complaintsTable) return res.status(404).json({ error:'not found' });
+    const complaintsTable = await firstExistingTable(db, ['product_reports', 'complaints', 'product_complaints', 'reports', 'claims']);
+    if (!complaintsTable) return res.status(404).json({ error: 'not found' });
     await db.query(`UPDATE \`${complaintsTable}\` SET status='resolved' WHERE id=? OR complaint_id=?`, [id, id]);
-    res.json({ ok:true });
-  } catch (e) { console.error(e); res.status(500).json({ error:'server' }) }
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'server' }) }
+});
+
+
+
+// Report a product
+app.post('/api/reports', async (req, res) => {
+  try {
+    const userId = req.user?.id || null; // if you have auth middleware attaching req.user
+    const { productId, reason } = req.body || {};
+    if (!productId || !reason) return res.status(400).json({ message: 'productId and reason are required' });
+    await db.query('INSERT INTO product_reports (product_id, reporter_user_id, reason) VALUES (?,?,?)',
+      [productId, userId, reason]);
+    // optional: notify admins via socket.io if available
+    try { io?.emit && io.emit('admin:report:new', { productId, reason }); } catch { }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('report create error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Admin: list reports (basic)
+app.get('/api/mod/reports', async (req, res) => {
+  try {
+    // TODO: check admin role from req.user if you have middleware
+    const [rows] = await db.query('SELECT * FROM product_reports ORDER BY created_at DESC LIMIT 200');
+    res.json(rows);
+  } catch (e) {
+    console.error('report list error', e);
+    res.status(500).json({ message: 'Server error' });
+  }
 });

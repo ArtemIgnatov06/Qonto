@@ -1,6 +1,7 @@
 // ProductPage.jsx — карточка товара + магазин-плашка + отзывы с фото
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import reportIcon from '../assets/report.png';
 import { useParams, Link } from 'react-router-dom';
 import '../Styles/ProductPage.css';
 
@@ -93,6 +94,11 @@ const extractGallery = (p) => {
 /* ------------------------------ Component ------------------------------ */
 
 export default function ProductPage() {
+  const [showReport, setShowReport] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reporting, setReporting] = useState(false);
+  const [reportToast, setReportToast] = useState('');
+
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
@@ -130,7 +136,7 @@ export default function ProductPage() {
           const json = await r.json();
           const p = pluckProduct(json);
           if (p && !abort) { setProduct(p); break; }
-        } catch {}
+        } catch { }
       }
       if (!abort) setLoading(false);
     })();
@@ -159,7 +165,7 @@ export default function ProductPage() {
               .filter(Boolean)
             : [];
           if (!abort && urls.length) { setGallery(urls); break; }
-        } catch {}
+        } catch { }
       }
     })();
     return () => { abort = true; };
@@ -181,7 +187,7 @@ export default function ProductPage() {
           const d = await r.json();
           const t = d?.title || d?.name || d?.data?.title || d?.data?.name;
           if (t && !abort) { setCatalogTitle(t); break; }
-        } catch {}
+        } catch { }
       }
     })();
     return () => { abort = true; };
@@ -195,10 +201,10 @@ export default function ProductPage() {
       const arr = await r.json();
       const list = Array.isArray(arr?.items) ? arr.items
         : Array.isArray(arr?.data) ? arr.data
-        : Array.isArray(arr) ? arr
-        : [];
+          : Array.isArray(arr) ? arr
+            : [];
       setReviews(list);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -211,8 +217,8 @@ export default function ProductPage() {
           const d = await r.json();
           const list = Array.isArray(d?.items) ? d.items
             : Array.isArray(d?.data) ? d.data
-            : Array.isArray(d) ? d
-            : [];
+              : Array.isArray(d) ? d
+                : [];
           if (!abort) setReviews(list);
         }
       } finally {
@@ -244,9 +250,9 @@ export default function ProductPage() {
 
   const shopCover =
     product?.shop_cover_url ? normSrc(product.shop_cover_url) :
-    (shopFruits || null) ||
-    pickShopCover('fruits.png','shop-cover.jpg','shop-cover.png','store-cover.jpg','store-cover.png','shop.jpg','shop.png') ||
-    null;
+      (shopFruits || null) ||
+      pickShopCover('fruits.png', 'shop-cover.jpg', 'shop-cover.png', 'store-cover.jpg', 'store-cover.png', 'shop.jpg', 'shop.png') ||
+      null;
 
   /* ------------------------- handlers ------------------------ */
 
@@ -271,7 +277,7 @@ export default function ProductPage() {
         setTimeout(() => setCartMsg(''), 2500);
         setCartBusy(false);
         return;
-      } catch {}
+      } catch { }
     }
     setCartMsg('Не вдалося додати до кошика');
     setTimeout(() => setCartMsg(''), 2500);
@@ -309,7 +315,7 @@ export default function ProductPage() {
         if (fileRef.current) fileRef.current.value = '';
         return;
       }
-    } catch {}
+    } catch { }
 
     alert('Не вдалося надіслати відгук');
   };
@@ -320,188 +326,316 @@ export default function ProductPage() {
   if (!product) return <div className="pad-24">Товар не знайдено</div>;
 
   return (
-    <div className="pdp-wrap">
-      <div className="pdp-grid pdp-grid--nochips">
-        {/* Thumbs */}
-        <div className="pdp-thumbs" aria-label="Галерея зображень">
-          {Array.from({ length: Math.min(5, Math.max(photos.length, 0)) }).map((_, i) => {
-            const src = photos[i];
-            return (
-              <button
-                key={i}
-                className={'thumb' + (i === 0 ? ' is-active' : '')}
-                onClick={(e) => {
-                  const main = e.currentTarget.closest('.pdp-grid').querySelector('.pdp-photo .main');
-                  if (main && src) main.src = src;
-                  e.currentTarget.parentElement.querySelectorAll('.thumb').forEach((b) => b.classList.remove('is-active'));
-                  e.currentTarget.classList.add('is-active');
-                }}
-                type="button"
-                disabled={!src}
-              >
-                {src ? <img src={src} alt={`${title} ${i + 1}`} /> : <span style={{opacity:.5}}>—</span>}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Main photo */}
-        <div className="pdp-photo">
-          {hasPhotos ? (
-            <img className="main" src={photos[0]} alt={title} />
-          ) : (
-            <div className="main empty" aria-label="Немає зображення">no image</div>
-          )}
-        </div>
-
-        {/* Right info */}
-        <div className="pdp-info">
-          <h1 className="title">{title}</h1>
-
-          <div className="rating">
-            <img src={star} alt="" className="star" />
-            <span className="score">{rating.toFixed(1).replace('.', ',')}</span>
-            <span className="dot" aria-hidden="true"></span>
-            <a href="#reviews" className="link">
-              {reviewsCount ? `${reviewsCount.toLocaleString('uk-UA')} відгуків` : 'Немає відгуків'}
-            </a>
+    <>
+      <div className="pdp-wrap">
+        <div className="pdp-grid pdp-grid--nochips">
+          {/* Thumbs */}
+          <div className="pdp-thumbs" aria-label="Галерея зображень">
+            {Array.from({ length: Math.min(5, Math.max(photos.length, 0)) }).map((_, i) => {
+              const src = photos[i];
+              return (
+                <button
+                  key={i}
+                  className={'thumb' + (i === 0 ? ' is-active' : '')}
+                  onClick={(e) => {
+                    const main = e.currentTarget.closest('.pdp-grid').querySelector('.pdp-photo .main');
+                    if (main && src) main.src = src;
+                    e.currentTarget.parentElement.querySelectorAll('.thumb').forEach((b) => b.classList.remove('is-active'));
+                    e.currentTarget.classList.add('is-active');
+                  }}
+                  type="button"
+                  disabled={!src}
+                >
+                  {src ? <img src={src} alt={`${title} ${i + 1}`} /> : <span style={{ opacity: .5 }}>—</span>}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="buy-row" style={{ marginTop: '16px' }}>
-            <button className="btn-primary" type="button" disabled={cartBusy} onClick={handleAddToCart}>
-              <span className="icon"><img src={basketWhite} alt="" /></span>
-              <span className="txt">{cartBusy ? 'Додаємо…' : 'Додати до кошику'}</span>
-            </button>
-            {cartMsg && <span className="cart-msg" style={{ marginLeft: 12 }}>{cartMsg}</span>}
-          </div>
-
-          {/* Магазин: сверху картинка, снизу белый блок */}
-          <section className="shop">
-            <h3>Магазин</h3>
-            {sellerId ? (
-              <Link to={`/shop/${sellerId}`} className="shop-card" aria-label="Перейти до магазину">
-                <div className="shop-card__media">
-                  <img src={shopCover || shopFruits} alt="" />
-                </div>
-                <div className="shop-card__body">
-                  <div className="shop-card__name" title={sellerNameText || 'Магазин'}>
-                    {sellerNameText || 'Магазин'}
-                  </div>
-                  <div className="shop-card__cta">
-                    Перейти до магазину <span className="arrow" aria-hidden>›</span>
-                  </div>
-                </div>
-              </Link>
+          {/* Main photo */}
+          <div className="pdp-photo">
+            {hasPhotos ? (
+              <img className="main" src={photos[0]} alt={title} />
             ) : (
-              <div className="shop-card is-disabled">
-                <div className="shop-card__media"><img src={shopCover || shopFruits} alt="" /></div>
-                <div className="shop-card__body">
-                  <div className="shop-card__name">{sellerNameText || 'Магазин'}</div>
-                  <div className="shop-card__cta muted">Профіль продавця недоступний</div>
-                </div>
-              </div>
+              <div className="main empty" aria-label="Немає зображення">no image</div>
             )}
+          </div>
+
+          {/* Right info */}
+          <div className="pdp-info">
+            <div className="title-row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <h1 className="title" style={{ margin: 0 }}>{title}</h1>
+              <button aria-label="Поскаржитися" onClick={() => setShowReport(true)} style={{ border: "none", background: "transparent", cursor: "pointer", padding: 0 }}>
+                <img src={reportIcon} alt="Поскаржитися" style={{ width: 20, height: 20, opacity: 0.9 }} />
+              </button>
+            </div>
+
+            <div className="rating">
+              <img src={star} alt="" className="star" />
+              <span className="score">{rating.toFixed(1).replace('.', ',')}</span>
+              <span className="dot" aria-hidden="true"></span>
+              <a href="#reviews" className="link">
+                {reviewsCount ? `${reviewsCount.toLocaleString('uk-UA')} відгуків` : 'Немає відгуків'}
+              </a>
+            </div>
+
+            <div className="buy-row" style={{ marginTop: '16px' }}>
+              <button className="btn-primary" type="button" disabled={cartBusy} onClick={handleAddToCart}>
+                <span className="icon"><img src={basketWhite} alt="" /></span>
+                <span className="txt">{cartBusy ? 'Додаємо…' : 'Додати до кошику'}</span>
+              </button>
+              {cartMsg && <span className="cart-msg" style={{ marginLeft: 12 }}>{cartMsg}</span>}
+            </div>
+
+            {/* Магазин: сверху картинка, снизу белый блок */}
+            <section className="shop">
+              <h3>Магазин</h3>
+              {sellerId ? (
+                <Link to={`/shop/${sellerId}`} className="shop-card" aria-label="Перейти до магазину">
+                  <div className="shop-card__media">
+                    <img src={shopCover || shopFruits} alt="" />
+                  </div>
+                  <div className="shop-card__body">
+                    <div className="shop-card__name" title={sellerNameText || 'Магазин'}>
+                      {sellerNameText || 'Магазин'}
+                    </div>
+                    <div className="shop-card__cta">
+                      Перейти до магазину <span className="arrow" aria-hidden>›</span>
+                    </div>
+                  </div>
+                </Link>
+              ) : (
+                <div className="shop-card is-disabled">
+                  <div className="shop-card__media"><img src={shopCover || shopFruits} alt="" /></div>
+                  <div className="shop-card__body">
+                    <div className="shop-card__name">{sellerNameText || 'Магазин'}</div>
+                    <div className="shop-card__cta muted">Профіль продавця недоступний</div>
+                  </div>
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+
+        {/* About */}
+        <div className="pdp-below">
+          <section className="about" style={{ gridColumn: '1 / -1' }}>
+            <h3>Про товар</h3>
+            <p>{(product?.short_description || product?.description || '—')}</p>
+            <button className="link-inline" type="button">Детальніше</button>
           </section>
         </div>
-      </div>
 
-      {/* About */}
-      <div className="pdp-below">
-        <section className="about" style={{ gridColumn: '1 / -1' }}>
-          <h3>Про товар</h3>
-          <p>{(product?.short_description || product?.description || '—')}</p>
-          <button className="link-inline" type="button">Детальніше</button>
-        </section>
-      </div>
+        {/* Reviews composer + list */}
+        <div className="reviews-strip" id="reviews">
+          <div className="stars">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <button
+                key={i}
+                className="sbtn"
+                type="button"
+                onClick={() => setRevRating(i + 1)}
+                aria-label={`${i + 1}/5`}
+                title={`${i + 1}/5`}
+              >
+                <img src={i < revRating ? star : starGray} alt="" />
+              </button>
+            ))}
+          </div>
 
-      {/* Reviews composer + list */}
-      <div className="reviews-strip" id="reviews">
-        <div className="stars">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <button
-              key={i}
-              className="sbtn"
-              type="button"
-              onClick={() => setRevRating(i + 1)}
-              aria-label={`${i + 1}/5`}
-              title={`${i + 1}/5`}
-            >
-              <img src={i < revRating ? star : starGray} alt="" />
-            </button>
-          ))}
+          <input
+            className="r-input"
+            placeholder="Залишіть свій відгук"
+            value={revText}
+            onChange={(e) => setRevText(e.target.value)}
+          />
+
+          <button className="r-attach" type="button" onClick={() => fileRef.current?.click()} title="Додати фото">
+            <img src={addIcon} alt="" />
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            onChange={handleChooseFiles}
+          />
+          <button className="r-send" type="button" onClick={handleSendReview} title="Надіслати">
+            <img src={sendIcon} alt="" />
+          </button>
+
+          <label className="anon" title="Приховати ім'я та прізвище">
+            <span>Анонімний відгук</span>
+            <input type="checkbox" checked={revAnon} onChange={(e) => setRevAnon(e.target.checked)} />
+          </label>
         </div>
 
-        <input
-          className="r-input"
-          placeholder="Залишіть свій відгук"
-          value={revText}
-          onChange={(e) => setRevText(e.target.value)}
-        />
+        {revFiles.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, padding: '8px 20px 0 20px' }}>
+            {revFiles.map((f, idx) => (
+              <span key={idx} style={{ fontSize: 12, opacity: .8 }}>{f.name}</span>
+            ))}
+          </div>
+        )}
 
-        <button className="r-attach" type="button" onClick={() => fileRef.current?.click()} title="Додати фото">
-          <img src={addIcon} alt="" />
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          onChange={handleChooseFiles}
-        />
-        <button className="r-send" type="button" onClick={handleSendReview} title="Надіслати">
-          <img src={sendIcon} alt="" />
-        </button>
-
-        <label className="anon" title="Приховати ім'я та прізвище">
-          <span>Анонімний відгук</span>
-          <input type="checkbox" checked={revAnon} onChange={(e) => setRevAnon(e.target.checked)} />
-        </label>
+        <div style={{ padding: '10px 20px 30px' }}>
+          {revLoading ? (
+            <div style={{ opacity: .6 }}>Завантаження відгуків…</div>
+          ) : (
+            reviews.map((r) => (
+              <div key={r.id || r._id} style={{ border: '1px solid #eee', borderRadius: 12, padding: 12, margin: '10px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <strong>
+                    {r.is_anonymous ? 'Анонім' :
+                      ((r.user?.first_name || r.first_name || '') + ' ' + (r.user?.last_name || r.last_name || '')).trim() || r.user_name || r.username || 'Користувач'}
+                  </strong>
+                  <span style={{ opacity: .6, fontSize: 13 }}>
+                    {new Date(r.created_at || r.createdAt || r.updated_at || Date.now()).toLocaleDateString('uk-UA')}
+                  </span>
+                  <span style={{ marginLeft: 'auto' }}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <img key={i} src={i < (Number(r.rating) || 0) ? star : starGray} alt="" style={{ height: 14, verticalAlign: 'middle' }} />
+                    ))}
+                  </span>
+                </div>
+                {(r.comment || r.text) && <div style={{ margin: '4px 0 8px 0' }}>{r.comment || r.text}</div>}
+                {!!(r.images?.length) && (
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {r.images.map((img, i) => {
+                      const src = typeof img === 'string'
+                        ? normSrc(img)
+                        : normSrc(img?.url || img?.src || img?.path || img?.image_url || img?.imageUrl);
+                      return src ? <img key={i} src={src} alt="" style={{ height: 64, borderRadius: 8 }} /> : null;
+                    })}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      {revFiles.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, padding: '8px 20px 0 20px' }}>
-          {revFiles.map((f, idx) => (
-            <span key={idx} style={{ fontSize: 12, opacity: .8 }}>{f.name}</span>
-          ))}
+      {/* Report modal */}
+      {showReport && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.35)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+          onClick={() => setShowReport(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 420,
+              maxWidth: '90%',
+              background: '#fff',
+              borderRadius: 16,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              padding: 20
+            }}
+          >
+            <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12 }}>
+              Виберіть причину скарги:
+            </div>
+
+            {[
+              'Порушення авторських прав',
+              'Недостовірна або оманлива інформація',
+              'Заборонений або обмежений товар',
+              'Нечесна або шкідлива продукція'
+            ].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setReportReason(r)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '10px 12px',
+                  margin: '8px 0',
+                  borderRadius: 10,
+                  border: '1px solid #e5e7eb',
+                  background: reportReason === r ? '#ffe5e5' : '#fff'
+                }}
+              >
+                {r}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={async () => {
+                if (!reportReason) return;
+                try {
+                  setReporting(true);
+                  const res = await fetch('/api/reports', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                      productId: (product && product.id) || id,
+                      reason: reportReason
+                    })
+                  });
+                  const j = await res.json().catch(() => ({}));
+                  if (res.ok) {
+                    setShowReport(false);
+                    setReportReason('');
+                    setReportToast('Ваша скарга на товар прийнята на розгляд');
+                    setTimeout(() => setReportToast(''), 3000);
+                  } else {
+                    setReportToast((j && j.message) || 'Не вдалося надіслати скаргу');
+                    setTimeout(() => setReportToast(''), 3000);
+                  }
+                } finally {
+                  setReporting(false);
+                }
+              }}
+              disabled={!reportReason || reporting}
+              style={{
+                width: '100%',
+                marginTop: 6,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: '#f1f59',
+                border: '1px solid #e5e7eb',
+                cursor: !reportReason || reporting ? 'not-allowed' : 'pointer',
+                opacity: !reportReason || reporting ? 0.7 : 1
+              }}
+            >
+              Поскаржитися на товар
+            </button>
+          </div>
         </div>
       )}
 
-      <div style={{ padding: '10px 20px 30px' }}>
-        {revLoading ? (
-          <div style={{ opacity: .6 }}>Завантаження відгуків…</div>
-        ) : (
-          reviews.map((r) => (
-            <div key={r.id || r._id} style={{ border: '1px solid #eee', borderRadius: 12, padding: 12, margin: '10px 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <strong>
-                  {r.is_anonymous ? 'Анонім' :
-                    ((r.user?.first_name || r.first_name || '') + ' ' + (r.user?.last_name || r.last_name || '')).trim() || r.user_name || r.username || 'Користувач'}
-                </strong>
-                <span style={{ opacity: .6, fontSize: 13 }}>
-                  {new Date(r.created_at || r.createdAt || r.updated_at || Date.now()).toLocaleDateString('uk-UA')}
-                </span>
-                <span style={{ marginLeft: 'auto' }}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <img key={i} src={i < (Number(r.rating) || 0) ? star : starGray} alt="" style={{ height: 14, verticalAlign: 'middle' }} />
-                  ))}
-                </span>
-              </div>
-              {(r.comment || r.text) && <div style={{ margin: '4px 0 8px 0' }}>{r.comment || r.text}</div>}
-              {!!(r.images?.length) && (
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {r.images.map((img, i) => {
-                    const src = typeof img === 'string'
-                      ? normSrc(img)
-                      : normSrc(img?.url || img?.src || img?.path || img?.image_url || img?.imageUrl);
-                    return src ? <img key={i} src={src} alt="" style={{ height: 64, borderRadius: 8 }} /> : null;
-                  })}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+      {/* Toast */}
+      {reportToast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#fff',
+            border: '1px solid #e5e7eb',
+            padding: '10px 14px',
+            borderRadius: 999,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            zIndex: 1001
+          }}
+        >
+          {reportToast}
+        </div>
+      )}
+    </>
   );
 }
