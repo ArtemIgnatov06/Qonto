@@ -6,7 +6,6 @@
   min-height:1000px;
   font-family:'Ubuntu',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   color:#363535;
-  /* force full-bleed like the mock: break out of centered containers */
   width:100vw;
   margin-left:calc(50% - 50vw);
 }
@@ -108,3 +107,58 @@ main.q-profile{
 /* Единым сдвигом подтягиваем весь контент профиля вверх */
 .q-profile { --lift: -150px; }        /* настрой: -32 / -56 / -64 и т.д. */
 .q-profile > * { transform: translateY(var(--lift)); }
+/* ================= Moderator mode ================= */
+.q-profile.is-moderator .orders-title,
+.q-profile.is-moderator .orders-history-title,
+.q-profile.is-moderator .order-card,
+.q-profile.is-moderator .mini-product,
+.q-profile.is-moderator .mini-banner,
+.q-profile.is-moderator .checklist,
+.q-profile.is-moderator .seller-quicklinks,
+.q-profile.is-moderator .btn-signout { display:none; }
+
+.q-profile.is-moderator .moder-nav{
+  position:absolute;
+  left:82px;
+  top:370px;
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+.q-profile.is-moderator .moder-nav li{
+  margin:10px 0;
+  font:400 14px/24px 'Ubuntu',sans-serif;
+}
+.q-profile.is-moderator .moder-nav a,
+.q-profile.is-moderator .moder-nav .linklike{
+  color:#363535;
+  text-decoration:none;
+  background:none;
+  border:0;
+  cursor:pointer;
+  padding:0;
+}
+
+.q-profile.is-moderator .moder-illustration{
+  position:absolute;
+  top:120px;
+  /* Move the mascot to the right; keep it responsive */
+  left:58vw;
+  width:auto;
+  max-width:36vw;
+  height:auto;
+  transform:translateX(-5%);
+}
+@media (max-width: 1400px){
+  .q-profile.is-moderator .moder-illustration{
+    left:54vw;
+    max-width:40vw;
+    transform:none;
+  }
+}
+@media (max-width: 1100px){
+  .q-profile.is-moderator .moder-illustration{
+    left:50vw;
+    max-width:48vw;
+  }
+}

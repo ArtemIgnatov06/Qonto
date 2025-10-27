@@ -17,6 +17,28 @@ import http from 'http';
 import { Server } from 'socket.io';
 import crypto from 'crypto';
 
+import countriesLib from 'i18n-iso-countries';
+
+
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+// Register i18n-iso-countries locales (via createRequire to avoid ESM JSON assert issues)
+countriesLib.registerLocale(require('i18n-iso-countries/langs/uk.json'));
+countriesLib.registerLocale(require('i18n-iso-countries/langs/en.json'));
+let ukLocale, enLocale;
+try { ukLocale = require('i18n-iso-countries/langs/uk.json'); } catch { }
+try { enLocale = require('i18n-iso-countries/langs/en.json'); } catch { }
+if (ukLocale && !countriesLib.getAlpha2Codes().__ukRegistered) {
+
+  countriesLib.getAlpha2Codes().__ukRegistered = true;
+}
+if (enLocale && !countriesLib.getAlpha2Codes().__enRegistered) {
+
+  countriesLib.getAlpha2Codes().__enRegistered = true;
+}
+
 /* Optional SMS via Twilio (only if configured) */
 let twilioClient = null;
 const SMS_PROVIDER = process.env?.SMS_PROVIDER || '';
@@ -37,6 +59,74 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 // === SQL loader (generated) ===
 import { readFileSync } from 'fs';
 import { resolve as _resolve } from 'path';
+
+import { Country as CSCountry, State as CSState, City as CSCity } from 'country-state-city';
+
+/* === Moderation utilities (auto-injected) === */
+async function firstExistingTable(db, candidates) {
+  for (const t of candidates) {
+    try {
+      const [rows] = await db.query('SHOW TABLES LIKE ?', [t]);
+      if (rows && rows.length) return t;
+    } catch (_) { /* ignore */ }
+  }
+  return null;
+}
+
+async function smartCount(db, table) {
+  if (!table) return { count: 0, lastTime: null };
+  const statusCols = ['status','state','moder_status','moder_state'];
+  const createdCols = ['created_at','createdAt','created','date','created_time','timestamp'];
+  // try pending-like filter first
+  for (const col of statusCols) {
+    try {
+      const [rows] = await db.query(
+        `SELECT COUNT(*) AS c FROM \`${table}\` WHERE \`${col}\` IN ('pending','new','open','created','waiting')`
+      );
+      let lastTime = null;
+      for (const cc of createdCols) {
+        try {
+          const [lr] = await db.query(`SELECT MAX(\`${cc}\`) AS m FROM \`${table}\``);
+          lastTime = (lr && lr[0] && (lr[0].m ?? lr[0].M)) || lastTime;
+          if (lastTime) break;
+        } catch(_){}
+      }
+            if (rows && rows[0] && rows[0].c !== undefined) {
+        return { count: Number(rows[0].c) || 0, lastTime: lastTime || null };
+      }
+    } catch(_){}
+  }
+  // fallback: just count all
+  try {
+    const [rows] = await db.query(`SELECT COUNT(*) AS c FROM \`${table}\``);
+    let lastTime = null;
+    for (const cc of createdCols) {
+      try {
+        const [lr] = await db.query(`SELECT MAX(\`${cc}\`) AS m FROM \`${table}\``);
+        lastTime = (lr && lr[0] && (lr[0].m ?? lr[0].M)) || lastTime;
+        if (lastTime) break;
+      } catch(_){}
+    }
+    return { count: Number(rows?.[0]?.c) || 0, lastTime: lastTime || null };
+  } catch(e) {
+    console.error('smartCount error:', e);
+    return { count: 0, lastTime: null };
+  }
+}
+
+function rowsToItems(rows) {
+  return rows.map(r => ({
+    id: r.id ?? r.ID ?? r.request_id ?? r.complaint_id,
+    user_id: r.user_id ?? r.uid ?? r.author_id ?? r.customer_id,
+    // ПРИОРИТЕТ: сначала ФИО, затем альтернативы, и только потом username
+    user_name:
+      [r.first_name || '', r.last_name || ''].join(' ').trim() ||
+      r.full_name || r.user_name || r.customer_name || r.username || null,
+    avatar_url: r.avatar_url || r.avatar || r.photo_url || null,
+    store_name: r.store_name || r.shop_name || r.market_name || r.store || r.shop || null,
+    created_at: r.created_at || r.createdAt || r.date || r.created_time || r.timestamp || null
+  }));
+}
 
 function _parseQueries(filePath) {
   let src = '';
@@ -82,7 +172,7 @@ app.use(cookieParser());
 
 /* ===== Avatars upload ===== */
 const avatarDir = path.join(uploadsRoot, 'avatars');
-try { fs.mkdirSync(avatarDir, { recursive: true }); } catch {}
+try { fs.mkdirSync(avatarDir, { recursive: true }); } catch { }
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, avatarDir),
   filename: (req, file, cb) => {
@@ -132,8 +222,8 @@ const chatStorage = multer.diskStorage({
 });
 function isAllowedAttachment(file) {
   const ok = [
-    'image/png','image/jpeg','image/webp','image/gif',
-    'application/pdf','image/heic','image/heif'
+    'image/png', 'image/jpeg', 'image/webp', 'image/gif',
+    'application/pdf', 'image/heic', 'image/heif'
   ];
   return ok.includes(file.mimetype);
 }
@@ -570,7 +660,7 @@ async function ensureReviewImages(db, dbName) {
 
     // 4) (пере)создаём внешний ключ
     // сначала пытаемся удалить, если уже существует (не страшно, если не было)
-    try { await db.query(`ALTER TABLE review_images DROP FOREIGN KEY fk_review_images_review`); } catch (_) {}
+    try { await db.query(`ALTER TABLE review_images DROP FOREIGN KEY fk_review_images_review`); } catch (_) { }
 
     await db.query(`
       ALTER TABLE review_images
@@ -692,17 +782,17 @@ const jwtRegSecret = process.env.JWT_REG_SECRET || (JWT_SECRET + '_reg');
 app.post('/api/register-email/start', async (req, res) => {
   try {
     let { firstName, lastName, email, phone } = req.body || {};
-    firstName = (firstName||'').trim();
-    lastName  = (lastName||'').trim();
-    email     = (email||'').trim();
-    phone     = normalizePhone(phone||'');
+    firstName = (firstName || '').trim();
+    lastName = (lastName || '').trim();
+    email = (email || '').trim();
+    phone = normalizePhone(phone || '');
 
     if (!firstName || !email) return res.status(400).json({ error: 'Заповніть всі поля!!!' });
 
-    const [[e1]] = await db.query(SQL.select_users_09,[email]);
+    const [[e1]] = await db.query(SQL.select_users_09, [email]);
     if (e1) return res.status(400).json({ error: 'Користувач з таким email вже існує.' });
     if (phone) {
-      const [[p1]] = await db.query(SQL.select_users_10,[phone]);
+      const [[p1]] = await db.query(SQL.select_users_10, [phone]);
       if (p1) return res.status(400).json({ error: 'Цей номер теелфону вже використовується' });
     }
 
@@ -733,8 +823,8 @@ app.post('/api/register-email/start', async (req, res) => {
 app.post('/api/register-email/verify', async (req, res) => {
   try {
     let { email, code } = req.body || {};
-    email = (email||'').trim();
-    code = (code||'').trim();
+    email = (email || '').trim();
+    code = (code || '').trim();
 
     console.log('[OTP verify] incoming', email, code, 'calc=', sha256(code));
 
@@ -773,8 +863,8 @@ app.post('/api/register-email/finish', async (req, res) => {
     if (exists) return res.status(400).json({ error: 'Email вже використовується' });
 
     const first_name = payload.firstName || '';
-    const last_name  = payload.lastName  || '';
-    const phone      = payload.phone     || '';
+    const last_name = payload.lastName || '';
+    const phone = payload.phone || '';
 
     const usernameBase = (email || '').split('@')[0] || 'user';
     const username = await ensureUniqueUsername(usernameBase);
@@ -960,7 +1050,7 @@ app.post('/api/me/update-profile', requireAuth, async (req, res) => {
     const [exists] = await db.query(SQL.select_users_12, [email, req.user.id]);
     if (exists.length) return res.status(400).json({ error: 'Этот email уже используется' });
 
-    await db.query(SQL.update_general_03, [ first_name, last_name, email, contact_email || null, req.user.id ]);
+    await db.query(SQL.update_general_03, [first_name, last_name, email, contact_email || null, req.user.id]);
 
     const user = await getUserById(req.user.id);
     res.json({ ok: true, user });
@@ -978,21 +1068,21 @@ app.post('/api/heartbeat', requireAuth, async (req, res) => {
 
 /* ===== Chats ===== */
 function _emitTo(req, userId, event, payload) {
-  try { const fn = req.app?.locals?.emitToUser; if (typeof fn === 'function') fn(userId, event, payload); } catch (_) {}
+  try { const fn = req.app?.locals?.emitToUser; if (typeof fn === 'function') fn(userId, event, payload); } catch (_) { }
 }
 app.post('/api/chats/start', requireAuth, async (req, res) => {
   try {
     const seller_id = Number(req.body?.seller_id);
-    const buyer_id  = Number(req.user.id);
+    const buyer_id = Number(req.user.id);
     if (!seller_id || seller_id === buyer_id) {
       return res.status(400).json({ error: 'Некорректный продавец' });
 
-// === Chat list for /chats page ===
-app.get('/api/chats/my', requireAuth, async (req, res) => {
-  try {
-    const me = req.user.id;
-    const [rows] = await db.query(
-      `
+      // === Chat list for /chats page ===
+      app.get('/api/chats/my', requireAuth, async (req, res) => {
+        try {
+          const me = req.user.id;
+          const [rows] = await db.query(
+            `
       SELECT
         t.id, t.seller_id, t.buyer_id, t.updated_at,
         CASE WHEN t.seller_id = ? THEN t.buyer_id ELSE t.seller_id END AS other_id,
@@ -1007,31 +1097,31 @@ app.get('/api/chats/my', requireAuth, async (req, res) => {
       WHERE t.seller_id = ? OR t.buyer_id = ?
       ORDER BY COALESCE((SELECT MAX(m.created_at) FROM chat_messages m WHERE m.thread_id = t.id), t.updated_at) DESC, t.id DESC
       `,
-      [me, me, me, me, me]
-    );
-    res.json({ items: rows || [] });
-  } catch (e) {
-    console.error('GET /api/chats/my error', e);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+            [me, me, me, me, me]
+          );
+          res.json({ items: rows || [] });
+        } catch (e) {
+          console.error('GET /api/chats/my error', e);
+          res.status(500).json({ error: 'Server error' });
+        }
+      });
 
-// === Remove a chat thread completely ===
-app.delete('/api/chats/:id', requireAuth, async (req, res) => {
-  try {
-    const threadId = Number(req.params.id);
-    const me = req.user.id;
-    const [[t]] = await db.query(`SELECT id, seller_id, buyer_id FROM chat_threads WHERE id = ? LIMIT 1`, [threadId]);
-    if (!t) return res.status(404).json({ error: 'Диалог не найден' });
-    if (t.seller_id !== me && t.buyer_id !== me) return res.status(403).json({ error: 'Нет доступа' });
-    const [r] = await db.query(`DELETE FROM chat_threads WHERE id = ?`, [threadId]);
-    if (!r.affectedRows) return res.status(409).json({ error: 'Не удалось удалить' });
-    res.json({ ok: true, id: threadId });
-  } catch (e) {
-    console.error('DELETE /api/chats/:id error', e);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+      // === Remove a chat thread completely ===
+      app.delete('/api/chats/:id', requireAuth, async (req, res) => {
+        try {
+          const threadId = Number(req.params.id);
+          const me = req.user.id;
+          const [[t]] = await db.query(`SELECT id, seller_id, buyer_id FROM chat_threads WHERE id = ? LIMIT 1`, [threadId]);
+          if (!t) return res.status(404).json({ error: 'Диалог не найден' });
+          if (t.seller_id !== me && t.buyer_id !== me) return res.status(403).json({ error: 'Нет доступа' });
+          const [r] = await db.query(`DELETE FROM chat_threads WHERE id = ?`, [threadId]);
+          if (!r.affectedRows) return res.status(409).json({ error: 'Не удалось удалить' });
+          res.json({ ok: true, id: threadId });
+        } catch (e) {
+          console.error('DELETE /api/chats/:id error', e);
+          res.status(500).json({ error: 'Server error' });
+        }
+      });
     }
     const [se] = await db.query(SQL.select_users_13, [seller_id]);
     if (!se.length) return res.status(404).json({ error: 'Продавец не найден' });
@@ -1043,7 +1133,7 @@ app.delete('/api/chats/:id', requireAuth, async (req, res) => {
     if (ex.length) return res.json({ id: ex[0].id });
 
     await db.query(SQL.insert_general_06, [seller_id, buyer_id]);
-    const [rows] = await db.query(SQL.select_chat_threads,[seller_id, buyer_id]);
+    const [rows] = await db.query(SQL.select_chat_threads, [seller_id, buyer_id]);
     if (!rows.length) return res.status(500).json({ error: 'Не удалось создать чат' });
     return res.json({ id: rows[0].id });
   } catch (e) {
@@ -1122,7 +1212,7 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
     const receiver = me === t.seller_id ? t.buyer_id : t.seller_id;
     const blockedForMe =
       (receiver === t.seller_id && t.blocked_by_seller) ||
-      (receiver === t.buyer_id  && t.blocked_by_buyer);
+      (receiver === t.buyer_id && t.blocked_by_buyer);
     if (blockedForMe) return res.status(403).json({ error: 'Пользователь заблокировал вас' });
 
     const files = Array.isArray(req.files) ? req.files : [];
@@ -1154,7 +1244,7 @@ app.post('/api/chats/:id/messages', requireAuth, uploadChat.array('files', 8), a
 
     const receiverMuted =
       (receiver === t.seller_id && t.muted_by_seller) ||
-      (receiver === t.buyer_id  && t.muted_by_buyer);
+      (receiver === t.buyer_id && t.muted_by_buyer);
 
     if (receiverMuted) {
       if (receiver === t.seller_id) {
@@ -1231,7 +1321,7 @@ app.patch('/api/messages/:id', requireAuth, async (req, res) => {
       SQL.select_chat_messages_04, [id]
     );
     _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
-    _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
+    _emitTo(req, m.buyer_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
     res.json({ ok: true, item: updated });
   } catch (e) {
     console.error('PATCH /api/messages/:id', e);
@@ -1265,7 +1355,7 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
       SQL.select_chat_messages_04, [id]
     );
     _emitTo(req, m.seller_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
-    _emitTo(req, m.buyer_id,  'chat:message:update', { thread_id: m.thread_id, item: updated });
+    _emitTo(req, m.buyer_id, 'chat:message:update', { thread_id: m.thread_id, item: updated });
     res.json({ ok: true, item: updated });
   } catch (e) {
     console.error('DELETE /api/messages/:id', e);
@@ -1610,7 +1700,7 @@ app.get('/api/reco/personal', async (req, res) => {
       WHERE p.status = 'active'
       ORDER BY p.created_at DESC, p.id DESC
       LIMIT ?
-      `,[limit]
+      `, [limit]
     );
     res.json({ items: rows || [] });
   } catch (e) {
@@ -1722,7 +1812,7 @@ app.get('/api/products/:id', async (req, res) => {
       JOIN users u ON u.id = p.seller_id
       WHERE p.id = ?
       LIMIT 1
-      `,[id]
+      `, [id]
     );
     const item = rows[0];
     if (!item) return res.status(404).json({ message: 'Товар не найден' });
@@ -1810,7 +1900,7 @@ app.post('/api/products/:id/reviews', requireAuth, uploadReviews.array('images[]
       LEFT JOIN review_images ri ON ri.review_id = r.id
       WHERE r.id = ?
       GROUP BY r.id
-      `,[review.id]
+      `, [review.id]
     );
     const item = row ? { ...row, images: row.images_csv ? row.images_csv.split('||') : [] } : review;
 
@@ -2107,7 +2197,7 @@ app.post('/products/:id/images',
   }
 );
 /* ===== Image proxy (CORS bypass for product images) ===== */
-const _fetch = (typeof fetch === 'function') ? fetch : ((...args) => import('node-fetch').then(({default: f}) => f(...args)));
+const _fetch = (typeof fetch === 'function') ? fetch : ((...args) => import('node-fetch').then(({ default: f }) => f(...args)));
 app.get('/api/proxy-img', async (req, res) => {
   const url = req.query.u;
   if (!url || !/^https?:\/\//i.test(url)) return res.status(400).send('Bad image url');
@@ -2131,12 +2221,12 @@ app.get('/api/proxy-img', async (req, res) => {
 
 // POST /seller/apply/step
 // multipart/form-data (FormData) — по step сохраняем куски + файлы
-app.post('/seller/apply/step', requireAuth, upload.any(), async (req,res) => {
+app.post('/seller/apply/step', requireAuth, upload.any(), async (req, res) => {
   const userId = req.user.id;
   const step = Number(req.body.step || 1);
 
   // загрузки файлов → верни URL (сохрани в /uploads, s3, что угодно)
-  const byField = Object.fromEntries((req.files||[]).map(f => [f.fieldname, '/uploads/'+f.filename]));
+  const byField = Object.fromEntries((req.files || []).map(f => [f.fieldname, '/uploads/' + f.filename]));
 
   // собери значения для upsert
   const vals = {
@@ -2168,17 +2258,17 @@ app.post('/seller/apply/step', requireAuth, upload.any(), async (req,res) => {
 
   // step 5: карта (разбираем и сохраняем safe поля)
   if (step === 5) {
-    const raw = String(req.body.card_number||'').replace(/\s+/g,'');
+    const raw = String(req.body.card_number || '').replace(/\s+/g, '');
     const brand = raw.startsWith('4') ? 'visa' :
-                  raw.startsWith('5') ? 'mastercard' : 'card';
+      raw.startsWith('5') ? 'mastercard' : 'card';
     const last4 = raw.slice(-4);
-    const [mm,yy] = String(req.body.card_exp||'').split('/');
-    const holder = String(req.body.card_holder||'').trim();
+    const [mm, yy] = String(req.body.card_exp || '').split('/');
+    const holder = String(req.body.card_holder || '').trim();
 
     // тут можешь токенизировать у провайдера и получить token
     const token = null;
     await db.exec('insert_user_card', [
-      userId, brand, last4, Number(mm||0), Number('20'+(yy||'00')),
+      userId, brand, last4, Number(mm || 0), Number('20' + (yy || '00')),
       holder, token, userId // последний параметр для подзапроса is_default
     ]);
   }
@@ -2190,7 +2280,7 @@ app.post('/seller/apply/step', requireAuth, upload.any(), async (req,res) => {
 });
 
 // POST /seller/apply/submit
-app.post('/seller/apply/submit', requireAuth, async (req,res) => {
+app.post('/seller/apply/submit', requireAuth, async (req, res) => {
   const userId = req.user.id;
   await db.exec('update_seller_application_submit', [userId]);
   // статус юзера → pending
@@ -2223,9 +2313,9 @@ app.post('/api/chat', async (req, res) => {
   }
   try {
     try { const r = await callModel(PRIMARY_MODEL); return res.json({ reply: r.aiReply, model: r.usedModel }); }
-    catch (e) { const s = e.response?.status; if (![401,402,403].includes(s)) throw e; }
+    catch (e) { const s = e.response?.status; if (![401, 402, 403].includes(s)) throw e; }
     for (const m of FALLBACK_MODELS) {
-      try { const r = await callModel(m); return res.json({ reply: r.aiReply, model: r.usedModel }); } catch (e) {}
+      try { const r = await callModel(m); return res.json({ reply: r.aiReply, model: r.usedModel }); } catch (e) { }
     }
     return res.status(503).json({ error: 'AI недоступен для текущего ключа/модели. Проверьте ключ и Allowed Sites.' });
   } catch (error) {
@@ -2235,9 +2325,9 @@ app.post('/api/chat', async (req, res) => {
     res.status(status).json({
       error:
         status === 401 ? 'Неверный/отключённый OPENROUTER_API_KEY.' :
-        status === 402 ? 'Недостаточно кредитов/лимит.' :
-        status === 403 ? 'Доступ к выбранной модели ограничен (проверьте Allowed Sites/регион/политику).' :
-        'Не удалось связаться с AI.'
+          status === 402 ? 'Недостаточно кредитов/лимит.' :
+            status === 403 ? 'Доступ к выбранной модели ограничен (проверьте Allowed Sites/регион/политику).' :
+              'Не удалось связаться с AI.'
     });
   }
 });
@@ -2313,9 +2403,9 @@ app.post('/seller/apply', requireAuth, async (req, res) => {
   try {
     let { company_name, tax_id, price_list_url, comment } = req.body || {};
     company_name = String(company_name || '').trim();
-    tax_id       = String(tax_id || '').trim();
+    tax_id = String(tax_id || '').trim();
     price_list_url = String(price_list_url || '').trim() || null;
-    comment        = String(comment || '').trim() || null;
+    comment = String(comment || '').trim() || null;
 
     if (!company_name || !tax_id) {
       return res.status(400).json({ message: 'company_name и tax_id обязательны' });
@@ -2360,37 +2450,37 @@ app.post('/seller/apply', requireAuth, async (req, res) => {
 });
 
 /* 1) Проверка уникальности названия */
-app.post('/api/seller/apply/validate-name', requireAuth, async (req,res)=>{
-  try{
-    const name = String(req.body?.shop_name||'').trim();
-    if(!name) return res.status(400).json({message:'shop_name required'});
+app.post('/api/seller/apply/validate-name', requireAuth, async (req, res) => {
+  try {
+    const name = String(req.body?.shop_name || '').trim();
+    if (!name) return res.status(400).json({ message: 'shop_name required' });
     const [r] = await db.query(`SELECT 1 FROM seller_applications WHERE shop_name=? LIMIT 1`, [name]);
-    if(r.length) return res.status(409).json({message:'Назва зайнята'});
-    return res.json({ok:true});
-  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+    if (r.length) return res.status(409).json({ message: 'Назва зайнята' });
+    return res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ message: 'Server error' }); }
 });
 
 /* 2) Сохранение шага (upsert) — НЕ трогаем status вообще */
-app.post('/api/seller/apply/save-step', requireAuth, async (req,res)=>{
-  try{
-    const p = req.body||{};
+app.post('/api/seller/apply/save-step', requireAuth, async (req, res) => {
+  try {
+    const p = req.body || {};
     const values = {
       user_id: req.user.id,
-      step: Math.max(1, Math.min(5, parseInt(p.step||'1',10))),
-      shop_name: (p.shop_name||null),
-      country: (p.country||null),
-      shipping_address: (p.shipping_address||null),
-      city: (p.city||null),
-      zip: (p.zip||null),
-      reg_type: (p.reg_type==='individual'?'individual':'company'),
-      doc_company_extract_url: p.doc_company_extract_url||null,
-      doc_company_itn_url: p.doc_company_itn_url||null,
-      doc_individual_passport_url: p.doc_individual_passport_url||null,
-      doc_individual_itn_url: p.doc_individual_itn_url||null,
-      company_full_name: p.company_full_name||null,
-      edrpou: p.edrpou||null,
-      iban: p.iban||null,
-      payout_card_id: p.payout_card_id||null
+      step: Math.max(1, Math.min(5, parseInt(p.step || '1', 10))),
+      shop_name: (p.shop_name || null),
+      country: (p.country || null),
+      shipping_address: (p.shipping_address || null),
+      city: (p.city || null),
+      zip: (p.zip || null),
+      reg_type: (p.reg_type === 'individual' ? 'individual' : 'company'),
+      doc_company_extract_url: p.doc_company_extract_url || null,
+      doc_company_itn_url: p.doc_company_itn_url || null,
+      doc_individual_passport_url: p.doc_individual_passport_url || null,
+      doc_individual_itn_url: p.doc_individual_itn_url || null,
+      company_full_name: p.company_full_name || null,
+      edrpou: p.edrpou || null,
+      iban: p.iban || null,
+      payout_card_id: p.payout_card_id || null
     };
 
     await db.query(`
@@ -2427,26 +2517,27 @@ app.post('/api/seller/apply/save-step', requireAuth, async (req,res)=>{
       values.company_full_name, values.edrpou, values.iban, values.payout_card_id
     ]);
 
-    res.json({ok:true});
-  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ message: 'Server error' }); }
 });
 
 /* 3) Сабмит — ставим 'pending' (он есть в твоём ENUM) */
-app.post('/api/seller/apply/submit', requireAuth, async (req,res)=>{
+app.post('/api/seller/apply/submit', requireAuth, async (req, res) => {
   const conn = await db.getConnection();
-  try{
+  try {
     const payout_card_id = req.body?.payout_card_id ?? null;
     await conn.beginTransaction();
 
     const [[row]] = await conn.query(`SELECT * FROM seller_applications WHERE user_id=? LIMIT 1`, [req.user.id]);
-    if(!row) { await conn.rollback(); return res.status(400).json({message:'Чернетки не знайдено'}); }
-    if(!row.shop_name || !row.country || !row.shipping_address || !row.city || !row.zip ||
-       !row.company_full_name || !row.edrpou || !row.iban) {
-      await conn.rollback(); return res.status(400).json({message:'Заповніть усі обовʼязкові поля'}); }
+    if (!row) { await conn.rollback(); return res.status(400).json({ message: 'Чернетки не знайдено' }); }
+    if (!row.shop_name || !row.country || !row.shipping_address || !row.city || !row.zip ||
+      !row.company_full_name || !row.edrpou || !row.iban) {
+      await conn.rollback(); return res.status(400).json({ message: 'Заповніть усі обовʼязкові поля' });
+    }
 
-    if(payout_card_id!=null){
+    if (payout_card_id != null) {
       const [[c]] = await conn.query(`SELECT id FROM user_cards WHERE id=? AND user_id=?`, [payout_card_id, req.user.id]);
-      if(!c){ await conn.rollback(); return res.status(400).json({message:'Картка не знайдена'}); }
+      if (!c) { await conn.rollback(); return res.status(400).json({ message: 'Картка не знайдена' }); }
     }
 
     // ВАЖНО: 'pending' вместо 'submitted'
@@ -2460,14 +2551,14 @@ app.post('/api/seller/apply/submit', requireAuth, async (req,res)=>{
     await conn.query(`UPDATE users SET seller_status='pending', updated_at=NOW() WHERE id=?`, [req.user.id]);
 
     await conn.commit();
-    res.json({ok:true});
-  }catch(e){ await conn.rollback(); console.error(e); res.status(500).json({message:'Server error'}); }
-  finally{ conn.release(); }
+    res.json({ ok: true });
+  } catch (e) { await conn.rollback(); console.error(e); res.status(500).json({ message: 'Server error' }); }
+  finally { conn.release(); }
 });
 
 /* 4) Картки користувача */
-app.get('/api/me/cards', requireAuth, async (req,res)=>{
-  try{
+app.get('/api/me/cards', requireAuth, async (req, res) => {
+  try {
     const [rows] = await db.query(
       `SELECT id,brand,last4,exp_month,exp_year,holder_name
          FROM user_cards
@@ -2475,26 +2566,26 @@ app.get('/api/me/cards', requireAuth, async (req,res)=>{
         ORDER BY id DESC`,
       [req.user.id]
     );
-    res.json({items: rows});
-  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+    res.json({ items: rows });
+  } catch (e) { console.error(e); res.status(500).json({ message: 'Server error' }); }
 });
 
-app.post('/api/me/cards', requireAuth, async (req,res)=>{
-  try{
+app.post('/api/me/cards', requireAuth, async (req, res) => {
+  try {
     const [cnt] = await db.query(`SELECT COUNT(*) c FROM user_cards WHERE user_id=?`, [req.user.id]);
-    if((cnt?.[0]?.c||0) >= 2) return res.status(400).json({message:'Максимум 2 картки'});
+    if ((cnt?.[0]?.c || 0) >= 2) return res.status(400).json({ message: 'Максимум 2 картки' });
 
-    const number = String(req.body?.number||'').replace(/\s+/g,'');
-    const exp = String(req.body?.exp||'');
-    const cvc = String(req.body?.cvc||'');
-    const holder = String(req.body?.holder_name||'').trim();
+    const number = String(req.body?.number || '').replace(/\s+/g, '');
+    const exp = String(req.body?.exp || '');
+    const cvc = String(req.body?.cvc || '');
+    const holder = String(req.body?.holder_name || '').trim();
 
-    if(!/^\d{12,19}$/.test(number) || !luhn(number)) return res.status(400).json({message:'Некоректний номер картки'});
-    if(!/^\d{2}\/\d{2}$/.test(exp)) return res.status(400).json({message:'Некоректний термін'});
-    if(!/^\d{3,4}$/.test(cvc)) return res.status(400).json({message:'Некоректний CVC'});
-    if(!holder) return res.status(400).json({message:'Вкажіть власника'});
+    if (!/^\d{12,19}$/.test(number) || !luhn(number)) return res.status(400).json({ message: 'Некоректний номер картки' });
+    if (!/^\d{2}\/\d{2}$/.test(exp)) return res.status(400).json({ message: 'Некоректний термін' });
+    if (!/^\d{3,4}$/.test(cvc)) return res.status(400).json({ message: 'Некоректний CVC' });
+    if (!holder) return res.status(400).json({ message: 'Вкажіть власника' });
 
-    const [mm, yy] = exp.split('/').map(x=>parseInt(x,10));
+    const [mm, yy] = exp.split('/').map(x => parseInt(x, 10));
     const brand = detectBrand(number);
     const last4 = number.slice(-4);
 
@@ -2503,8 +2594,8 @@ app.post('/api/me/cards', requireAuth, async (req,res)=>{
        VALUES (?,?,?,?,?,?,NULL)`,
       [req.user.id, brand, last4, mm, 2000 + yy, holder]
     );
-    res.status(201).json({ok:true});
-  }catch(e){ console.error(e); res.status(500).json({message:'Server error'}); }
+    res.status(201).json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ message: 'Server error' }); }
 });
 
 /* ===== Ensure wishlist schema ===== */
@@ -2544,7 +2635,7 @@ app.get('/api/sellers/:id/products', async (req, res) => {
       FROM products p
       WHERE p.status = 'active' AND p.seller_id = ?
       ORDER BY p.created_at DESC, p.id DESC
-      `,[sellerId]
+      `, [sellerId]
     );
     res.json({ items: rows || [] });
   } catch (e) {
@@ -2582,9 +2673,9 @@ app.post('/api/wishlist', requireAuth, async (req, res) => {
     const pid = Number(req.body?.product_id);
     if (!pid) return res.status(400).json({ message: 'Invalid product_id' });
     const [[ex]] = await db.query(`SELECT id FROM wishlist_items WHERE user_id=? AND product_id=? LIMIT 1`, [req.user.id, pid]);
-    if (ex) { await db.query(`DELETE FROM wishlist_items WHERE id=?`, [ex.id]); return res.json({ ok:true, removed:true, product_id:pid }); }
+    if (ex) { await db.query(`DELETE FROM wishlist_items WHERE id=?`, [ex.id]); return res.json({ ok: true, removed: true, product_id: pid }); }
     await db.query(`INSERT INTO wishlist_items (user_id, product_id) VALUES (?, ?)`, [req.user.id, pid]);
-    res.status(201).json({ ok:true, added:true, product_id:pid });
+    res.status(201).json({ ok: true, added: true, product_id: pid });
   } catch (e) { console.error('POST /api/wishlist', e); res.status(500).json({ message: 'Server error' }); }
 });
 
@@ -2622,13 +2713,13 @@ try {
            FROM products p
            WHERE p.status='active' AND p.seller_id=?
            ORDER BY p.created_at DESC, p.id DESC`,
-           [sellerId]
+          [sellerId]
         );
         res.json({ items: rows || [] });
-      } catch(e) { console.error('GET /api/sellers/:id/products', e); res.status(500).json({ message:'Server error' }); }
+      } catch (e) { console.error('GET /api/sellers/:id/products', e); res.status(500).json({ message: 'Server error' }); }
     });
   }
-} catch {}
+} catch { }
 
 // index.js (server) — добавить маршрут смены пароля
 app.post('/api/me/change-password', async (req, res) => {
@@ -2653,4 +2744,527 @@ app.post('/api/me/change-password', async (req, res) => {
     console.error('change-password error:', e);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+// ===== GEO SUGGEST BACKEND =====
+// Подсказки стран/городов + автоиндекс через Nominatim (OSM)
+// (ВНИМАНИЕ: здесь НЕТ повторных import — они уже есть вверху файла)
+
+// --- автоопределение языка: если в запросе есть кириллица → 'uk', иначе 'en'
+function detectLang(input = "") {
+  const s = String(input || "");
+  if (/[\u0400-\u04FF]/.test(s)) return "uk";
+  if (/[A-Za-z]/.test(s)) return "en";
+  return "uk";
+}
+
+// Украинская транслитерация для префиксного матчинга (ха → kha)
+function uaTranslitPrefix(s = "") {
+  const map = {
+    "а": "a", "б": "b", "в": "v", "г": "h", "ґ": "g", "д": "d", "е": "e", "є": "ye", "ж": "zh", "з": "z",
+    "и": "y", "і": "i", "ї": "yi", "й": "i", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p",
+    "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "kh", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "shch",
+    "ю": "yu", "я": "ya", "ь": "", "’": "", "'": ""
+  };
+  const lower = (s || "").toLowerCase();
+  let out = "";
+  for (const ch of lower) out += map[ch] !== undefined ? map[ch] : ch;
+  return out;
+}
+function norm(s = "") {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+// ===== простой in-memory кэш (по умолчанию 10 минут)
+const _cache = new Map(); // key -> { ts, ttl, data }
+function cacheGet(key) {
+  const v = _cache.get(key);
+  if (!v) return null;
+  if (Date.now() - v.ts > (v.ttl || 600000)) { _cache.delete(key); return null; }
+  return v.data;
+}
+function cacheSet(key, data, ttl = 600000) {
+  _cache.set(key, { ts: Date.now(), ttl, data });
+}
+
+// ====== СТРАНЫ ======
+app.get("/api/geo/countries", (req, res) => {
+  const q = String(req.query.query || "").trim();
+  let lang = String(req.query.lang || "auto");
+  if (lang === "auto") lang = detectLang(q);
+
+  const cacheKey = `countries|${lang}|${q}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return res.json(cached);
+
+  const all = CSCountry.getAllCountries().map(c => {
+    const local = countriesLib.getName(c.isoCode, lang) || c.name;
+    return { code: c.isoCode, name: c.name, localName: local, label: local };
+  });
+
+  let list = all;
+  if (q) {
+    const nq = norm(q);
+    const qlat = uaTranslitPrefix(nq);
+    list = all.filter(c => {
+      const a = norm(c.localName || "");
+      const b = norm(c.name || "");
+      return a.startsWith(nq) || b.startsWith(nq) || a.startsWith(qlat) || b.startsWith(qlat);
+    });
+  }
+
+  const out = list.slice(0, 50);
+  cacheSet(cacheKey, out);
+  res.json(out);
+});
+
+// ====== ГОРОДА ======
+app.get('/api/geo/cities', async (req, res) => {
+  const code  = String(req.query.country || '').toUpperCase();
+  const cname = String(req.query.countryName || '');
+  const qRaw  = String(req.query.query || '').trim();
+  let   lang  = String(req.query.lang || 'auto');
+
+  const isCyr = (s = '') => /[\u0400-\u04FF]/.test(s);
+  const norm  = (s = '') =>
+    String(s || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+  // авто-язык как и раньше
+  if (lang === 'auto') lang = isCyr(qRaw) ? 'uk' : 'en';
+
+  // резолв кода страны (по EN/UА названию)
+  let countryCode = code;
+  if (!countryCode && cname) {
+    const found = CSCountry.getAllCountries().find(
+      c => norm(c.name) === norm(cname) ||
+           norm(countriesLib.getName(c.isoCode, 'uk') || '') === norm(cname)
+    );
+    countryCode = found?.isoCode || '';
+  }
+  if (!countryCode) return res.json([]);
+
+  // --- умный трансліт UА->EN (позиционно)
+  function uaToLatSmart(s = '') {
+    const lower = String(s || '').toLowerCase();
+    let out = '';
+    for (let i = 0; i < lower.length; i++) {
+      const ch = lower[i];
+      const atStart = i === 0 || /[^a-zа-яёіїєґ']/i.test(lower[i - 1]) || lower[i - 1] === "'";
+      if (ch === 'є') out += atStart ? 'ye' : 'ie';
+      else if (ch === 'ї') out += atStart ? 'yi' : 'i';
+      else if (ch === 'ю') out += atStart ? 'yu' : 'iu';
+      else if (ch === 'я') out += atStart ? 'ya' : 'ia';
+      else {
+        const m = {
+          'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','ж':'zh','з':'z',
+          'и':'y','і':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p',
+          'р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch',
+          'ь':'','’':'',"'":''
+        };
+        out += (m[ch] ?? ch);
+      }
+    }
+    return out;
+  }
+
+  // --- RU -> UA часто используемые экзонимы (префиксами)
+  const RU2UA_PREFIX = [
+    ['киев','київ'], ['днепр','дніпро'], ['одесс','одеса'], ['львов','львів'],
+    ['харьк','харків'], ['запорож','запоріж'], ['ровн','рівн'], ['николаев','миколаїв'],
+    ['черновц','чернівц'], ['луганск','луганськ'], ['донецк','донецьк'], ['херсон','херсон'],
+    ['кропивницк','кропивницьк'], ['ужгород','ужгород'], ['кировоград','кропивницьк']
+  ];
+  function ruToUaGuess(q = '') {
+    const nq = norm(q);
+    const hit = RU2UA_PREFIX.find(([ru]) => nq.startsWith(ru));
+    return hit ? hit[1] : null;
+  }
+
+  // --- строим набор вариантов запроса
+  const variants = new Set();
+  const nq = norm(qRaw);
+  if (nq) variants.add(nq);
+  const ruUa = ruToUaGuess(qRaw);
+  if (ruUa) variants.add(norm(ruUa));
+  variants.add(uaToLatSmart(nq));          // латиница для кириллицы
+  if (ruUa) variants.add(uaToLatSmart(norm(ruUa)));
+
+  // ключ кэша учитывать все варианты
+  const cacheKey = `cities|${countryCode}|${lang}|${[...variants].join('|')}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return res.json(cached);
+
+  // 1) Локальная база
+  const states = CSState.getStatesOfCountry(countryCode);
+  let base = [];
+  for (const s of states) base = base.concat(CSCity.getCitiesOfState(countryCode, s.isoCode));
+  if (!base.length) base = CSCity.getCitiesOfCountry(countryCode);
+
+  // матчер по нескольким вариантам
+  function matches(ctName) {
+    const a = norm(ctName || '');
+    const short = [...variants].some(v => v && v.length <= 2);
+    for (const v of variants) {
+      if (!v) continue;
+      const lat = uaToLatSmart(v);
+      if (a.startsWith(v) || a.startsWith(lat)) return true;
+      if (short && (a.includes(v) || a.includes(lat))) return true; // для 1–2 букв — мягче
+    }
+    return !nq; // пустой запрос — всё ок
+  }
+
+  let result = base
+    .filter(ct => matches(ct.name))
+    .map(ct => ({
+      id: `${countryCode}:${ct.name}`,
+      name: ct.name,
+      countryCode,
+      localName: undefined
+    }));
+
+  // 2) Подтягиваем Nominatim (кириллица/UA)
+  const needUA = (countryCode === 'UA') || isCyr(qRaw) || lang === 'uk';
+  const NEED_ENRICH = needUA && (nq.length >= 1);
+
+  async function fetchFromNominatim(qText) {
+    try {
+      const url = new URL('https://nominatim.openstreetmap.org/search');
+      url.searchParams.set('format', 'jsonv2');
+      url.searchParams.set('limit', '50');
+      url.searchParams.set('q', qText);
+      url.searchParams.set('countrycodes', countryCode.toLowerCase());
+      url.searchParams.set('accept-language', needUA ? 'uk' : 'en');
+      url.searchParams.set('namedetails', '1');
+
+      const r = await fetch(url, { headers: { 'User-Agent': 'QontoCheckout/1.5' } });
+      if (!r.ok) return [];
+      const data = await r.json();
+      return (Array.isArray(data) ? data : [])
+        .filter(row => ['city','town','village','hamlet','municipality','suburb','quarter','neighbourhood','locality','place'].includes(String(row.type || '')))
+        .map(row => {
+          const nd = row.namedetails || {};
+          const uk = nd['name:uk'] || nd['name:uk-Latn'] || null;
+          const en = nd['name:en'] || row.name || null;
+          const display = (uk || (row.display_name ? String(row.display_name).split(',')[0] : en));
+          return {
+            id: `osm:${row.osm_id}`,
+            name: en || display || '',
+            localName: uk || display || '',
+            countryCode,
+            label: display || (en || '')
+          };
+        });
+    } catch { return []; }
+  }
+
+  if (NEED_ENRICH) {
+    const qList = [...variants].filter(Boolean);
+    const seenOsm = new Set();
+    for (const qText of qList) {
+      const osm = await fetchFromNominatim(qText);
+      for (const it of osm) {
+        if (!matches(it.localName || it.name)) continue;
+        const k = norm((it.localName || it.name) + '|' + it.countryCode);
+        if (seenOsm.has(k)) continue;
+        seenOsm.add(k);
+        result.push(it);
+      }
+      if (result.length >= 200) break;
+    }
+  }
+
+  // --- РАНЖИРОВАНИЕ: крупные города и префиксные совпадения выше
+  const UA_MAJOR_PREFIXES = [
+    { uk: 'київ', en: 'kyiv' }, { uk: 'харків', en: 'kharkiv' }, { uk: 'дніпро', en: 'dnipro' },
+    { uk: 'одес', en: 'odesa' }, { uk: 'льв', en: 'lviv' }, { uk: 'запоріж', en: 'zaporizh' },
+    { uk: 'миколаїв', en: 'mykolaiv' }, { uk: 'чернів', en: 'cherniv' }, { uk: 'черкас', en: 'cherkas' },
+    { uk: 'полтав', en: 'poltav' }, { uk: 'сум', en: 'sumy' }, { uk: 'терноп', en: 'ternop' },
+    { uk: 'рівн', en: 'rivne' }, { uk: 'ужгород', en: 'uzhhorod' }, { uk: 'івано-франків', en: 'ivano-frank' },
+    { uk: 'херсон', en: 'kherson' }, { uk: 'луцьк', en: 'lutsk' }, { uk: 'житом', en: 'zhytom' }
+  ];
+
+  const VARS = [...variants];
+  const shortInput = VARS.some(v => v && v.length <= 2);
+
+  function scoreCity(c) {
+    const nm  = norm(c.name);
+    const loc = norm(c.localName || '');
+    let score = 0;
+
+    // точное совпадение
+    for (const v of VARS) {
+      if (!v) continue;
+      const lat = uaToLatSmart(v);
+      if (nm === v || nm === lat || (loc && loc === v)) score += 100;
+    }
+
+    // префикс
+    for (const v of VARS) {
+      if (!v) continue;
+      const lat = uaToLatSmart(v);
+      if (nm.startsWith(v) || nm.startsWith(lat)) score += 60;
+      if (loc && loc.startsWith(v)) score += 70;
+    }
+
+    // короткий ввод — допускаем includes
+    if (shortInput) {
+      for (const v of VARS) {
+        if (!v) continue;
+        const lat = uaToLatSmart(v);
+        const i1 = nm.indexOf(lat);
+        const i2 = loc ? loc.indexOf(v) : -1;
+        if (i1 >= 0) score += Math.max(30 - i1, 5);
+        if (i2 >= 0) score += Math.max(35 - i2, 8);
+      }
+    }
+
+    // буст крупных городов
+    const big = UA_MAJOR_PREFIXES.find(p => nm.startsWith(p.en) || (loc && loc.startsWith(p.uk)));
+    if (big) score += 80;
+
+    // лёгкий штраф за очень длинные «деревенские» названия
+    score -= Math.max((nm.length - 6), 0) * 0.8;
+
+    return score;
+  }
+
+  result.sort((a, b) => {
+    const sa = scoreCity(a), sb = scoreCity(b);
+    if (sa !== sb) return sb - sa;
+    return (a.localName || a.name || '').localeCompare(b.localName || b.name || '', 'uk');
+  });
+
+  // финальный дедуп и выбор ярлыка
+  const seen = new Set();
+  const out = [];
+  for (const c of result) {
+    const key = norm((c.localName || c.name) + '|' + c.countryCode);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      ...c,
+      label: needUA ? (c.localName || c.name) : c.name
+    });
+  }
+
+  const finalOut = out.slice(0, 100);
+  cacheSet(cacheKey, finalOut, 300000);
+  res.json(finalOut);
+});
+
+// ====== ПОЧТОВЫЙ ИНДЕКС ПО ГОРОДУ ======
+app.get("/api/geo/postal", async (req, res) => {
+  const code = String(req.query.country || "");
+  const cname = String(req.query.countryName || "");
+  const city = String(req.query.city || "");
+  const lang = String(req.query.lang || "uk");
+
+  if (!city || (!code && !cname)) return res.json({ postal: "" });
+
+  let countryCode = code;
+  if (!countryCode && cname) {
+    const found = CSCountry.getAllCountries().find(
+      c => norm(c.name) === norm(cname) ||
+        norm(countriesLib.getName(c.isoCode, "uk") || "") === norm(cname)
+    );
+    countryCode = found?.isoCode || "";
+  }
+
+  const cacheKey = `postal|${countryCode}|${lang}|${city}`;
+  const cached = cacheGet(cacheKey);
+  if (cached !== null && cached !== undefined) {
+    return res.json({ postal: cached });
+  }
+
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/search");
+    url.searchParams.set("city", city);
+    if (countryCode) url.searchParams.set("countrycodes", countryCode.toLowerCase());
+    url.searchParams.set("format", "json");
+    url.searchParams.set("addressdetails", "1");
+    url.searchParams.set("limit", "1");
+    url.searchParams.set("accept-language", lang);
+
+    const r = await fetch(url, { headers: { "User-Agent": "QonteCheckout/1.0" } });
+    const data = await r.json();
+    const postal = data?.[0]?.address?.postcode || "";
+
+    cacheSet(cacheKey, postal, 300000);
+    return res.json({ postal });
+  } catch (e) {
+    console.error("postal error", e);
+    return res.json({ postal: "" });
+  }
+});
+
+/* === Moderator routes — summary & lists === */
+app.get('/api/moder/notifications/summary', async (req, res) => {
+  try {
+    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
+    const requestsTable   = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
+    const [compl, reqs] = await Promise.all([ smartCount(db, complaintsTable), smartCount(db, requestsTable) ]);
+    res.json({ complaints: compl.count, shop_requests: reqs.count, lastTimes: { complaints: compl.lastTime, shop_requests: reqs.lastTime } });
+  } catch (err) {
+    console.error('GET /api/moder/notifications/summary', err);
+    res.json({ complaints:0, shop_requests:0, lastTimes: { complaints:null, shop_requests:null } });
+  }
+});
+
+app.get('/api/moder/cases/requests', async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit||20), 100);
+    const offset = Math.max(Number(req.query.offset||0), 0);
+    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
+    const requestsTable = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
+    let rows = [];
+    if (requestsTable) {
+      try {
+        const [data] = await db.query(
+          `SELECT r.*, u.first_name, u.last_name, u.username, u.email, u.avatar_url
+           FROM \`${requestsTable}\` r
+           LEFT JOIN \`${usersTable}\` u ON u.id = r.user_id
+           ORDER BY r.created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
+        );
+        rows = data;
+      } catch(_ ) {
+        const [data] = await db.query(
+          `SELECT * FROM \`${requestsTable}\` ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
+        );
+        rows = data;
+      }
+    }
+    res.json({ items: rowsToItems(rows) });
+  } catch (e) {
+    console.error('GET /api/moder/cases/requests', e);
+    res.json({ items: [] });
+  }
+});
+
+app.get('/api/moder/cases/complaints', async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit||20), 100);
+    const offset = Math.max(Number(req.query.offset||0), 0);
+    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
+    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
+    let rows = [];
+    if (complaintsTable) {
+      try {
+        const [data] = await db.query(
+          `SELECT c.*, u.first_name, u.last_name, u.username, u.email, u.avatar_url
+           FROM \`${complaintsTable}\` c
+           LEFT JOIN \`${usersTable}\` u ON u.id = c.user_id
+           ORDER BY c.created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
+        );
+        rows = data;
+      } catch(_ ) {
+        const [data] = await db.query(
+          `SELECT * FROM \`${complaintsTable}\` ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
+        );
+        rows = data;
+      }
+    }
+    res.json({ items: rowsToItems(rows) });
+  } catch (e) {
+    console.error('GET /api/moder/cases/complaints', e);
+    res.json({ items: [] });
+  }
+});
+
+
+/* === Moderator routes — details & approve === */
+app.get('/api/moder/cases/requests/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
+    const requestsTable = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
+    if (!requestsTable) return res.status(404).json({ error:'not found' });
+
+    const [rows] = await db.query(
+      `SELECT r.*, u.first_name, u.last_name, u.username, u.avatar_url
+       FROM \`${requestsTable}\` r
+       LEFT JOIN \`${usersTable}\` u ON u.id = r.user_id
+       WHERE r.id = ? OR r.request_id = ? LIMIT 1`, [id, id]
+    );
+    const r = rows?.[0];
+    if (!r) return res.status(404).json({ error:'not found' });
+
+    const name = [r.first_name||'', r.last_name||''].join(' ').trim() || r.username || null;
+    const docs = {
+      passport_url: r.passport_url || r.passport || r.passport_scan || null,
+      registry_url: r.registry_url || r.registry || r.registry_extract || null,
+      ipn_url:      r.ipn_url || r.tax_id || r.itn || null,
+    };
+
+    res.json({
+      id: r.id || r.request_id,
+      store_name: r.store_name || r.shop_name || r.market_name || r.store || r.shop || null,
+      created_at: r.created_at || r.createdAt || r.date || r.created_time || r.timestamp || null,
+      user: { id: r.user_id, name, avatar_url: r.avatar_url || null },
+      docs
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'server' });
+  }
+});
+
+app.get('/api/moder/cases/complaints/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const usersTable = await firstExistingTable(db, ['users','myshopdb.users']);
+    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
+    if (!complaintsTable) return res.status(404).json({ error:'not found' });
+
+    const [rows] = await db.query(
+      `SELECT c.*, u.first_name, u.last_name, u.username, u.avatar_url
+       FROM \`${complaintsTable}\` c
+       LEFT JOIN \`${usersTable}\` u ON u.id = c.user_id
+       WHERE c.id = ? OR c.complaint_id = ? LIMIT 1`, [id, id]
+    );
+    const r = rows?.[0];
+    if (!r) return res.status(404).json({ error:'not found' });
+
+    const name = [r.first_name||'', r.last_name||''].join(' ').trim() || r.username || null;
+    const docs = {
+      passport_url: r.passport_url || null,
+      registry_url: r.registry_url || null,
+      ipn_url:      r.ipn_url || null,
+      attachment:   r.attachment_url || r.screenshot || null
+    };
+
+    res.json({
+      id: r.id || r.complaint_id,
+      store_name: r.store_name || r.shop_name || r.market_name || r.store || r.shop || null,
+      created_at: r.created_at || r.createdAt || r.date || r.created_time || r.timestamp || null,
+      user: { id: r.user_id, name, avatar_url: r.avatar_url || null },
+      docs
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error:'server' });
+  }
+});
+
+app.post('/api/moder/cases/requests/:id/approve', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const requestsTable = await firstExistingTable(db, ['seller_requests','shop_requests','seller_applications','applications','requests_open_shop']);
+    if (!requestsTable) return res.status(404).json({ error:'not found' });
+    await db.query(`UPDATE \`${requestsTable}\` SET status='approved' WHERE id=? OR request_id=?`, [id, id]);
+    res.json({ ok:true });
+  } catch (e) { console.error(e); res.status(500).json({ error:'server' }) }
+});
+
+app.post('/api/moder/cases/complaints/:id/approve', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const complaintsTable = await firstExistingTable(db, ['complaints','product_complaints','reports','claims']);
+    if (!complaintsTable) return res.status(404).json({ error:'not found' });
+    await db.query(`UPDATE \`${complaintsTable}\` SET status='resolved' WHERE id=? OR complaint_id=?`, [id, id]);
+    res.json({ ok:true });
+  } catch (e) { console.error(e); res.status(500).json({ error:'server' }) }
 });

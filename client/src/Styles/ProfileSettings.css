@@ -580,3 +580,10 @@
 .addr-row__input:focus,
 .addr-row__input-label:focus{ outline:none; box-shadow:0 0 0 2px rgba(53,198,94,.25); }
 .addr-row__input::placeholder{ color:#A3A2A3; }
+
+/* Green focus for password fields (instead of browser blue) */
+.ps-root .pass-field__input:focus{
+  outline: none;
+  border-color: #35C65E;
+  box-shadow: 0 0 0 2px rgba(53, 198, 94, 0.25);
+}

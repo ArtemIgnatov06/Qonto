@@ -1,4 +1,4 @@
-// client/src/Pages/Profile.jsx — full name display + dynamic checklist + avatar upload/initials
+// client/src/Pages/Profile.jsx — role-based view (user vs moderator)
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../Styles/Profile.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import imgChat from '../assets/chat.png';
 import imgCompleteSmall from '../assets/complete-small.png';
 import imgPlane from '../assets/planex.png';
 import imgReady from '../assets/ready.png';
+import imgModerator from '../assets/moderator-page.png';
 
 /* ===================== routes / constants ===================== */
 const ADD_PRODUCT_URL = '/products/new';
@@ -107,6 +108,10 @@ function normalizeUser(src){
     best.seller_rejection_reason ?? best.sellerRejectionReason ?? best.seller?.rejection_reason ?? null;
 
   return { first_name:first||'', last_name:last||'', email, avatar, seller_status, seller_rejection_reason };
+  const id = best.id ?? best.user_id ?? best.userId ?? best.uid ?? null;
+  const role = best.role ?? best.user_role ?? best.role_name ?? (best.is_admin ? 'admin' : null);
+  const is_admin = !!(best.is_admin || role === 'admin' || role === 'moderator');
+  return { id, role, is_admin, first_name:first||'', last_name:last||'', email, avatar };
 }
 
 async function uploadAvatar(file){
@@ -132,7 +137,7 @@ export default function Profile(){
 
   const [user, setUser] = useState(()=> authUser || parseLocal(['user','auth','profile','qonto_user','qonto.auth','qonto.profile']) || null);
 
-  // Checklist statuses
+  // Checklist statuses (for regular users)
   const [done, setDone] = useState({ photo:false, address:false, card:false, order:false });
 
   useEffect(()=>{ if (authUser) setUser(prev => ({ ...(prev||{}), ...normalizeUser(authUser) })); }, [authUser]);
@@ -196,6 +201,9 @@ export default function Profile(){
     user?.sellerRejectionReason ??
     user?.seller?.rejection_reason ??
     null;
+  // Moderator check:
+  // We treat DB admin/moderator role OR specific id=2 as moderator.
+  const isModerator = !!(user?.is_admin || ['admin','moderator','адмін','модератор'].includes((user?.role||'').toString().toLowerCase()) || user?.id === 2);
 
   // Avatar upload
   const fileRef = useRef(null);
@@ -253,7 +261,7 @@ export default function Profile(){
   }
 
   return (
-    <main className="q-profile" role="main">
+    <main className={`q-profile ${isModerator ? 'is-moderator' : ''}`} role="main">
       <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={onFileChange} />
 
       <section className="frame-918" aria-label="Профіль">
@@ -267,10 +275,11 @@ export default function Profile(){
           </button>
         )}
         <span className="seller-dot" aria-hidden="true"></span>
-        <span className="seller-tag">Покупець</span>
+        <span className="seller-tag">{isModerator ? 'Модератор' : 'Покупець'}</span>
         <h5 className="seller-name">{displayName}</h5>
       </section>
 
+      {/* Common controls */}
       <button className="btn-edit-shop" type="button" onClick={() => navigate('/profile/settings')}>
         <span className="btn-edit-bg" />
         <img className="btn-edit-ico" src={imgSettings} alt="" />
@@ -283,42 +292,45 @@ export default function Profile(){
         <span className="btn-chats-label">Чати</span>
       </Link>
 
-      <section className="checklist" id="sellerChecklist" aria-label="Чекліст профілю">
-        <div className="cl-frame"></div>
-        <div className={`cl-icon cl-icon-1 ${done.photo ? 'is-done' : ''}`} style={done.photo ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
-        <div className={`cl-icon cl-icon-2 ${done.address ? 'is-done' : ''}`} style={done.address ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
-        <div className={`cl-icon cl-icon-3 ${done.card ? 'is-done' : ''}`} style={done.card ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
-        <div className={`cl-icon cl-icon-4 ${done.order ? 'is-done' : ''}`} style={done.order ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
-        <div className="cl-text cl-text-1">Додайте фото профілю</div>
-        <div className="cl-text cl-text-2">Додайте адресу</div>
-        <div className="cl-text cl-text-3">Додайте карту</div>
-        <div className="cl-text cl-text-4">Замовте перший товар</div>
-      </section>
+      {/* Regular user blocks */}
+      {!isModerator && (
+        <>
+          <section className="checklist" id="sellerChecklist" aria-label="Чекліст профілю">
+            <div className="cl-frame"></div>
+            <div className={`cl-icon cl-icon-1 ${done.photo ? 'is-done' : ''}`} style={done.photo ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+            <div className={`cl-icon cl-icon-2 ${done.address ? 'is-done' : ''}`} style={done.address ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+            <div className={`cl-icon cl-icon-3 ${done.card ? 'is-done' : ''}`} style={done.card ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+            <div className={`cl-icon cl-icon-4 ${done.order ? 'is-done' : ''}`} style={done.order ? { backgroundImage:`url(${imgReady})` } : undefined}></div>
+            <div className="cl-text cl-text-1">Додайте фото профілю</div>
+            <div className="cl-text cl-text-2">Додайте адресу</div>
+            <div className="cl-text cl-text-3">Додайте карту</div>
+            <div className="cl-text cl-text-4">Замовте перший товар</div>
+          </section>
 
-      <nav className="seller-quicklinks" aria-label="Швидкі дії">
-        <Link className="ql-view" to="/cart">Кошик</Link>
-        <Link className="ql-analyt" to="/favorites">Список бажань</Link>
-      </nav>
+          <nav className="seller-quicklinks" aria-label="Швидкі дії">
+            <Link className="ql-view" to="/cart">Кошик</Link>
+            <Link className="ql-analyt" to="/favorites">Список бажань</Link>
+          </nav>
 
-      <button className="btn-signout" type="button" onClick={doLogout}>Вийти з профілю</button>
+          <button className="btn-signout" type="button" onClick={doLogout}>Вийти з профілю</button>
 
-      <h4 className="orders-title">Мої замовлення</h4>
+          <h4 className="orders-title">Мої замовлення</h4>
 
-      <a className="order-card is-done" href="/orders/ready">
-        <div className="thumb"></div>
-        <div className="oc-title oc-done">Готово</div>
-        <div className="oc-date">8 серпня, Пт</div>
-        <div className="oc-note">Можна забирати до 16 серпня, Сб</div>
-        <span className="oc-frame" />
-      </a>
+          <a className="order-card is-done" href="/orders/ready">
+            <div className="thumb"></div>
+            <div className="oc-title oc-done">Готово</div>
+            <div className="oc-date">8 серпня, Пт</div>
+            <div className="oc-note">Можна забирати до 16 серпня, Сб</div>
+            <span className="oc-frame" />
+          </a>
 
-      <a className="order-card" href="/orders/shipping">
-        <div className="thumb"></div>
-        <div className="oc-title">В дорозі</div>
-        <div className="oc-wait">Очікується:</div>
-        <div className="oc-date-green">9 серпня, Сб</div>
-        <span className="oc-frame" />
-      </a>
+          <a className="order-card" href="/orders/shipping">
+            <div className="thumb"></div>
+            <div className="oc-title">В дорозі</div>
+            <div className="oc-wait">Очікується:</div>
+            <div className="oc-date-green">9 серпня, Сб</div>
+            <span className="oc-frame" />
+          </a>
 
       {/* Banner with seller status–aware CTA */}
       <div className="mini-banner">
@@ -358,6 +370,42 @@ export default function Profile(){
         <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" style={{ pointerEvents: 'none' }} />
         <div className="bn-frame" style={{ pointerEvents: 'none' }}></div>
       </div>
+          <h4 className="orders-history-title">Історія замовлень</h4>
+
+          <div className="mini-product">
+            <div className="mp-mask"></div>
+            <div className="mp-title">Доставлено</div>
+            <div className="mp-date">9 серпня, Сб</div>
+            <div className="mp-note">Було забрано 10 серпня, Сб</div>
+            <a className="mp-link" href="/orders/123"></a>
+            <div className="mp-frame"></div>
+          </div>
+
+          <div className="mini-banner">
+            <img className="bn-img" src={imgCompleteSmall} alt="" />
+            <div className="bn-title">Відкрийте свій магазин та почніть свої перші продажі!</div>
+            <button className="bn-btn" type="button" onClick={() => navigate('/become-seller')}>
+              <span>Стати продавцем</span>
+            </button>
+            <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" />
+            <div className="bn-frame"></div>
+          </div>
+        </>
+      )}
+
+      {/* Moderator-only UI */}
+      {isModerator && (
+        <>
+          <ul className="moder-nav" aria-label="Навігація модератора">
+            <li><Link to="/moder/messages">Повідомлення</Link></li>
+            <li><Link to="/moder/cases">Заявки</Link></li>
+            <li><Link to="/moder/cases">Жалоби</Link></li>
+            <li><button type="button" className="linklike" onClick={doLogout}>Вийти з профілю</button></li>
+          </ul>
+
+          <img className="moder-illustration" src={imgModerator} alt="" />
+        </>
+      )}
     </main>
   );
 }

@@ -43,6 +43,10 @@ import WishlistPage from './Pages/Wishlist.jsx';
 import ShopPage from './Pages/ShopPage.jsx';
 import ProfileSettings from './Pages/ProfileSettings';
 
+import ModerNotifications from './Pages/ModerNotifications';
+import ModerCases from './Pages/ModerCases';
+import ModerCaseView from './Pages/ModerCaseView';
+
 import './App.css';
 
 // Обёртка, которая держит <html lang> в актуальном состоянии при смене языка
@@ -119,6 +123,10 @@ export default function App() {
 
                 <Route path="/shop/:sellerId" element={<ShopPage />} />
                 <Route path="/profile/settings" element={<ProfileSettings />} />
+
+                <Route path="/moder/messages" element={<ModerNotifications />} />
+                <Route path="/moder/cases" element={<ModerCases />} />
+                <Route path="/moder/cases/:id" element={<ModerCaseView/>} />
               </Routes>
             </main>
 
