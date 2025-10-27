@@ -2,7 +2,7 @@
 .q-profile{
   position:relative;
   display:block;
-  padding-top:120px;
+  padding-top:50px;
   min-height:1000px;
   font-family:'Ubuntu',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   color:#363535;
@@ -78,7 +78,7 @@
 .q-profile .mini-banner .bn-frame{position:absolute;inset:0;border:2px solid #ECECEC;border-radius:15px}
 .q-profile .mini-banner .bn-img{position:absolute;left:300px;top:120px;width:70px;height:70px;object-fit:cover}
 .q-profile .mini-banner .bn-title{position:absolute;left:30px;top:27px;width:279px;height:84px;font:500 24px/28px 'Ubuntu',sans-serif;color:#363535}
-.q-profile .mini-banner .bn-btn{position:absolute;left:35px;top:132px;width:222px;height:55px;border-radius:10px;background:#35C65E;border:2px solid #35C65E;color:#fff;font:500 14px/24px 'Ubuntu',sans-serif;display:flex;align-items:center;justify-content:center}
+.q-profile .mini-banner .bn-btn{position:absolute;left:35px;top:132px;width:222px;height:55px;border-radius:10px;background:#35C65E;border:2px solid #35C65E;color:#fff;font:500 14px/24px 'Ubuntu',sans-serif;display:flex;align-items:center;justify-content:center; cursor: pointer;}
 .q-profile .mini-banner .bn-arrow{position:absolute;left:217px;top:149px;width:23px;height:22px}
 
 /* Additions for clickable avatar & initials */
@@ -99,3 +99,12 @@
   letter-spacing:0.5px;
 }
 .q-profile .frame-918 .avatar.avatar--button img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* Снимаем глобальный верхний паддинг, который прописан на main */
+main.q-profile{
+  padding-top: 16px !important; /* поставь 0–24px по вкусу */
+  margin-top: 0 !important;
+}
+/* Единым сдвигом подтягиваем весь контент профиля вверх */
+.q-profile { --lift: -150px; }        /* настрой: -32 / -56 / -64 и т.д. */
+.q-profile > * { transform: translateY(var(--lift)); }

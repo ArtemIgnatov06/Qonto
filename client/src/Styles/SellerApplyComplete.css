@@ -1,0 +1,270 @@
+:root{
+  --accent:#35C65E;
+  --stroke:#ECECEC;
+  --fg:#363535;
+}
+
+/* холст страницы под абсолютную раскладку */
+.success-page{
+  position: relative;
+  min-height: 720px; /* запас под абсолюты как в макете */
+}
+
+/* === ТЕКСТ слева (точные координаты из макета) === */
+.success-title{
+  position: absolute;
+  width: 289px;
+  height: 36px;
+  left: 244.92px;
+  top: 280.28px;
+  white-space: nowrap;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  color: var(--accent);
+}
+.success-text{
+  position: absolute;
+  width: 381px;
+  height: 48px;
+  left: 244.92px;
+  top: 320.28px;
+
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--fg);
+}
+
+/* === КНОПКИ (точные размеры/позиции) === */
+.success-btn{
+  position:absolute;
+  height:55px;
+  border-radius:10px;
+  font:500 14px/24px 'Ubuntu', sans-serif;
+  display:flex; 
+  align-items:center; 
+  justify-content:flex-start;
+  padding-left:20px;
+  gap:10px;
+  cursor:pointer;
+  transition: all .2s ease;
+}
+
+.success-btn--primary{
+  width:205px; left:245px; top:393px;
+  background:var(--accent);
+  border:2px solid var(--accent);
+  color:#fff;
+}
+.success-btn--primary:hover{ background:#2eaa50; }
+.success-btn--primary:active{ transform:translateY(1px); }
+
+.success-btn--ghost{
+  width:190px; left:245px; top:463px;
+  background:#fff;
+  border:2px solid var(--stroke);
+  color:#828181;
+}
+.success-btn--ghost:hover{ border-color:#dcdcdc; color:#363535; }
+.success-btn--ghost:active{ transform:translateY(1px); }
+
+/* Иконки рядом с кнопками (как в статике) */
+.success-icon{
+  position:absolute;
+  display:block;
+  object-fit:contain;
+  pointer-events:none;
+}
+.success-icon--arrow{
+  width:22.82px; height:22.13px;
+  left:397px; top:409.83px;
+}
+.success-icon--user{
+  width:37px; height:37px;
+  left:375px; top:472px;
+}
+
+/* Большая иллюстрация справа (координаты из макета) */
+.success-img-main{
+  position:absolute;
+  width:602.79px;
+  height:406.26px;
+  left:717.42px;
+  top:276.8px;
+  object-fit:contain;
+}
+
+/* Декоры */
+.decor {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  opacity: 1;
+  z-index: 1;
+}
+.decor--left {
+  width: 366.045px;
+  height: 312.746px;
+  left: -20px;
+  top: 311px;
+}
+.decor--right {
+  width: 310.563px;
+  height: 265.342px;
+  left: 1376.25px;  /* как в макете */
+  top: 100.67px;
+}
+
+/* Никаких рамок/карточек здесь нет — хедер/футер остаются глобальными */
+/* холст */
+.success-page{
+  position: relative;
+  min-height: 720px;
+}
+
+/* НОВОЕ: центрирующий фрейм под макет 980px */
+.success-frame{
+  position: relative;
+  width: 980px;      /* рабочая ширина блока по фигме */
+  margin: 0 auto;    /* центрируем */
+  min-height: 560px; /* чтобы всё влезло */
+}
+
+/* ДАЛЕЕ — абсолюты считаем ОТ success-frame */
+.success-title{
+  position: absolute;
+  left: 0px;            /* было 244.92 от края страницы */
+  top: 280.28px;
+  width: 289px; height: 36px;
+  white-space: nowrap;
+  margin: 0;
+  font: 400 25px/36px 'Ubuntu', sans-serif;
+  color: #35C65E;
+}
+
+.success-text{
+  position: absolute;
+  left: 0px;            /* было 244.92 */
+  top: 320.28px;
+  width: 381px; height: 48px;
+  margin: 0;
+  font: 400 14px/24px 'Ubuntu', sans-serif;
+  color: #363535;
+}
+
+/* кнопки */
+.success-btn{
+  position:absolute;
+  height:55px;
+  border-radius:10px;
+  font:500 14px/24px 'Ubuntu', sans-serif;
+  display:flex; align-items:center; justify-content:flex-start;
+  padding-left:20px; gap:10px; cursor:pointer; transition:all .2s ease;
+}
+.success-btn--primary{
+  width:205px; left:0px; top:393px;            /* было left:245 */
+  background:#35C65E; border:2px solid #35C65E; color:#fff;
+}
+.success-btn--primary:hover{ background:#2eaa50; }
+.success-btn--primary:active{ transform:translateY(1px); }
+
+.success-btn--ghost{
+  width:190px; left:0px; top:463px;            /* было left:245 */
+  background:#fff; border:2px solid #ECECEC; color:#828181;
+}
+.success-btn--ghost:hover{ border-color:#dcdcdc; color:#363535; }
+.success-btn--ghost:active{ transform:translateY(1px); }
+
+/* иконки возле кнопок — смещаем на ту же дельту (397-245=152, 375-245=130) */
+.success-icon{ position:absolute; display:block; object-fit:contain; pointer-events:none; }
+.success-icon--arrow{ width:22.82px; height:22.13px; left:152px; top:409.83px; }
+.success-icon--user { width:37px; height:37px; left:130px; top:472px; }
+
+/* большая иллюстрация — сдвиг относительно фрейма:
+   717.42-244.92=472.5 */
+.success-img-main{
+  position:absolute;
+  width:602.79px; height:406.26px;
+  left:472.5px; top:276.8px;
+  object-fit:contain;
+}
+
+/* декоры как были */
+/* холст */
+.success-page{
+  position: relative;
+  min-height: 720px;
+}
+
+/* центрирующий фрейм */
+.success-frame{
+  position: relative;
+  width: 980px;
+  margin: 0 auto;
+  z-index: 1;                  /* поверх декора */
+  transform: translateY(-80px);/* ПОДНЯЛИ ВЫШЕ; +/- подстройкой цифры */
+}
+
+/* дальше — как у тебя, без изменений ... */
+
+/* --- Призраки: всегда у краёв окна --- */
+.sacomp-decor,
+.decor{                      /* если у тебя класс decor */
+  position: fixed;           /* вместо absolute */
+  pointer-events: none;
+  z-index: 0;                /* под контентом */
+  opacity: 1;
+}
+
+.sacomp-decor--left,
+.decor--left{
+  width: 366px;
+  left: -20px;               /* прям к левому краю */
+  top: 260px;                /* по вкусу */
+}
+
+.sacomp-decor--right,
+.decor--right{
+  width: 311px;
+  right: -10px;              /* прям к правому краю */
+  top: 140px;
+}
+
+/* на узких экранах можно чуть приглушить/спрятать */
+@media (max-width: 1100px){
+  .sacomp-decor--left,
+  .sacomp-decor--right,
+  .decor--left,
+  .decor--right{
+    opacity: 0.25;
+  }
+}
+
+/* на всякий случай — без внешних отступов */
+body { margin: 0; }
+
+/* левый уже норм, правого прибьём к правому краю окна */
+.decor--right{
+  position: fixed !important;   /* отлип от карточек/контейнеров */
+  top: 140px;                   /* как на макете, можешь подвинуть */
+  right: 0;                     /* к самому краю вьюпорта */
+  width: 311px;
+  transform: translateX(50%);   /* выносим половину за край, чтобы выглядывал */
+  z-index: 0;
+  pointer-events: none;
+}
+.decor--right img{
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* если нужно чуть меньше выносить — подрегулируй процент */

@@ -10,6 +10,10 @@ import imgCompleteSmall from '../assets/complete-small.png';
 import imgPlane from '../assets/planex.png';
 import imgReady from '../assets/ready.png';
 
+/* ===================== routes / constants ===================== */
+const ADD_PRODUCT_URL = '/products/new';
+const SELLER_APPLICATION_URL = '/seller/apply';
+
 /* ===================== helpers ===================== */
 const pick = (obj, path) =>
   (path||'').split('.').reduce((a,k)=> (a && a[k]!==undefined ? a[k] : undefined), obj);
@@ -95,7 +99,14 @@ function normalizeUser(src){
   }
   const email = best.email ?? best.mail ?? pick(best,'contacts.email') ?? pick(best,'emails.0') ?? '';
   const avatar = best.avatar_url ?? best.avatarUrl ?? best.avatar ?? pick(best,'images.avatar') ?? '';
-  return { first_name:first||'', last_name:last||'', email, avatar };
+
+  // normalize seller fields too
+  const seller_status =
+    best.seller_status ?? best.sellerStatus ?? best.seller?.status ?? null;
+  const seller_rejection_reason =
+    best.seller_rejection_reason ?? best.sellerRejectionReason ?? best.seller?.rejection_reason ?? null;
+
+  return { first_name:first||'', last_name:last||'', email, avatar, seller_status, seller_rejection_reason };
 }
 
 async function uploadAvatar(file){
@@ -173,6 +184,19 @@ export default function Profile(){
   const displayName = ([first,last].filter(Boolean).join(' ')) || nameFromEmail(email) || 'Користувач';
   const avatarUrl = user?.avatar_url || user?.avatarUrl || user?.avatar || '';
 
+  // Seller status derived once and reused
+  const sellerStatus =
+    user?.seller_status ??
+    user?.sellerStatus ??
+    user?.seller?.status ??
+    null;
+
+  const sellerRejectionReason =
+    user?.seller_rejection_reason ??
+    user?.sellerRejectionReason ??
+    user?.seller?.rejection_reason ??
+    null;
+
   // Avatar upload
   const fileRef = useRef(null);
   const onAvatarClick = () => fileRef.current?.click();
@@ -199,29 +223,27 @@ export default function Profile(){
         if (val) setUser(prev=> ({ ...(prev||{}), ...normalizeUser(val) }));
       }
       if (e.key === 'addresses' || e.key === 'cards' || e.key === 'orders'){
-        // re-evaluate checklist
-        setDone(d=> ({ ...d })); // simple trigger; next effect recomputes
+        setDone(d=> ({ ...d })); // trigger recompute
       }
     };
     window.addEventListener('storage', handler);
     return ()=> window.removeEventListener('storage', handler);
   }, []);
 
+  function goApply(){
+    navigate(SELLER_APPLICATION_URL);
+  }
+
   async function doLogout(){
-    // Try server endpoints; then clear local session and redirect
     const endpoints = [
       { url: '/api/logout', method:'POST' },
       { url: '/logout', method:'POST' },
       { url: '/auth/logout', method:'POST' },
     ];
     for (const ep of endpoints){
-      try{
-        const res = await fetch(ep.url, { method: ep.method, credentials:'include' });
-        // not critical whether ok or not — proceed to local cleanup
-      }catch{/* ignore */}
+      try{ await fetch(ep.url, { method: ep.method, credentials:'include' }); }catch{/* ignore */}
     }
     try{
-      // Clear common auth storages
       const keys = ['token','auth','user','profile','qonto_user','qonto.auth','qonto.profile','addresses','cards','orders','twofa'];
       keys.forEach(k => localStorage.removeItem(k));
       sessionStorage.clear?.();
@@ -298,25 +320,43 @@ export default function Profile(){
         <span className="oc-frame" />
       </a>
 
-      <h4 className="orders-history-title">Історія замовлень</h4>
-
-      <div className="mini-product">
-        <div className="mp-mask"></div>
-        <div className="mp-title">Доставлено</div>
-        <div className="mp-date">9 серпня, Сб</div>
-        <div className="mp-note">Було забрано 10 серпня, Сб</div>
-        <a className="mp-link" href="/orders/123"></a>
-        <div className="mp-frame"></div>
-      </div>
-
+      {/* Banner with seller status–aware CTA */}
       <div className="mini-banner">
-        <img className="bn-img" src={imgCompleteSmall} alt="" />
+        {/* отключаем перехват кликов у декоративных элементов */}
+        <img className="bn-img" src={imgCompleteSmall} alt="" style={{ pointerEvents: 'none' }} />
         <div className="bn-title">Відкрийте свій магазин та почніть свої перші продажі!</div>
-        <button className="bn-btn" type="button" onClick={() => navigate('/become-seller')}>
-          <span>Стати продавцем</span>
-        </button>
-        <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" />
-        <div className="bn-frame"></div>
+
+        {sellerStatus !== 'approved' ? (
+          <button
+            className="bn-btn"
+            type="button"
+            onClick={goApply}
+            disabled={sellerStatus === 'pending'}
+            aria-label="Перейти до Seller Application"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
+            {sellerStatus === 'pending' ? 'Заявка відправлена' : 'Стати продавцем'}
+          </button>
+        ) : (
+          <button
+            className="bn-btn"
+            type="button"
+            onClick={() => navigate(ADD_PRODUCT_URL)}
+            aria-label="Додати товар"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
+            Додати товар
+          </button>
+        )}
+
+        {sellerStatus === 'rejected' && sellerRejectionReason && (
+          <p className="bn-reason" style={{ marginTop: 8, opacity: 0.75 }}>
+            Причина відхилення: {sellerRejectionReason}
+          </p>
+        )}
+
+        <img className="bn-arrow" src={imgPlane} alt="" width="23" height="22" style={{ pointerEvents: 'none' }} />
+        <div className="bn-frame" style={{ pointerEvents: 'none' }}></div>
       </div>
     </main>
   );
