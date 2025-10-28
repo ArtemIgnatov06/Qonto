@@ -1,31 +1,75 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import '../Styles/chat-widget.css';
+/* ---------- Demo data + helpers for local suggestions ---------- */
 
-/* ---------- Моковые данные продуктов (можно ставить ПРЯМЫЕ HTTPS ссылки) ---------- */
+// Небольшой демо-ассортимент (если нужно — замени на реальные)
 const FAKE_PRODUCTS = [
-  { id: 1,  title: 'Набір каструль 6 пр.',               brand: 'Tefal',   price: 2399, category: 'kitchen', image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=640' },
-  { id: 2,  title: 'Ножі кухонні 5 пр. з підставкою',    brand: 'BergHOFF',price: 1299, category: 'kitchen', image: 'https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=640' },
-  { id: 3,  title: 'Блендер ручний 800W',                brand: 'Bosch',   price: 1899, category: 'kitchen', image: 'https://images.unsplash.com/photo-1610440042657-612c34a1b3b3?q=80&w=640' },
-  { id: 4,  title: 'Електрочайник 1.7L',                 brand: 'Philips', price: 1499, category: 'kitchen', image: 'https://images.unsplash.com/photo-1606813907291-76a8cbb3a9b0?q=80&w=640' },
-  { id: 5,  title: 'Тостер 2-слотовий',                  brand: 'Bosch',   price: 1699, category: 'kitchen', image: 'https://images.unsplash.com/photo-1617814076367-bd0e1a2a3a9b?q=80&w=640' },
-  { id: 6,  title: 'Сковорода 28 см антипригарна',        brand: 'Tefal',   price: 999,  category: 'kitchen', image: 'https://images.unsplash.com/photo-1514511547117-f9c3d2a4d87d?q=80&w=640' },
-  { id: 7,  title: 'Мультиварка 5L',                     brand: 'Xiaomi',  price: 2599, category: 'kitchen', image: 'https://images.unsplash.com/photo-1622445275938-9d1e3f08cf31?q=80&w=640' },
-  { id: 8,  title: 'Кавомолка 150W',                      brand: 'Bosch',   price: 799,  category: 'kitchen', image: 'https://images.unsplash.com/photo-1504630083234-14187a9df0f5?q=80&w=640' },
-  { id: 9,  title: 'Електрична м’ясорубка',               brand: 'Braun',   price: 2899, category: 'kitchen', image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?q=80&w=640' },
-  { id: 10, title: 'Набір контейнерів 10 пр.',            brand: 'Curver',  price: 549,  category: 'kitchen', image: 'https://images.unsplash.com/photo-1611077543384-5873b31f5b2c?q=80&w=640' },
+  { id: 101, title: 'Чайник Bosch TWK3A011 1.7L', brand: 'bosch', price: 1499, image: '/images/kettle-bosch.jpg' },
+  { id: 102, title: 'Чайник Philips HD4646 1.5L', brand: 'philips', price: 1399, image: '/images/kettle-philips.jpg' },
+  { id: 103, title: 'Блендер Braun MQ5235', brand: 'braun', price: 1999, image: '/images/blender-braun.jpg' },
+  { id: 104, title: 'Сковорода Tefal 24 см', brand: 'tefal', price: 799, image: '/images/pan-tefal.jpg' },
+  { id: 105, title: 'Нож кухонний Tramontina', brand: 'tramontina', price: 399, image: '/images/knife-tram.jpg' },
+  { id: 106, title: 'Дошка обробна деревʼяна', brand: 'no-brand', price: 199, image: '/images/board.jpg' },
+  { id: 107, title: 'Каструля з кришкою 3 л', brand: 'no-brand', price: 699, image: '/images/pot.jpg' },
+  { id: 108, title: 'Електрочайник Xiaomi Mi', brand: 'xiaomi', price: 1299, image: '/images/kettle-xiaomi.jpg' },
 ];
 
-/* ---------- Утилиты для рендера HTML карточек ---------- */
+// Триггер «старт набора для кухні»
+function isKitchenStart(text = '') {
+  const t = text.toLowerCase();
+  return /(кухн|перш(ий|ий) набір|початков|starter|basic)/.test(t);
+}
+
+// «Покажи дешевше/дешеві варіанти»
+function isCheaper(text = '') {
+  const t = text.toLowerCase();
+  return /(дешев|дешевше|ще дешев|cheap|cheaper|budget)/.test(t);
+}
+
+// Витяг бренду з тексту (по відомим брендам або слову "від <бренд>")
+function extractBrand(text = '') {
+  const t = text.toLowerCase();
+  const brands = [...new Set(FAKE_PRODUCTS.map(p => p.brand))].filter(b => b !== 'no-brand');
+  for (const b of brands) {
+    if (t.includes(b)) return b;
+  }
+  const m = t.match(/від\s+([a-zа-яёїієґ0-9\-]+)/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
+// Вибір стартового набору — просто підбір кухонних речей
+function pickKitchenEssentials() {
+  const keys = /(чайник|блендер|сковород|ніж|дошк|кастр)/i;
+  const list = FAKE_PRODUCTS.filter(p => keys.test(p.title));
+  return list.length ? list : FAKE_PRODUCTS.slice(0, 6);
+}
+
+// Дешевші аналоги з базового списку або з FAKE_PRODUCTS
+function pickCheaper(base = []) {
+  const src = (base.length ? base : FAKE_PRODUCTS).slice().sort((a, b) => a.price - b.price);
+  // візьми ще дешевші позиції (верх списку), обмежимо до 12
+  return src.slice(0, 12);
+}
+
+// Фільтр по бренду
+function filterByBrand(list = [], brand = '') {
+  const b = brand.toLowerCase();
+  const src = list.length ? list : FAKE_PRODUCTS;
+  return src.filter(p => (p.brand || '').toLowerCase() === b);
+}
+
+/* ---------- Утилиты для HTML карточек (оставляем — AI может вернуть HTML списком) ---------- */
 function htmlEscape(str = '') {
   return String(str)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-function currency(n) { return new Intl.NumberFormat('uk-UA', { style: 'currency', currency: 'UAH', maximumFractionDigits: 0 }).format(n); }
-
+function currency(n) {
+  return new Intl.NumberFormat('uk-UA', { style: 'currency', currency: 'UAH', maximumFractionDigits: 0 }).format(n);
+}
 function renderProductsHTML(list, title = 'Рекомендації') {
-  const cards = list.map(p => {
+  const cards = (list || []).map(p => {
     const img = p.image
       ? `<img src="${htmlEscape(p.image)}" alt="${htmlEscape(p.title)}" loading="lazy" onerror="this.replaceWith(document.getElementById('cw-img-fallback').content.cloneNode(true))">`
       : `<span class="noimg"></span>`;
@@ -34,14 +78,13 @@ function renderProductsHTML(list, title = 'Рекомендації') {
         <div class="cw-thumb">${img}</div>
         <div class="cw-meta">
           <div class="cw-title" title="${htmlEscape(p.title)}">${htmlEscape(p.title)}</div>
-          <div class="cw-sub">${htmlEscape(p.brand)}</div>
-          <div class="cw-price">${currency(p.price)}</div>
+          <div class="cw-sub">${htmlEscape(p.brand || '')}</div>
+          <div class="cw-price">${typeof p.price === 'number' ? currency(p.price) : ''}</div>
         </div>
       </div>
     `;
   }).join('');
 
-  // Фолбек-картинка (SVG)
   const fallbackTemplate = `
     <template id="cw-img-fallback">
       <div class="cw-thumb-fallback" aria-label="image placeholder">
@@ -61,40 +104,6 @@ function renderProductsHTML(list, title = 'Рекомендації') {
       <div class="cw-grid">${cards}</div>
     </div>
   `;
-}
-
-/* ---------- Простая логика под 3 команды ---------- */
-function isKitchenStart(text) {
-  const t = text.toLowerCase();
-  return (
-    /(заселивс|переїхав|переїхала|переїзд|новий дім|новому домі|новий будинок)/.test(t) &&
-    /(кухн|посуд|каструл|сковород|чайник|тостер|блендер)/.test(t)
-  );
-}
-function isCheaper(text) {
-  return /дешевш/.test(text.toLowerCase());
-}
-function extractBrand(text) {
-  const m = text.toLowerCase().match(/від\s+([a-zа-яёіїєґ0-9\-\s]+)/i);
-  if (!m) return null;
-  return m[1].trim().replace(/[.!?,;:]+$/, '');
-}
-
-function pickKitchenEssentials() {
-  const list = FAKE_PRODUCTS.filter(p => p.category === 'kitchen');
-  return [...list].sort((a, b) => a.price - b.price);
-}
-function pickCheaper(baseList) {
-  if (!baseList?.length) return [];
-  const avg = baseList.reduce((s, p) => s + p.price, 0) / baseList.length;
-  return baseList.filter(p => p.price <= avg).sort((a, b) => a.price - b.price).slice(0, 8);
-}
-function filterByBrand(baseList, brand) {
-  if (!brand) return [];
-  const b = brand.toLowerCase();
-  return (baseList?.length ? baseList : FAKE_PRODUCTS)
-    .filter(p => p.brand.toLowerCase().includes(b))
-    .slice(0, 12);
 }
 
 /* ---------- Сообщение ---------- */
@@ -126,6 +135,8 @@ function isImageUrl(u) {
 function Composer({ onSend, disabled }) {
   const [value, setValue] = useState('');
   const [files, setFiles] = useState([]); // {type:'file'|'url', file?:File, url?:string, name:string}
+
+
   const taRef = useRef(null);
 
   // авто-высота textarea 1–5 строк
@@ -264,8 +275,6 @@ export default function ChatWidget({
     try { return JSON.parse(localStorage.getItem('qonto.ai.chat') || '[]'); }
     catch { return []; }
   });
-
-  // Контекст «последней выдачи»
   const [lastList, setLastList] = useState([]);
 
   useEffect(() => {
@@ -315,55 +324,113 @@ export default function ChatWidget({
     return () => window.removeEventListener('unhandledrejection', onRejection);
   }, [autoOpenOnError, controlled]);
 
-  /* --------- «Фейковый AI» --------- */
-  async function send({ text/*, files*/ }) {
-    setLoading(true); setErrText('');
-    const user = { role: 'user', content: text };
-    setMsgs((m) => [...m, user]);
-
+  /* --------- Клиентские экшены (fallback, пока бэкенд-хуки не подключены) --------- */
+  function performClientAction(action) {
     try {
-      let replyHTML = '';
-      let nextList = [];
-
-      if (isKitchenStart(text)) {
-        nextList = pickKitchenEssentials().slice(0, 12);
-        replyHTML = renderProductsHTML(nextList, 'Початковий набір для кухні');
-      } else if (isCheaper(text)) {
-        const base = lastList.length ? lastList : pickKitchenEssentials();
-        nextList = pickCheaper(base);
-        replyHTML = renderProductsHTML(nextList, 'Ще вигідніше ⬇️');
-      } else {
-        const brand = extractBrand(text);
-        if (brand) {
-          nextList = filterByBrand(lastList.length ? lastList : FAKE_PRODUCTS, brand);
-          const title = `Тільки товари від ${brand.charAt(0).toUpperCase() + brand.slice(1)}`;
-          replyHTML = nextList.length ? renderProductsHTML(nextList, title) :
-            `<div class="cw-block"><div class="cw-block-title">${title}</div><div class="cw-note">Нічого не знайшов. Спробуйте інший бренд.</div></div>`;
-        } else {
-          replyHTML = `
-            <div class="cw-block">
-              <div class="cw-block-title">Я можу:</div>
-              <ul class="cw-list">
-                <li>«Я заселився в новий дім і мені треба товари на кухню» — підберу стартовий набір</li>
-                <li>«Можна будь ласка щось подешевше» — покажу бюджетніші позиції</li>
-                <li>«Покажи мені тільки товари від Bosch» — відфільтрую по бренду</li>
-              </ul>
-            </div>`;
-          nextList = lastList;
-        }
+      if (action?.type === 'cart.add') {
+        const { productId, qty = 1 } = action;
+        const key = 'qonto.cart';
+        const cart = JSON.parse(localStorage.getItem(key) || '[]');
+        const idx = cart.findIndex(i => i.productId === productId);
+        if (idx >= 0) cart[idx].qty += qty; else cart.push({ productId, qty });
+        localStorage.setItem(key, JSON.stringify(cart));
       }
-
-      setLastList(nextList);
-      setMsgs((m) => [...m, { role: 'assistant', content: replyHTML }]);
-    } catch {
-      setMsgs((m) => [...m, { role: 'assistant', content: 'Проблема з мережею, спробуй ще раз.' }]);
-    } finally { setLoading(false); }
+      if (action?.type === 'compare.add') {
+        const { productId } = action;
+        const key = 'qonto.compare';
+        const list = new Set(JSON.parse(localStorage.getItem(key) || '[]'));
+        list.add(productId);
+        localStorage.setItem(key, JSON.stringify([...list]));
+      }
+    } catch {}
   }
 
+  /* --------- Отправка на бэкенд AI --------- */
+async function send({ text /*, files */ }) {
+  setLoading(true);
+  setErrText('');
+  const user = { role: 'user', content: text };
+  setMsgs((m) => [...m, user]);
+
+  try {
+    let replyHTML = '';
+    let nextList = [];
+
+    if (isKitchenStart(text)) {
+      nextList = pickKitchenEssentials().slice(0, 12);
+      replyHTML = renderProductsHTML(nextList, 'Початковий набір для кухні');
+    } else if (isCheaper(text)) {
+      const base = lastList.length ? lastList : pickKitchenEssentials();
+      nextList = pickCheaper(base);
+      replyHTML = renderProductsHTML(nextList, 'Ще вигідніше ⬇️');
+    } else {
+      const brand = extractBrand(text);
+
+      if (brand) {
+        nextList = filterByBrand(lastList.length ? lastList : FAKE_PRODUCTS, brand);
+        const title = `Тільки товари від ${brand.charAt(0).toUpperCase() + brand.slice(1)}`;
+        replyHTML = nextList.length
+          ? renderProductsHTML(nextList, title)
+          : `<div class="cw-block"><div class="cw-block-title">${title}</div><div class="cw-note">Нічого не знайшов. Спробуйте інший бренд.</div></div>`;
+      } else {
+        // ⚡️ запит до бекенду
+        const r = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ message: text })
+        });
+
+        if (!r.ok) {
+          const data = await r.json().catch(() => ({}));
+          throw new Error(data?.error || `AI недоступний (${r.status})`);
+        }
+        const data = await r.json();
+
+        if (Array.isArray(data.products) && data.products.length) {
+          nextList = data.products.map((p) => ({
+            id: p.id,
+            title: p.title,
+            price: Number(p.price),
+            image: p.image || p.preview_image_url || '',
+            brand: p.brand || ''
+          }));
+          replyHTML = renderProductsHTML(nextList, data.title || 'Знайдені товари');
+        } else {
+          const raw = (data.reply || '').trim();
+          const safeHTML = raw
+            ? htmlEscape(raw).replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')
+            : 'Вибач, не зміг сформувати відповідь. Спробуй переформулювати запит.';
+
+          replyHTML = `
+            <div class="cw-block">
+              <div class="cw-block-title">Відповідь AI</div>
+              <div class="cw-plain"><p>${safeHTML}</p></div>
+            </div>
+          `;
+          // ⬆️ без рядка "Модель: ..."
+        }
+      }
+    }
+
+    setLastList(nextList);
+    setMsgs((m) => [...m, { role: 'assistant', content: replyHTML }]);
+  } catch (e) {
+    console.error(e);
+    setMsgs((m) => [...m, { role: 'assistant', content: 'Проблема з мережею, спробуй ще раз.' }]);
+    setErrText(String(e?.message || 'Помилка мережі'));
+  } finally {
+    setLoading(false);
+  }
+}
+
+
+
   const suggestions = [
-    'Я заселився в новий дім і мені треба товари на кухню',
-    'Можна будь ласка щось подешевше',
-    'Покажи мені тільки товари від Bosch',
+    'Знайди чайник Bosch 1.7L до 1500 грн',
+    'Додай товар #123 у кошик, 2 шт',
+    'Додай товар 456 до порівняння',
+    'Покажи більше інформації про блендер Braun MQ5235'
   ];
 
   const Welcome = () => (
@@ -411,7 +478,7 @@ export default function ChatWidget({
       <div ref={popRef} id={id} className="cw-popover" role="dialog" aria-label="AI чат">
         <div className="cw-toolbar">
           <div className="cw-tab outline">Історія запитів</div>
-          <button className="cw-tab solid" type="button" onClick={() => { setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }]); setLastList([]); }} title="Новий чат">Новий чат</button>
+          <button className="cw-tab solid" type="button" onClick={() => { setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }]); }} title="Новий чат">Новий чат</button>
           <button className="cw-x" onClick={() => onClose?.()} aria-label="Закрити">×</button>
         </div>
 
@@ -443,7 +510,7 @@ export default function ChatWidget({
         <div ref={popRef} className="cw-popover" role="dialog" aria-label="AI чат" style={{ pointerEvents: 'auto' }}>
           <div className="cw-toolbar">
             <div className="cw-tab outline">Історія запитів</div>
-            <button className="cw-tab solid" onClick={() => { setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }]); setLastList([]); }}>Новий чат</button>
+            <button className="cw-tab solid" onClick={() => { setMsgs([{ role: 'assistant', content: 'Чим я можу допомогти?' }]); }}>Новий чат</button>
             <button className="cw-x" onClick={() => setUncontrolledOpen(false)} aria-label="Закрити">×</button>
           </div>
 

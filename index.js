@@ -61,6 +61,26 @@ import { readFileSync } from 'fs';
 import { resolve as _resolve } from 'path';
 
 import { Country as CSCountry, State as CSState, City as CSCity } from 'country-state-city';
+// --- AI Router (совместимо с CJS/ESM) ---
+function getUserCtx(req) {
+  return {
+    id: req.user?.id || null,
+    username: req.user?.username || null,
+    email: req.user?.email || null,
+  };
+}
+const hooks = {}; // при необходимости добавишь
+
+let createAiRouter = null;
+try {
+  const mod = await import('./server/aiRouter.mjs');         // динамически
+  createAiRouter = mod.default || mod.createAiRouter;         // CJS(default) | ESM(named)
+} catch (e) {
+  console.warn('AI router disabled:', e.message);
+}
+
+// подключаем, только если реально нашли экспорт
+
 
 /* === Moderation utilities (auto-injected) === */
 async function firstExistingTable(db, candidates) {
@@ -159,6 +179,11 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').sp
 
 // === Express app
 const app = express();
+app.use(express.json({ limit: '2mb' }));
+app.use(cors({
+  origin: process.env.CLIENT_ORIGIN?.split(',') || '*',
+  credentials: true
+}));
 
 // Static uploads
 const uploadsRoot = path.resolve(__dirname, 'uploads');
@@ -209,6 +234,10 @@ const uploadProductImages = multer({
     cb(null, allowed.includes(file.mimetype));
   }
 });
+if (createAiRouter) {
+  app.use('/api/ai', createAiRouter({ getUserCtx, hooks }));
+}
+//app.use('/api/ai', createAiRouter({ getUserCtx, hooks }));
 /* ===== Chat attachments upload ===== */
 const chatUploadsDir = path.join(uploadsRoot, 'chat');
 fs.mkdirSync(chatUploadsDir, { recursive: true });
@@ -232,6 +261,26 @@ const uploadChat = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => cb(null, isAllowedAttachment(file))
 });
+// --- Optional AI router (safe) ---
+import { pathToFileURL } from 'url';
+
+(async () => {
+  const js = path.resolve(__dirname, 'server/aiRouter.js');
+  const mjs = path.resolve(__dirname, 'server/aiRouter.mjs');
+  const file = fs.existsSync(mjs) ? mjs : (fs.existsSync(js) ? js : null);
+
+  if (!file) {
+    console.warn('AI router missing — skipping /api/ai');
+    return;
+  }
+  try {
+    const mod = await import(pathToFileURL(file).href);
+    const createAiRouter = mod.default || mod.createAiRouter;
+    if (createAiRouter) app.use('/api/ai', createAiRouter({ getUserCtx, hooks }));
+  } catch (e) {
+    console.warn('AI router disabled:', e.message);
+  }
+})();
 
 /* ===== Reviews images upload (for product reviews) ===== */
 const reviewsDir = path.join(uploadsRoot, 'reviews');
@@ -2304,46 +2353,61 @@ app.post('/seller/apply/submit', requireAuth, async (req, res) => {
 });
 
 /* ===== Chat (OpenRouter proxy) ===== */
+/* ===== Chat (DB-first, AI-fallback) ===== */
 app.post('/api/chat', async (req, res) => {
-  const userMessage = req.body.message;
-  const PRIMARY_MODEL = OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free';
-  const FALLBACK_MODELS = [
-    'meta-llama/llama-3.1-8b-instruct:free',
-    'openrouter/auto'
-  ];
-  if (!OPENROUTER_API_KEY) {
-    return res.status(503).json({ error: 'AI недоступен: отсутствует OPENROUTER_API_KEY на сервере.' });
-  }
-  let systemContext = 'Ты вежливый ИИ-помощник, консультирующий по интернет-магазину.';
-  if (req.user) systemContext += ` Пользователь: ${req.user.username}, email: ${req.user.email}.`;
-
-  async function callModel(model) {
-    const { data } = await axios.post(
-      `${OPENROUTER_BASE_URL}/chat/completions`,
-      { model, messages: [{ role: 'system', content: systemContext }, { role: 'user', content: userMessage }], temperature: 0.7 },
-      { headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'HTTP-Referer': OPENROUTER_SITE_URL, 'X-Title': OPENROUTER_TITLE } }
-    );
-    const aiReply = data?.choices?.[0]?.message?.content || 'Пустой ответ от модели';
-    return { aiReply, usedModel: model };
-  }
+  const userMessage = String(req.body?.message || '');
   try {
-    try { const r = await callModel(PRIMARY_MODEL); return res.json({ reply: r.aiReply, model: r.usedModel }); }
-    catch (e) { const s = e.response?.status; if (![401, 402, 403].includes(s)) throw e; }
-    for (const m of FALLBACK_MODELS) {
-      try { const r = await callModel(m); return res.json({ reply: r.aiReply, model: r.usedModel }); } catch (e) { }
+    // 1) Спочатку пробуємо знайти товари у БД
+    const filters = parseProductQuery(userMessage);
+    const items = await searchProductsDB(filters);
+
+    if (items.length) {
+      return res.json({
+        title: 'Знайдені товари',
+        products: items,
+        used: {
+          brand: filters.brand, minPrice: filters.minPrice, maxPrice: filters.maxPrice,
+          category: filters.category, sort: filters.sort, terms: filters.terms
+        }
+      });
     }
-    return res.status(503).json({ error: 'AI недоступен для текущего ключа/модели. Проверьте ключ и Allowed Sites.' });
+
+    // 2) Якщо товарів нема — відповідаємо текстом (OpenRouter або заглушка)
+    const PRIMARY_MODEL = OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct:free';
+    const FALLBACK_MODELS = ['meta-llama/llama-3.1-8b-instruct:free', 'openrouter/auto'];
+    let systemContext = 'Ти ввічливий AI-помічник інтернет-магазину. Якщо просять товар — поясни, що не знайдено і порадь уточнити бренд, категорію або бюджет.';
+    if (req.user) systemContext += ` Користувач: ${req.user.username} (${req.user.email}).`;
+
+    if (!OPENROUTER_API_KEY) {
+      // без ключа — проста відповідь
+      return res.json({
+        reply: 'Не зміг знайти товари за запитом. Спробуйте вказати бренд, категорію або бюджет (наприклад: "чайник Bosch до 1500 грн").',
+        model: 'local-fallback'
+      });
+    }
+
+    async function callModel(model) {
+      const { data } = await axios.post(
+        `${OPENROUTER_BASE_URL}/chat/completions`,
+        { model, messages: [{ role: 'system', content: systemContext }, { role: 'user', content: userMessage }], temperature: 0.6 },
+        { headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'HTTP-Referer': OPENROUTER_SITE_URL, 'X-Title': OPENROUTER_TITLE } }
+      );
+      const aiReply = data?.choices?.[0]?.message?.content || 'Порожня відповідь.';
+      return { aiReply, usedModel: model };
+    }
+
+    try { const r = await callModel(PRIMARY_MODEL); return res.json({ reply: r.aiReply, model: r.usedModel }); }
+    catch (e) {
+      const s = e.response?.status;
+      if (![401,402,403].includes(s)) throw e;
+      for (const m of FALLBACK_MODELS) {
+        try { const r2 = await callModel(m); return res.json({ reply: r2.aiReply, model: r2.usedModel }); } catch {}
+      }
+      return res.status(503).json({ error: 'AI недоступний для поточного ключа/моделі.' });
+    }
   } catch (error) {
-    const status = error.response?.status || 500;
-    const detail = error.response?.data || error.message;
-    console.error('Ошибка обращения к OpenRouter:', detail);
-    res.status(status).json({
-      error:
-        status === 401 ? 'Неверный/отключённый OPENROUTER_API_KEY.' :
-          status === 402 ? 'Недостаточно кредитов/лимит.' :
-            status === 403 ? 'Доступ к выбранной модели ограничен (проверьте Allowed Sites/регион/политику).' :
-              'Не удалось связаться с AI.'
-    });
+    console.error('API /api/chat error:', error?.response?.data || error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -2634,6 +2698,103 @@ app.post('/api/me/cards', requireAuth, async (req, res) => {
     console.error('ensure wishlist schema error:', e.message || e);
   }
 })();
+
+  /* ===== AI product search helpers ===== */
+function _toNumberUA(s = '') {
+  // "1 599", "1,599.00", "1.599,00" → 1599
+  const clean = String(s).replace(/\s+/g, '').replace(/,/g, '.');
+  const m = clean.match(/(\d+(?:\.\d+)?)/);
+  return m ? Math.round(parseFloat(m[1])) : null;
+}
+
+function parseProductQuery(raw = '') {
+  const text = String(raw || '').toLowerCase();
+
+  // бренд (простий словник; можна доповнювати)
+  const brandList = ['bosch','philips','braun','tefal','xiaomi','samsung','apple','asus','makita','tramontina','lenovo','hp','acer'];
+  let brand = null;
+  for (const b of brandList) { if (text.includes(b)) { brand = b; break; } }
+
+  // «дешевше» → сортування за ціною зростання
+  const sort =
+    /(дешев|cheap|дешевші|бюджет)/.test(text) ? 'price_asc' :
+    /(дорог|преміум)/.test(text) ? 'price_desc' :
+    'new';
+
+  // ціна: "до 1500", "від 500 до 1200", "≤ 1000", ">= 3000"
+  let minPrice = null, maxPrice = null;
+  const between = text.match(/(?:від|з)\s*([\d\s.,]+)\s*(?:uah|грн|₴)?\s*(?:до|по|-|—)\s*([\d\s.,]+)/i);
+  if (between) {
+    minPrice = _toNumberUA(between[1]);
+    maxPrice = _toNumberUA(between[2]);
+  } else {
+    const maxM = text.match(/(?:до|не\s*дорожче|≤|<=)\s*([\d\s.,]+)\s*(?:uah|грн|₴)?/i);
+    const minM = text.match(/(?:від|не\s*менше|≥|>=)\s*([\d\s.,]+)\s*(?:uah|грн|₴)?/i);
+    if (maxM) maxPrice = _toNumberUA(maxM[1]);
+    if (minM) minPrice = _toNumberUA(minM[1]);
+  }
+
+  // ймовірна категорія (проста евристика — можна мапити на ваші реальні)
+  let category = null;
+  if (/чайник|kettle/.test(text)) category = 'Чайники';
+  if (/блендер|blender/.test(text)) category = 'Блендери';
+  if (/сковород|pan/.test(text)) category = 'Сковороди';
+
+  // терми для LIKE
+  const terms = text
+    .replace(/[^\p{L}\p{N}\s-]+/giu, ' ')
+    .split(/\s+/).filter(t => t.length > 1 && !brandList.includes(t))
+    .slice(0, 6);
+
+  return { brand, sort, minPrice, maxPrice, category, terms, limit: 12 };
+}
+
+async function searchProductsDB(filters) {
+  const {
+    brand, sort = 'new', minPrice, maxPrice, category, terms = [], limit = 12
+  } = filters || {};
+
+  const where = [`p.status = 'active'`];
+  const params = [];
+
+  if (category) { where.push(`p.category = ?`); params.push(category); }
+
+  if (brand) { where.push(`LOWER(p.title) LIKE ?`); params.push(`%${brand}%`); }
+
+  if (terms.length) {
+    const like = `%${terms.join('%')}%`;
+    where.push(`(p.title LIKE ? OR p.description LIKE ? OR p.category LIKE ?)`);
+    params.push(like, like, like);
+  }
+
+  if (minPrice != null) { where.push(`p.price >= ?`); params.push(minPrice); }
+  if (maxPrice != null) { where.push(`p.price <= ?`); params.push(maxPrice); }
+
+  let orderBy = `p.created_at DESC, p.id DESC`;
+  if (sort === 'price_asc') orderBy = `p.price ASC, p.id DESC`;
+  if (sort === 'price_desc') orderBy = `p.price DESC, p.id DESC`;
+
+  const sql = `
+    SELECT
+      p.id, p.title, p.price, p.category,
+      COALESCE(NULLIF(TRIM(p.preview_image_url), ''), NULLIF(TRIM(p.image_url), '')) AS preview_image_url
+    FROM products p
+    WHERE ${where.join(' AND ')}
+    ORDER BY ${orderBy}
+    LIMIT ?
+  `;
+  params.push(limit);
+
+  const [rows] = await db.query(sql, params);
+  return rows.map(r => ({
+    id: r.id,
+    title: r.title,
+    price: Number(r.price),
+    brand: brand || '', // можна витягати з title регуляркою, якщо треба
+    image: r.preview_image_url || null
+  }));
+}
+
 
 /* ===== Seller's products (public) ===== */
 app.get('/api/sellers/:id/products', async (req, res) => {
