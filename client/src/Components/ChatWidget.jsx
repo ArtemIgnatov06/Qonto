@@ -408,7 +408,7 @@ async function send({ text /*, files */ }) {
               <div class="cw-plain"><p>${safeHTML}</p></div>
             </div>
           `;
-          // ⬆️ без рядка "Модель: ..."
+          
         }
       }
     }
